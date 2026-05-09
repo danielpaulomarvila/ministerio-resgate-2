@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
  * 
  * Esta migration renomeia o campo document_number para nif,
  * pois o NIF (Número de Identificação Fiscal) é o documento
- * fiscal principal em Portugal, substituindo o CPF usado no Brasil.
+ * fiscal principal em Portugal.
  */
 return new class extends Migration
 {
