@@ -146,7 +146,19 @@
 ## Ordem Recomendada dos Próximos Módulos
 
 ### Fase 2: Secretaria e Gestão de Pessoas
-1. CRUD completo de People
+1. CRUD completo de People (COMPLETADO - Fase 2.1)
+   - Campos pessoais: nome completo, nome preferido, data de nascimento, gênero
+   - Campos civis: estado civil (single, married, divorced, widowed, separated), nível de escolaridade (elementary, high_school, college, postgraduate, other)
+   - Contatos: email, telefone principal, telefone secundário
+   - Documentos: CPF/documento principal, documento secundário (RG, CNH, etc.)
+   - Endereço estruturado: rua, número, complemento, bairro/freguesia, CEP, cidade, estado/distrito, país
+   - Vida cristã: batismo (is_baptized, baptism_date), conversão (conversion_date), quem convidou (invited_by_person_id)
+   - Status: active, inactive, visitor, congregant, discipling, new_convert, regularization
+   - Métodos auxiliares: ageGroupLabel(), canHaveUser(), canBeMember()
+   - Relacionamentos: invitedBy (BelongsTo), invitedPeople (HasMany)
+   - Validações: StorePersonRequest e UpdatePersonRequest com mensagens em português
+   - Páginas Vue: Index, Create, Edit, Show organizadas em seções (A) Dados Pessoais, (B) Contatos, (C) Endereço, (D) Vida Cristã/Igreja, (E) Observações
+   - Avisos de elegibilidade: usuário, membro, departamento Resgatados, alerta de 11 anos
 2. CRUD de Families
 3. Gestão de Guardianships
 4. Sistema de aprovação de cadastros

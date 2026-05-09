@@ -35,13 +35,27 @@ Tabela principal de pessoas.
 - `preferred_name`: Nome como prefere ser chamada
 - `birth_date`: Data de nascimento para cálculo de idade
 - `gender`: Gênero (male, female, other)
+- `marital_status`: Estado civil (single, married, divorced, widowed, separated)
+- `education_level`: Nível de escolaridade (elementary, high_school, college, postgraduate, other)
 - `email`: E-mail único
-- `phone`: Telefone de contato
-- `document_number`: CPF ou outro documento
+- `phone`: Telefone principal de contato
+- `secondary_phone`: Telefone secundário
+- `document_number`: CPF ou documento principal
+- `secondary_document`: Documento secundário (RG, CNH, etc.)
 - `photo_path`: Caminho da foto no storage
+- `address`: Endereço (Rua/Avenida)
+- `address_number`: Número do endereço
+- `address_complement`: Complemento do endereço
+- `neighborhood`: Bairro/Freguesia
+- `postal_code`: Código Postal/CEP
+- `city`: Cidade
+- `state`: Estado/Distrito
+- `country`: País
 - `is_baptized`: Indica se foi batizado
 - `baptism_date`: Data do batismo
-- `person_status`: Status da pessoa (active, inactive, visitor, congregated)
+- `conversion_date`: Data de conversão
+- `invited_by_person_id`: Foreign key para people (quem convidou/influenciou/indicou)
+- `person_status`: Status da pessoa (active, inactive, visitor, congregant, discipling, new_convert, regularization)
 - `notes`: Anotações importantes
 - `created_at`, `updated_at`, `deleted_at`: Timestamps e soft delete
 
@@ -49,6 +63,14 @@ Tabela principal de pessoas.
 - `full_name`: Para busca por nome
 - `birth_date`: Para cálculo de idade
 - `person_status`: Para filtrar por status
+- `email`: Para busca por email (único)
+- `document_number`: Para busca por documento (único)
+- `invited_by_person_id`: Para buscar quem foi convidado por uma pessoa
+- `city`: Para busca por cidade
+
+**Relacionamentos:**
+- `invited_by_person_id` → people (foreign key, self-referential)
+- `invitedPeople`: Uma pessoa pode ter convidado várias pessoas (hasMany)
 
 ### 2. users
 Tabela de usuários que acessam o sistema.

@@ -19,12 +19,26 @@ class Person extends Model
         'preferred_name',
         'birth_date',
         'gender',
+        'marital_status',
+        'education_level',
         'email',
         'phone',
+        'secondary_phone',
         'document_number',
+        'secondary_document',
         'photo_path',
+        'address',
+        'address_number',
+        'address_complement',
+        'neighborhood',
+        'postal_code',
+        'city',
+        'state',
+        'country',
         'is_baptized',
         'baptism_date',
+        'conversion_date',
+        'invited_by_person_id',
         'person_status',
         'notes',
     ];
@@ -33,6 +47,7 @@ class Person extends Model
     protected $casts = [
         'birth_date' => 'date',
         'baptism_date' => 'date',
+        'conversion_date' => 'date',
         'is_baptized' => 'boolean',
     ];
 
@@ -104,6 +119,23 @@ class Person extends Model
     }
 
     /**
+     * Relacionamento: Uma pessoa pode ter sido convidada/influenciada/indicada por outra pessoa
+     * Campo único para informar quem trouxe a pessoa para a igreja
+     */
+    public function invitedBy(): BelongsTo
+    {
+        return $this->belongsTo(Person::class, 'invited_by_person_id');
+    }
+
+    /**
+     * Relacionamento: Uma pessoa pode ter convidado/influenciado/indicado outras pessoas
+     */
+    public function invitedPeople(): HasMany
+    {
+        return $this->hasMany(Person::class, 'invited_by_person_id');
+    }
+
+    /**
      * Calcula a idade atual da pessoa com base na birth_date
      * Retorna null se não houver data de nascimento
      */
@@ -153,5 +185,65 @@ class Person extends Model
     {
         $age = $this->getAgeAttribute();
         return $age !== null && $age >= 18;
+    }
+
+    /**
+     * Retorna o rótulo da categoria de idade para exibição
+     * Classifica por idade apenas, sem criar vínculo com departamento
+     * 
+     * @return string|null Rótulo da categoria ou null se não houver data de nascimento
+     */
+    public function ageGroupLabel(): ?string
+    {
+        $age = $this->getAgeAttribute();
+        
+        if ($age === null) {
+            return null;
+        }
+        
+        if ($age < 11) {
+            return 'Menor de 11 anos';
+        }
+        
+        if ($age >= 11 && $age < 14) {
+            return 'Júnior (11-13 anos)';
+        }
+        
+        if ($age >= 14 && $age < 18) {
+            return 'Jovem (14-17 anos)';
+        }
+        
+        return 'Adulto (18 anos ou mais)';
+    }
+
+    /**
+     * Verifica se a pessoa pode ter usuário no sistema
+     * Regra: menores de 11 anos não podem ter usuário próprio
+     * 
+     * @return bool True se pode ter usuário
+     */
+    public function canHaveUser(): bool
+    {
+        // Menores de 11 anos não podem ter usuário próprio
+        if ($this->isUnder11YearsOld()) {
+            return false;
+        }
+        
+        // Júniores (11-13) podem ter usuário, mas precisam de supervisão
+        // Jovens (14-17) podem ter usuário
+        // Adultos podem ter usuário
+        return true;
+    }
+
+    /**
+     * Verifica se a pessoa pode ser membro
+     * Regra: somente pessoas batizadas podem ser membros
+     * Não cria member_profile automaticamente
+     * 
+     * @return bool True se pode ser membro (é batizada)
+     */
+    public function canBeMember(): bool
+    {
+        return $this->is_baptized;
     }
 }

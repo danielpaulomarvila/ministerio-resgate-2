@@ -58,11 +58,18 @@ Este documento serve como checklist para validar que a fundação do sistema foi
   - [x] Relacionamento: hasMany GuardianShip (as minor)
   - [x] Relacionamento: hasMany GuardianShip (as guardian)
   - [x] Relacionamento: hasMany SystemAlert
+  - [x] Relacionamento: belongsTo Person (invitedBy) - Fase 2.1
+  - [x] Relacionamento: hasMany Person (invitedPeople) - Fase 2.1
   - [x] Método: getAgeAttribute()
   - [x] Método: isUnder11YearsOld()
   - [x] Método: isJunior()
   - [x] Método: isYoung()
   - [x] Método: isAdult()
+  - [x] Método: ageGroupLabel() - Fase 2.1
+  - [x] Método: canHaveUser() - Fase 2.1
+  - [x] Método: canBeMember() - Fase 2.1
+  - [x] Fillable atualizado com novos campos - Fase 2.1
+  - [x] Casts atualizado com novos campos - Fase 2.1
 
 - [x] `User` - Model de usuários (ajustado)
   - [x] Relacionamento: belongsTo Person
@@ -136,6 +143,41 @@ Este documento serve como checklist para validar que a fundação do sistema foi
   - [x] Recepção
   - [x] Pastoral
 - [x] Seeder executado com sucesso
+
+### ✅ People CRUD (Fase 2.1)
+- [x] Migration para adicionar novos campos à tabela people
+  - [x] marital_status (single, married, divorced, widowed, separated)
+  - [x] education_level (elementary, high_school, college, postgraduate, other)
+  - [x] secondary_phone
+  - [x] secondary_document
+  - [x] Campos de endereço estruturados (address, address_number, address_complement, neighborhood, postal_code, city, state, country)
+  - [x] conversion_date
+  - [x] invited_by_person_id (foreign key self-referential)
+  - [x] Atualização de person_status (active, inactive, visitor, congregant, discipling, new_convert, regularization)
+- [x] Migration executada com sucesso
+- [x] Model Person atualizado com novos campos
+  - [x] Fillable atualizado
+  - [x] Casts atualizado
+  - [x] Relacionamentos invitedBy e invitedPeople
+  - [x] Métodos auxiliares ageGroupLabel(), canHaveUser(), canBeMember()
+- [x] StorePersonRequest atualizado com novas validações
+- [x] UpdatePersonRequest atualizado com novas validações
+- [x] PersonController já suporta novos campos automaticamente
+- [x] Página People/Index.vue atualizada
+  - [x] Coluna Cidade adicionada
+  - [x] Cores atualizadas para novos status
+- [x] Página People/Create.vue atualizada
+  - [x] Campos organizados em seções: A) Dados Pessoais, B) Contatos, C) Endereço, D) Vida Cristã/Igreja, E) Observações
+  - [x] Todos os novos campos incluídos no formulário
+- [x] Página People/Edit.vue atualizada
+  - [x] Campos organizados em seções: A) Dados Pessoais, B) Contatos, C) Endereço, D) Vida Cristã/Igreja, E) Observações
+  - [x] Todos os novos campos incluídos no formulário
+- [x] Página People/Show.vue atualizada
+  - [x] Campos organizados em seções: A) Dados Pessoais, B) Contatos, C) Endereço, D) Vida Cristã/Igreja, E) Observações
+  - [x] Formatters novos para marital_status e education_level
+  - [x] Avisos de elegibilidade para usuário, membro e departamento Resgatados
+- [x] DOCUMENTO_BANCO_DADOS_INICIAL.md atualizado com novos campos
+- [x] DOCUMENTO_ARQUITETURA_INICIAL.md atualizado com detalhes da Fase 2.1
 
 ### ✅ Comentários no Código
 - [x] Todas as migrations têm comentários explicativos

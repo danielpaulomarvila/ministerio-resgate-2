@@ -38,7 +38,11 @@ const formatStatus = (status) => {
         'active': 'Ativo',
         'inactive': 'Inativo',
         'visitor': 'Visitante',
-        'congregated': 'Congregado'
+        'congregated': 'Congregado',
+        'congregant': 'Congregado',
+        'discipling': 'Discipulando',
+        'new_convert': 'Novo convertido',
+        'regularization': 'Em regularização'
     };
     return statusMap[status] || status;
 };
@@ -101,6 +105,9 @@ const formatGender = (gender) => {
                                             Email
                                         </th>
                                         <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                            Cidade
+                                        </th>
+                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                             Status
                                         </th>
                                         <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
@@ -139,13 +146,21 @@ const formatGender = (gender) => {
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="text-sm text-gray-900">
+                                                {{ person.city || '-' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
                                             <span
                                                 class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
                                                 :class="{
                                                     'bg-green-100 text-green-800': person.person_status === 'active',
                                                     'bg-red-100 text-red-800': person.person_status === 'inactive',
                                                     'bg-yellow-100 text-yellow-800': person.person_status === 'visitor',
-                                                    'bg-blue-100 text-blue-800': person.person_status === 'congregated'
+                                                    'bg-blue-100 text-blue-800': person.person_status === 'congregated' || person.person_status === 'congregant',
+                                                    'bg-purple-100 text-purple-800': person.person_status === 'discipling',
+                                                    'bg-pink-100 text-pink-800': person.person_status === 'new_convert',
+                                                    'bg-orange-100 text-orange-800': person.person_status === 'regularization'
                                                 }"
                                             >
                                                 {{ formatStatus(person.person_status) }}
@@ -181,7 +196,7 @@ const formatGender = (gender) => {
                                         </td>
                                     </tr>
                                     <tr v-if="people.length === 0">
-                                        <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">
                                             Nenhuma pessoa cadastrada.
                                         </td>
                                     </tr>

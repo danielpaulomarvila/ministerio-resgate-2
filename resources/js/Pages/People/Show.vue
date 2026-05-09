@@ -37,7 +37,11 @@ const formatStatus = (status) => {
         'active': 'Ativo',
         'inactive': 'Inativo',
         'visitor': 'Visitante',
-        'congregated': 'Congregado'
+        'congregated': 'Congregado',
+        'congregant': 'Congregado',
+        'discipling': 'Discipulando',
+        'new_convert': 'Novo convertido',
+        'regularization': 'Em regularização'
     };
     return statusMap[status] || status;
 };
@@ -53,6 +57,36 @@ const formatGender = (gender) => {
         'other': 'Outro'
     };
     return genderMap[gender] || gender;
+};
+
+/**
+ * Formata o estado civil para exibição em português
+ */
+const formatMaritalStatus = (status) => {
+    if (!status) return '-';
+    const statusMap = {
+        'single': 'Solteiro',
+        'married': 'Casado',
+        'divorced': 'Divorciado',
+        'widowed': 'Viúvo',
+        'separated': 'Separado'
+    };
+    return statusMap[status] || status;
+};
+
+/**
+ * Formata o nível de escolaridade para exibição em português
+ */
+const formatEducationLevel = (level) => {
+    if (!level) return '-';
+    const levelMap = {
+        'elementary': 'Fundamental',
+        'high_school': 'Médio',
+        'college': 'Superior',
+        'postgraduate': 'Pós-graduação',
+        'other': 'Outro'
+    };
+    return levelMap[level] || level;
 };
 
 /**
@@ -145,10 +179,10 @@ const getMemberProfileWarning = (category, isBaptized) => {
                             </p>
                         </div>
 
-                        <!-- Dados Principais -->
+                        <!-- A) Dados Pessoais -->
                         <div class="mb-8">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">
-                                Dados Principais
+                                A) Dados Pessoais
                             </h3>
                             
                             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -173,24 +207,92 @@ const getMemberProfileWarning = (category, isBaptized) => {
                                     <p class="mt-1 text-sm text-gray-900">{{ formatGender(person.gender) }}</p>
                                 </div>
                                 <div>
-                                    <span class="text-sm font-medium text-gray-500">Email:</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.email || '-' }}</p>
+                                    <span class="text-sm font-medium text-gray-500">Estado Civil:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ formatMaritalStatus(person.marital_status) }}</p>
                                 </div>
                                 <div>
-                                    <span class="text-sm font-medium text-gray-500">Telefone:</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.phone || '-' }}</p>
+                                    <span class="text-sm font-medium text-gray-500">Nível de Escolaridade:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ formatEducationLevel(person.education_level) }}</p>
                                 </div>
                                 <div>
-                                    <span class="text-sm font-medium text-gray-500">Documento:</span>
+                                    <span class="text-sm font-medium text-gray-500">Documento Principal (CPF/RG):</span>
                                     <p class="mt-1 text-sm text-gray-900">{{ person.document_number || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Documento Secundário:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.secondary_document || '-' }}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Batismo -->
+                        <!-- B) Contatos -->
                         <div class="mb-8">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">
-                                Batismo
+                                B) Contatos
+                            </h3>
+                            
+                            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Email:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.email || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Telefone Principal:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.phone || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Telefone Secundário:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.secondary_phone || '-' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- C) Endereço -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">
+                                C) Endereço
+                            </h3>
+                            
+                            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                <div class="col-span-2">
+                                    <span class="text-sm font-medium text-gray-500">Endereço:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.address || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Número:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.address_number || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Complemento:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.address_complement || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Bairro/Freguesia:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.neighborhood || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Código Postal/CEP:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.postal_code || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Cidade:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.city || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Estado/Distrito:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.state || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">País:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.country || '-' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- D) Vida Cristã/Igreja -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">
+                                D) Vida Cristã/Igreja
                             </h3>
                             
                             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -208,6 +310,14 @@ const getMemberProfileWarning = (category, isBaptized) => {
                                 <div v-if="person.is_baptized">
                                     <span class="text-sm font-medium text-gray-500">Data de Batismo:</span>
                                     <p class="mt-1 text-sm text-gray-900">{{ formatDate(person.baptism_date) }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Data de Conversão:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ formatDate(person.conversion_date) }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Quem convidou (ID):</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.invited_by_person_id || '-' }}</p>
                                 </div>
                             </div>
                         </div>
@@ -227,7 +337,10 @@ const getMemberProfileWarning = (category, isBaptized) => {
                                             'bg-green-100 text-green-800': person.person_status === 'active',
                                             'bg-red-100 text-red-800': person.person_status === 'inactive',
                                             'bg-yellow-100 text-yellow-800': person.person_status === 'visitor',
-                                            'bg-blue-100 text-blue-800': person.person_status === 'congregated'
+                                            'bg-blue-100 text-blue-800': person.person_status === 'congregated' || person.person_status === 'congregant',
+                                            'bg-purple-100 text-purple-800': person.person_status === 'discipling',
+                                            'bg-pink-100 text-pink-800': person.person_status === 'new_convert',
+                                            'bg-orange-100 text-orange-800': person.person_status === 'regularization'
                                         }"
                                     >
                                         {{ formatStatus(person.person_status) }}
@@ -236,10 +349,10 @@ const getMemberProfileWarning = (category, isBaptized) => {
                             </div>
                         </div>
 
-                        <!-- Observações -->
+                        <!-- E) Observações -->
                         <div class="mb-8">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">
-                                Observações
+                                E) Observações
                             </h3>
                             
                             <div>
@@ -247,10 +360,10 @@ const getMemberProfileWarning = (category, isBaptized) => {
                             </div>
                         </div>
 
-                        <!-- Avisos sobre Usuário e Membro -->
+                        <!-- Avisos sobre Elegibilidade -->
                         <div class="mb-8">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">
-                                Informações Adicionais
+                                Avisos sobre Elegibilidade Futura
                             </h3>
                             
                             <div class="space-y-4">
@@ -271,6 +384,26 @@ const getMemberProfileWarning = (category, isBaptized) => {
                                     </h4>
                                     <p class="text-sm text-green-700">
                                         {{ getMemberProfileWarning(ageCategory, person.is_baptized) }}
+                                    </p>
+                                </div>
+
+                                <!-- Aviso sobre Departamento Resgatados -->
+                                <div v-if="ageCategory === 'junior' || ageCategory === 'jovem'" class="p-4 bg-purple-50 border border-purple-200 rounded-md">
+                                    <h4 class="text-sm font-medium text-purple-900 mb-2">
+                                        Departamento Resgatados
+                                    </h4>
+                                    <p class="text-sm text-purple-700">
+                                        {{ ageCategory === 'junior' ? 'Júnior (11-13 anos): Pode participar do departamento Resgatados.' : 'Jovem (14-17 anos): Pode participar do departamento Resgatados.' }}
+                                    </p>
+                                </div>
+
+                                <!-- Aviso sobre Alerta de 11 Anos -->
+                                <div v-if="ageCategory === 'menor_de_11'" class="p-4 bg-red-50 border border-red-200 rounded-md">
+                                    <h4 class="text-sm font-medium text-red-900 mb-2">
+                                        Alerta Importante
+                                    </h4>
+                                    <p class="text-sm text-red-700">
+                                        Menor de 11 anos: Quando completar 11 anos, poderá ter usuário e participar do departamento Resgatados.
                                     </p>
                                 </div>
                             </div>
