@@ -206,16 +206,16 @@ Mostra dados de:
 
 O sistema usa terminologia portuguesa de Portugal:
 
-| Termo Antigo | Termo Novo (Portugal) |
-|--------------|------------------------|
-| Telefone | Telemóvel |
-| Contatos | Contactos |
-| Endereço | Morada |
-| Bairro | Freguesia |
-| Cidade | Concelho/Município |
-| Estado | Distrito |
-| CEP | Código Postal |
-| CPF | NIF |
+| Termo | Descrição |
+|-------|-----------|
+| Telemóvel | Telefone móvel |
+| Contactos | Meios de comunicação |
+| Morada | Endereço residencial |
+| Freguesia | Divisão administrativa local |
+| Concelho/Município | Divisão administrativa regional |
+| Distrito | Divisão administrativa superior |
+| Código Postal | Código de endereçamento postal |
+| NIF | Número de Identificação Fiscal |
 
 ## Regras de Negócio
 

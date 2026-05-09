@@ -8,6 +8,14 @@ Este documento serve como checklist para validar que o módulo de cadastro de pe
 
 ### ✅ Migrations
 
+- [x] Migration `create_people_table` com estrutura limpa desde o início
+  - [x] Campos pessoais: full_name, preferred_name, last_name, birth_date, gender, marital_status, nationality, birthplace, education_level, profession, occupation
+  - [x] Campos de contacto: email, primary_phone, secondary_phone, whatsapp, contact_notes
+  - [x] Campos adicionais: photo_path, is_baptized, baptism_date, conversion_date, invited_by_person_id, person_status, general_notes
+  - [x] Campos de auditoria: uuid, created_by_user_id, updated_by_user_id, deleted_by_user_id
+  - [x] Timestamps e softDeletes
+  - [x] Índices para performance
+
 - [x] Migration `create_person_documents_table`
   - [x] Campo person_id (foreign key para people)
   - [x] Campo nif (string, max 50, unique)
@@ -40,41 +48,6 @@ Este documento serve como checklist para validar que o módulo de cadastro de pe
   - [x] Índice postal_code
   - [x] Índice municipality_name
   - [x] Timestamps (created_at, updated_at)
-
-- [x] Migration `migrate_people_data_to_person_documents_and_addresses`
-  - [x] Migração de nif/document_number para person_documents.nif
-  - [x] Migração de secondary_document para person_documents.other_document
-  - [x] Migração de address para person_addresses.address_line
-  - [x] Migração de address_number para person_addresses.door_number
-  - [x] Migração de address_complement para person_addresses.address_complement
-  - [x] Migração de neighborhood para person_addresses.parish_name
-  - [x] Migração de postal_code para person_addresses.postal_code
-  - [x] Migração de city para person_addresses.municipality_name
-  - [x] Migração de state para person_addresses.district_name
-  - [x] Migração de country para person_addresses.country_name
-  - [x] Criação de full_address concatenado
-  - [x] Marcação de is_primary = true para primeira morada
-
-- [x] Migration `restructure_people_table_for_portugal`
-  - [x] Adição de last_name (string, max 255)
-  - [x] Adição de nationality (string, max 100)
-  - [x] Adição de birthplace (string, max 100)
-  - [x] Adição de profession (string, max 100)
-  - [x] Adição de occupation (string, max 100)
-  - [x] Renomeação de phone para primary_phone
-  - [x] Adição de whatsapp (string, max 50)
-  - [x] Adição de contact_notes (text)
-  - [x] Renomeação de notes para general_notes
-  - [x] Remoção de nif
-  - [x] Remoção de secondary_document
-  - [x] Remoção de address
-  - [x] Remoção de address_number
-  - [x] Remoção de address_complement
-  - [x] Remoção de neighborhood
-  - [x] Remoção de postal_code
-  - [x] Remoção de city
-  - [x] Remoção de state
-  - [x] Remoção de country
 
 ### ✅ Models
 
@@ -211,7 +184,6 @@ Este documento serve como checklist para validar que o módulo de cadastro de pe
 - [x] "Cidade" → "Concelho/Município"
 - [x] "Estado" → "Distrito"
 - [x] "CEP" → "Código Postal"
-- [x] "CPF" → "NIF"
 
 ### ✅ Validações
 
@@ -306,28 +278,25 @@ Este documento serve como checklist para validar que o módulo de cadastro de pe
 
 ### ✅ Tabela person_documents
 
-- [x] Tabela foi criada
+- [x] Tabela foi criada com estrutura limpa desde o início
 - [x] Foreign key person_id está configurada
 - [x] Índice person_id está configurado
 - [x] Índice unique nif está configurado
-- [x] Dados são migrados corretamente
 
 ### ✅ Tabela person_addresses
 
-- [x] Tabela foi criada
+- [x] Tabela foi criada com estrutura limpa desde o início
 - [x] Foreign key person_id está configurada
 - [x] Índice person_id está configurado
 - [x] Índice is_primary está configurado
 - [x] Índice postal_code está configurado
 - [x] Índice municipality_name está configurado
-- [x] Dados são migrados corretamente
 
 ### ✅ Tabela people
 
-- [x] Campos novos foram adicionados
-- [x] Campos antigos foram removidos
-- [x] Campos foram renomeados corretamente
-- [x] Dados permanecem consistentes
+- [x] Tabela foi criada com estrutura limpa desde o início
+- [x] Todos os campos necessários estão presentes
+- [x] Índices configurados corretamente
 
 ## Validação de Regras de Negócio
 
@@ -377,7 +346,7 @@ Este documento serve como checklist para validar que o módulo de cadastro de pe
 
 ### ✅ Concluído
 
-- Migrations criadas e executadas
+- Migrations criadas e executadas com estrutura limpa desde o início
 - Models criados e configurados
 - Controller atualizado com transações
 - Requests atualizados com validações
@@ -400,8 +369,9 @@ Este documento serve como checklist para validar que o módulo de cadastro de pe
 
 ## Observações
 
+- **Estrutura limpa desde o início**: Migrations consolidadas, sem remendos
 - **Estrutura separada**: Documentos e moradas em tabelas próprias
-- **Terminologia portuguesa**: Adotada em todo o sistema
+- **Terminologia portuguesa**: Adotada para documentos e moradas
 - **Validações robustas**: Backend e frontend
 - **Transações de banco**: Garantem integridade
 - **Documentação completa**: Inclui DOCUMENTO_CADASTRO_PESSOAS.md e DOCUMENTO_MORADAS_PORTUGAL.md

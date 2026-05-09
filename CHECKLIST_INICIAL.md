@@ -144,7 +144,14 @@ Este documento serve como checklist para validar que a fundação do sistema foi
   - [x] Pastoral
 - [x] Seeder executado com sucesso
 
-### ✅ People CRUD (Fase 2.1) - Refatorado para Portugal
+### ✅ People CRUD (Fase 2.1) - Estrutura Limpa para Portugal
+- [x] Migration create_people_table com estrutura limpa desde o início
+  - [x] Campos pessoais: full_name, preferred_name, last_name, birth_date, gender, marital_status, nationality, birthplace, education_level, profession, occupation
+  - [x] Campos de contacto: email, primary_phone, secondary_phone, whatsapp, contact_notes
+  - [x] Campos adicionais: photo_path, is_baptized, baptism_date, conversion_date, invited_by_person_id, person_status, general_notes
+  - [x] Campos de auditoria: uuid, created_by_user_id, updated_by_user_id, deleted_by_user_id
+  - [x] Timestamps e softDeletes
+  - [x] Índices para performance
 - [x] Migration para criar tabela person_documents
   - [x] Campos: nif, citizen_card_number, passport_number, residence_permit_number, other_document, document_notes
   - [x] person_id como foreign key para people
@@ -153,15 +160,6 @@ Este documento serve como checklist para validar que a fundação do sistema foi
   - [x] Campos: country_name, district_name, municipality_name, parish_name, locality_name, locality_manual, address_line, door_number, floor_or_unit, address_complement, postal_code, full_address, is_primary
   - [x] person_id como foreign key para people
   - [x] Índices: person_id, is_primary, postal_code, municipality_name
-- [x] Migration para migrar dados de people para person_documents e person_addresses
-  - [x] Migração de nif/document_number para person_documents.nif
-  - [x] Migração de secondary_document para person_documents.other_document
-  - [x] Migração de campos de endereço para person_addresses
-  - [x] Compatibilidade antiga: city -> municipality_name, state -> district_name, neighborhood -> parish_name, address_number -> door_number
-- [x] Migration para reestruturar tabela people
-  - [x] Adição de campos novos: last_name, nationality, birthplace, profession, occupation, primary_phone, whatsapp, contact_notes, general_notes
-  - [x] Renomeação: phone -> primary_phone, notes -> general_notes
-  - [x] Remoção de campos migrados: nif, secondary_document, campos de endereço
 - [x] Model PersonDocument criado
   - [x] Relacionamento: belongsTo Person
   - [x] Fillable configurado
