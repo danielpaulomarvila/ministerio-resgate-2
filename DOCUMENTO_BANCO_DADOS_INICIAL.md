@@ -33,30 +33,27 @@ Tabela principal de pessoas.
 - `id`: Identificador único
 - `full_name`: Nome completo da pessoa
 - `preferred_name`: Nome como prefere ser chamada
+- `last_name`: Apelido/Sobrenome
 - `birth_date`: Data de nascimento para cálculo de idade
 - `gender`: Gênero (male, female, other)
 - `marital_status`: Estado civil (single, married, divorced, widowed, separated)
 - `education_level`: Nível de escolaridade (elementary, high_school, college, postgraduate, other)
+- `nationality`: Nacionalidade
+- `birthplace`: Naturalidade
+- `profession`: Profissão
+- `occupation`: Ocupação
 - `email`: E-mail único
-- `phone`: Telefone principal de contato
-- `secondary_phone`: Telefone secundário
-- `nif`: NIF (Número de Identificação Fiscal) - documento fiscal principal em Portugal
-- `secondary_document`: Outro documento (Cartão de Cidadão, Título de Residência, Passaporte, etc.)
+- `primary_phone`: Telemóvel principal de contato
+- `secondary_phone`: Telemóvel secundário
+- `whatsapp`: WhatsApp
+- `contact_notes`: Notas de contacto
 - `photo_path`: Caminho da foto no storage
-- `address`: Endereço (Rua/Avenida)
-- `address_number`: Número do endereço
-- `address_complement`: Complemento do endereço
-- `neighborhood`: Bairro/Freguesia
-- `postal_code`: Código Postal/CEP
-- `city`: Cidade
-- `state`: Estado/Distrito
-- `country`: País
 - `is_baptized`: Indica se foi batizado
 - `baptism_date`: Data do batismo
 - `conversion_date`: Data de conversão
 - `invited_by_person_id`: Foreign key para people (quem convidou/influenciou/indicou)
 - `person_status`: Status da pessoa (active, inactive, visitor, congregant, discipling, new_convert, regularization)
-- `notes`: Anotações importantes
+- `general_notes`: Anotações importantes
 - `created_at`, `updated_at`, `deleted_at`: Timestamps e soft delete
 
 **Índices:**
@@ -64,13 +61,14 @@ Tabela principal de pessoas.
 - `birth_date`: Para cálculo de idade
 - `person_status`: Para filtrar por status
 - `email`: Para busca por email (único)
-- `nif`: Para busca por NIF (único)
 - `invited_by_person_id`: Para buscar quem foi convidado por uma pessoa
-- `city`: Para busca por cidade
 
 **Relacionamentos:**
 - `invited_by_person_id` → people (foreign key, self-referential)
 - `invitedPeople`: Uma pessoa pode ter convidado várias pessoas (hasMany)
+- `document`: Uma pessoa tem um documento (hasOne - PersonDocument)
+- `addresses`: Uma pessoa tem múltiplas moradas (hasMany - PersonAddress)
+- `primaryAddress`: Morada principal (hasOne - PersonAddress com is_primary = true)
 
 ### 2. users
 Tabela de usuários que acessam o sistema.
@@ -93,7 +91,58 @@ Tabela de usuários que acessam o sistema.
 - `status`: Para filtrar usuários ativos
 - `last_login_at`: Para rastrear acessos
 
-### 3. member_profiles
+### 3. person_documents
+Tabela para documentos de identificação de pessoas (adaptada para Portugal).
+
+**Campos principais:**
+- `id`: Identificador único
+- `person_id`: Foreign key para people (unique)
+- `nif`: NIF (Número de Identificação Fiscal) - documento fiscal principal em Portugal
+- `citizen_card_number`: Cartão de Cidadão
+- `passport_number`: Passaporte
+- `residence_permit_number`: Título de Residência
+- `other_document`: Outro documento
+- `document_notes`: Notas sobre documentos
+- `created_at`, `updated_at`: Timestamps
+
+**Relacionamentos:**
+- `person_id` → people (foreign key)
+
+**Índices:**
+- `person_id`: Para vincular à pessoa
+- `nif`: Para busca por NIF (único)
+
+### 4. person_addresses
+Tabela para moradas de pessoas (adaptada para Portugal).
+
+**Campos principais:**
+- `id`: Identificador único
+- `person_id`: Foreign key para people
+- `is_primary`: Indica se é a morada principal
+- `country_name`: País (ex: Portugal)
+- `district_name`: Distrito
+- `municipality_name`: Concelho/Município
+- `parish_name`: Freguesia
+- `locality_name`: Localidade
+- `locality_manual`: Localidade manual (para casos especiais)
+- `address_line`: Rua/Avenida
+- `door_number`: Número da porta
+- `floor_or_unit`: Andar/Fração
+- `address_complement`: Complemento
+- `postal_code`: Código Postal (formato 0000-000)
+- `full_address`: Endereço completo concatenado
+- `created_at`, `updated_at`: Timestamps
+
+**Relacionamentos:**
+- `person_id` → people (foreign key)
+
+**Índices:**
+- `person_id`: Para buscar moradas de uma pessoa
+- `is_primary`: Para buscar morada principal
+- `postal_code`: Para busca por código postal
+- `municipality_name`: Para busca por concelho
+
+### 5. member_profiles
 Tabela para membresia oficial.
 
 **Campos principais:**
@@ -115,7 +164,7 @@ Tabela para membresia oficial.
 - `membership_status`: Para filtrar membros ativos
 - `membership_date`: Para ordenar por data de entrada
 
-### 4. families
+### 6. families
 Tabela de famílias.
 
 **Campos principais:**
@@ -135,7 +184,7 @@ Tabela de famílias.
 - `name`: Para buscar por nome da família
 - `status`: Para filtrar famílias ativas
 
-### 5. family_members
+### 7. family_members
 Tabela de vínculo entre pessoas e famílias (pivot table).
 
 **Campos principais:**
@@ -158,7 +207,7 @@ Tabela de vínculo entre pessoas e famílias (pivot table).
 - `relationship_type`: Para filtrar por tipo de relacionamento
 - Unique: `[family_id, person_id, ends_at]` para evitar duplicidade de vínculo ativo
 
-### 6. guardianships
+### 8. guardianships
 Tabela para responsáveis por menores de idade.
 
 **Campos principais:**
@@ -185,7 +234,7 @@ Tabela para responsáveis por menores de idade.
 - `status`: Para filtrar responsabilidades ativas
 - Unique: `[minor_person_id, guardian_person_id, ends_at]` para evitar duplicidade
 
-### 7. departments
+### 9. departments
 Tabela de departamentos da igreja.
 
 **Campos principais:**
@@ -212,7 +261,7 @@ Tabela de departamentos da igreja.
 - Recepção
 - Pastoral
 
-### 8. department_people
+### 10. department_people
 Tabela para vínculo entre pessoas e departamentos (pivot table).
 
 **Campos principais:**
@@ -238,7 +287,7 @@ Tabela para vínculo entre pessoas e departamentos (pivot table).
 - `status`: Para filtrar vínculos ativos
 - Unique: `[department_id, person_id, ends_at]` para evitar duplicidade
 
-### 9. system_alerts
+### 11. system_alerts
 Tabela para alertas internos do sistema.
 
 **Campos principais:**
@@ -268,7 +317,7 @@ Tabela para alertas internos do sistema.
 - `related_person_id`: Para buscar alertas de uma pessoa
 - `related_family_id`: Para buscar alertas de uma família
 
-### 10. activity_logs
+### 12. activity_logs
 Tabela para auditoria e histórico de ações.
 
 **Campos principais:**
@@ -414,6 +463,9 @@ Quando uma criança menor de 11 anos estiver próxima de completar 11 anos, o si
 ### Person
 - `hasOne(User)`: Uma pessoa pode ter um usuário
 - `hasOne(MemberProfile)`: Uma pessoa pode ter um perfil de membro
+- `hasOne(PersonDocument)`: Uma pessoa tem um registro de documentos
+- `hasMany(PersonAddress)`: Uma pessoa pode ter múltiplas moradas
+- `hasOne(PersonAddress as primaryAddress)`: Morada principal da pessoa
 - `belongsToMany(Family)`: Uma pessoa pode pertencer a famílias
 - `belongsToMany(Department)`: Uma pessoa pode estar em departamentos
 - `hasMany(GuardianShip as minor)`: Uma pessoa (menor) pode ter responsáveis
@@ -429,6 +481,12 @@ Quando uma criança menor de 11 anos estiver próxima de completar 11 anos, o si
 ### MemberProfile
 - `belongsTo(Person)`: Um perfil de membro pertence a uma pessoa
 - `belongsTo(User as approvedBy)`: Um perfil de membro é aprovado por um usuário
+
+### PersonDocument
+- `belongsTo(Person)`: Um documento pertence a uma pessoa
+
+### PersonAddress
+- `belongsTo(Person)`: Uma morada pertence a uma pessoa
 
 ### Family
 - `belongsTo(Person as mainResponsible)`: Uma família tem um responsável principal

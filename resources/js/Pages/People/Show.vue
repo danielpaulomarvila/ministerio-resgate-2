@@ -8,11 +8,16 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
  * 
  * Esta página exibe todos os dados da pessoa, incluindo:
  * - Dados principais (nome, telefone, email, etc.)
+ * - Documentos (NIF, Cartão de Cidadão, Passaporte, etc.)
+ * - Morada (com estrutura portuguesa)
  * - Idade calculada
  * - Situação de batismo
  * - Status
  * - Observações
  * - Avisos sobre faixa etária (menor de 11, Júnior, Jovem, Adulto)
+ * 
+ * Documentos e moradas foram separados em tabelas próprias
+ * para deixar a tabela principal mais limpa e organizada.
  * 
  * Também mostra avisos sobre quando a pessoa poderia futuramente
  * ter usuário ou perfil de membro, conforme as regras de idade e batismo.
@@ -195,6 +200,10 @@ const getMemberProfileWarning = (category, isBaptized) => {
                                     <p class="mt-1 text-sm text-gray-900">{{ person.preferred_name || '-' }}</p>
                                 </div>
                                 <div>
+                                    <span class="text-sm font-medium text-gray-500">Apelido/Sobrenome:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.last_name || '-' }}</p>
+                                </div>
+                                <div>
                                     <span class="text-sm font-medium text-gray-500">Idade:</span>
                                     <p class="mt-1 text-sm text-gray-900">{{ person.age || '-' }}</p>
                                 </div>
@@ -215,20 +224,28 @@ const getMemberProfileWarning = (category, isBaptized) => {
                                     <p class="mt-1 text-sm text-gray-900">{{ formatEducationLevel(person.education_level) }}</p>
                                 </div>
                                 <div>
-                                    <span class="text-sm font-medium text-gray-500">NIF:</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.nif || '-' }}</p>
+                                    <span class="text-sm font-medium text-gray-500">Nacionalidade:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.nationality || '-' }}</p>
                                 </div>
                                 <div>
-                                    <span class="text-sm font-medium text-gray-500">Outro documento:</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.secondary_document || '-' }}</p>
+                                    <span class="text-sm font-medium text-gray-500">Naturalidade:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.birthplace || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Profissão:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.profession || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Ocupação:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.occupation || '-' }}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- B) Contatos -->
+                        <!-- B) Contactos -->
                         <div class="mb-8">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">
-                                B) Contatos
+                                B) Contactos
                             </h3>
                             
                             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -237,62 +254,116 @@ const getMemberProfileWarning = (category, isBaptized) => {
                                     <p class="mt-1 text-sm text-gray-900">{{ person.email || '-' }}</p>
                                 </div>
                                 <div>
-                                    <span class="text-sm font-medium text-gray-500">Telefone Principal:</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.phone || '-' }}</p>
+                                    <span class="text-sm font-medium text-gray-500">Telemóvel Principal:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.primary_phone || '-' }}</p>
                                 </div>
                                 <div>
-                                    <span class="text-sm font-medium text-gray-500">Telefone Secundário:</span>
+                                    <span class="text-sm font-medium text-gray-500">Telemóvel Secundário:</span>
                                     <p class="mt-1 text-sm text-gray-900">{{ person.secondary_phone || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">WhatsApp:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.whatsapp || '-' }}</p>
+                                </div>
+                                <div class="col-span-2">
+                                    <span class="text-sm font-medium text-gray-500">Notas de Contacto:</span>
+                                    <p class="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{{ person.contact_notes || '-' }}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- C) Endereço -->
+                        <!-- C) Documentos -->
                         <div class="mb-8">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">
-                                C) Endereço
+                                C) Documentos
                             </h3>
                             
                             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">NIF:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.document?.nif || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Cartão de Cidadão:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.document?.citizen_card_number || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Passaporte:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.document?.passport_number || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Título de Residência:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.document?.residence_permit_number || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Outro Documento:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.document?.other_document || '-' }}</p>
+                                </div>
                                 <div class="col-span-2">
-                                    <span class="text-sm font-medium text-gray-500">Endereço:</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.address || '-' }}</p>
-                                </div>
-                                <div>
-                                    <span class="text-sm font-medium text-gray-500">Número:</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.address_number || '-' }}</p>
-                                </div>
-                                <div>
-                                    <span class="text-sm font-medium text-gray-500">Complemento:</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.address_complement || '-' }}</p>
-                                </div>
-                                <div>
-                                    <span class="text-sm font-medium text-gray-500">Bairro/Freguesia:</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.neighborhood || '-' }}</p>
-                                </div>
-                                <div>
-                                    <span class="text-sm font-medium text-gray-500">Código Postal/CEP:</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.postal_code || '-' }}</p>
-                                </div>
-                                <div>
-                                    <span class="text-sm font-medium text-gray-500">Cidade:</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.city || '-' }}</p>
-                                </div>
-                                <div>
-                                    <span class="text-sm font-medium text-gray-500">Estado/Distrito:</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.state || '-' }}</p>
-                                </div>
-                                <div>
-                                    <span class="text-sm font-medium text-gray-500">País:</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.country || '-' }}</p>
+                                    <span class="text-sm font-medium text-gray-500">Notas sobre Documentos:</span>
+                                    <p class="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{{ person.document?.document_notes || '-' }}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- D) Vida Cristã/Igreja -->
+                        <!-- D) Morada -->
                         <div class="mb-8">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">
-                                D) Vida Cristã/Igreja
+                                D) Morada
+                            </h3>
+                            
+                            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">País:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.primaryAddress?.country_name || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Distrito:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.primaryAddress?.district_name || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Concelho/Município:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.primaryAddress?.municipality_name || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Freguesia:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.primaryAddress?.parish_name || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Localidade:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.primaryAddress?.locality_name || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Localidade (Manual):</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.primaryAddress?.locality_manual || '-' }}</p>
+                                </div>
+                                <div class="col-span-2">
+                                    <span class="text-sm font-medium text-gray-500">Rua/Avenida:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.primaryAddress?.address_line || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Número da Porta:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.primaryAddress?.door_number || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Andar/Fração:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.primaryAddress?.floor_or_unit || '-' }}</p>
+                                </div>
+                                <div class="col-span-2">
+                                    <span class="text-sm font-medium text-gray-500">Complemento:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.primaryAddress?.address_complement || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Código Postal:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.primaryAddress?.postal_code || '-' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- E) Vida Cristã/Igreja -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">
+                                E) Vida Cristã/Igreja
                             </h3>
                             
                             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -349,14 +420,14 @@ const getMemberProfileWarning = (category, isBaptized) => {
                             </div>
                         </div>
 
-                        <!-- E) Observações -->
+                        <!-- F) Observações -->
                         <div class="mb-8">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">
-                                E) Observações
+                                F) Observações
                             </h3>
                             
                             <div>
-                                <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ person.notes || '-' }}</p>
+                                <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ person.general_notes || '-' }}</p>
                             </div>
                         </div>
 

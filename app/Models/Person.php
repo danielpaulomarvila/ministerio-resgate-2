@@ -15,32 +15,33 @@ class Person extends Model
 
     // Campos que podem ser preenchidos em massa
     protected $fillable = [
+        'uuid',
         'full_name',
         'preferred_name',
+        'last_name',
         'birth_date',
         'gender',
         'marital_status',
         'education_level',
-        'email',
-        'phone',
+        'nationality',
+        'birthplace',
+        'profession',
+        'occupation',
+        'primary_phone',
         'secondary_phone',
-        'nif', // Número de Identificação Fiscal - documento fiscal principal em Portugal
-        'secondary_document', // Outro documento: Cartão de Cidadão, Título de Residência, Passaporte, etc.
+        'whatsapp',
+        'email',
         'photo_path',
-        'address',
-        'address_number',
-        'address_complement',
-        'neighborhood',
-        'postal_code',
-        'city',
-        'state',
-        'country',
+        'contact_notes',
+        'general_notes',
         'is_baptized',
         'baptism_date',
         'conversion_date',
         'invited_by_person_id',
         'person_status',
-        'notes',
+        'created_by_user_id',
+        'updated_by_user_id',
+        'deleted_by_user_id',
     ];
 
     // Cast de tipos de dados
@@ -58,6 +59,32 @@ class Person extends Model
     public function user(): HasOne
     {
         return $this->hasOne(User::class);
+    }
+
+    /**
+     * Relacionamento: Uma pessoa pode ter um registro de documentos
+     * Documentos foram separados para deixar a tabela people mais limpa
+     */
+    public function document(): HasOne
+    {
+        return $this->hasOne(PersonDocument::class);
+    }
+
+    /**
+     * Relacionamento: Uma pessoa pode ter múltiplas moradas
+     * Moradas foram separadas para deixar a tabela people mais limpa
+     */
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(PersonAddress::class);
+    }
+
+    /**
+     * Relacionamento: Uma pessoa pode ter uma morada principal
+     */
+    public function primaryAddress(): HasOne
+    {
+        return $this->hasOne(PersonAddress::class)->where('is_primary', true);
     }
 
     /**

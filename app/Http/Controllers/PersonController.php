@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StorePersonRequest;
 use App\Http\Requests\UpdatePersonRequest;
 use App\Models\Person;
+use App\Models\PersonDocument;
+use App\Models\PersonAddress;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,6 +20,9 @@ use Inertia\Response;
  * Este controller lida com o CRUD básico de pessoas,
  * permitindo que a Secretaria cadastre e gerencie
  * pessoas (crianças, adolescentes, adultos, etc.).
+ * 
+ * Documentos e moradas foram separados em tabelas próprias
+ * para deixar a tabela principal mais limpa e organizada.
  */
 class PersonController extends Controller
 {
@@ -25,15 +31,17 @@ class PersonController extends Controller
      * 
      * Esta página mostra uma tabela com todas as pessoas cadastradas,
      * incluindo dados principais como nome, idade calculada, status,
-     * telefone, email e se é batizada.
+     * telemóvel, email, NIF e concelho/município.
      * 
      * @return Response Página Inertia com a lista de pessoas
      */
     public function index(): Response
     {
         // Busca todas as pessoas com soft deletes incluídos (para mostrar inativas também)
+        // Carrega documentos e morada principal para mostrar dados adicionais
         // Ordena por nome completo para facilitar a busca
         $people = Person::withTrashed()
+            ->with(['document', 'primaryAddress'])
             ->orderBy('full_name')
             ->get()
             ->map(function ($person) {
@@ -70,30 +78,60 @@ class PersonController extends Controller
      * - Email opcional, mas válido se preenchido
      * - Data de nascimento opcional, mas válida se preenchida
      * - Data de batismo só faz sentido se is_baptized for true
+     * - Documentos são salvos em tabela separada
+     * - Morada é salva em tabela separada
      * 
-     * Após salvar, redireciona para a página de detalhes da pessoa.
+     * Usa transação de banco para garantir integridade.
      * 
      * @param StorePersonRequest $request Request validado
      * @return RedirectResponse Redirecionamento para a página de detalhes
      */
     public function store(StorePersonRequest $request): RedirectResponse
     {
-        // Cria a pessoa com os dados validados
-        $person = Person::create($request->validated());
-
-        // Redireciona para a página de detalhes da pessoa criada
-        return Redirect::route('people.show', $person->id)
-            ->with('success', 'Pessoa cadastrada com sucesso!');
+        DB::beginTransaction();
+        
+        try {
+            // Cria a pessoa com os dados validados
+            $person = Person::create($request->validated()['person']);
+            
+            // Cria/atualiza documentos da pessoa
+            if (!empty($request->validated()['document'])) {
+                PersonDocument::create(array_merge(
+                    ['person_id' => $person->id],
+                    $request->validated()['document']
+                ));
+            }
+            
+            // Cria/atualiza morada principal da pessoa
+            if (!empty($request->validated()['address'])) {
+                PersonAddress::create(array_merge(
+                    ['person_id' => $person->id, 'is_primary' => true],
+                    $request->validated()['address']
+                ));
+            }
+            
+            DB::commit();
+            
+            return Redirect::route('people.show', $person->id)
+                ->with('success', 'Pessoa cadastrada com sucesso!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return Redirect::back()
+                ->with('error', 'Erro ao cadastrar pessoa: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
      * Mostra os detalhes de uma pessoa específica
      * 
      * Esta página exibe todos os dados da pessoa, incluindo:
-     * - Dados principais (nome, telefone, email, etc.)
+     * - Dados principais (nome, telemóvel, email, etc.)
      * - Idade calculada
      * - Situação de batismo
      * - Status
+     * - Documentos (NIF, Cartão de Cidadão, etc.)
+     * - Morada principal
      * - Observações
      * - Avisos sobre faixa etária (menor de 11, Júnior, Jovem, Adulto)
      * 
@@ -106,7 +144,7 @@ class PersonController extends Controller
     public function show(Person $person): Response
     {
         // Carrega a pessoa com relacionamentos para mostrar vínculos
-        $person->load(['user', 'memberProfile', 'families', 'departments']);
+        $person->load(['user', 'document', 'primaryAddress', 'memberProfile', 'families', 'departments']);
 
         // Calcula idade dinamicamente
         $person->age = $person->getAgeAttribute();
@@ -143,6 +181,9 @@ class PersonController extends Controller
      */
     public function edit(Person $person): Response
     {
+        // Carrega documentos e morada principal para edição
+        $person->load(['document', 'primaryAddress']);
+
         return Inertia::render('People/Edit', [
             'person' => $person,
         ]);
@@ -154,7 +195,7 @@ class PersonController extends Controller
      * Valida os dados conforme as regras de negócio, semelhante
      * à criação, mas permitindo edição de campos existentes.
      * 
-     * Após atualizar, redireciona para a página de detalhes da pessoa.
+     * Usa transação de banco para garantir integridade.
      * 
      * @param UpdatePersonRequest $request Request validado
      * @param Person $person Pessoa a ser atualizada
@@ -162,12 +203,44 @@ class PersonController extends Controller
      */
     public function update(UpdatePersonRequest $request, Person $person): RedirectResponse
     {
-        // Atualiza a pessoa com os dados validados
-        $person->update($request->validated());
-
-        // Redireciona para a página de detalhes da pessoa atualizada
-        return Redirect::route('people.show', $person->id)
-            ->with('success', 'Pessoa atualizada com sucesso!');
+        DB::beginTransaction();
+        
+        try {
+            // Atualiza a pessoa com os dados validados
+            $person->update($request->validated()['person']);
+            
+            // Atualiza documentos da pessoa
+            if (!empty($request->validated()['document'])) {
+                $documentData = array_merge(['person_id' => $person->id], $request->validated()['document']);
+                
+                if ($person->document) {
+                    $person->document->update($documentData);
+                } else {
+                    PersonDocument::create($documentData);
+                }
+            }
+            
+            // Atualiza morada principal da pessoa
+            if (!empty($request->validated()['address'])) {
+                $addressData = array_merge(['person_id' => $person->id, 'is_primary' => true], $request->validated()['address']);
+                
+                if ($person->primaryAddress) {
+                    $person->primaryAddress->update($addressData);
+                } else {
+                    PersonAddress::create($addressData);
+                }
+            }
+            
+            DB::commit();
+            
+            return Redirect::route('people.show', $person->id)
+                ->with('success', 'Pessoa atualizada com sucesso!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return Redirect::back()
+                ->with('error', 'Erro ao atualizar pessoa: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**

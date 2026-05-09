@@ -8,7 +8,10 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
  * 
  * Esta página mostra todas as pessoas cadastradas no sistema,
  * incluindo dados principais como nome, idade calculada, status,
- * telefone, email e se é batizada.
+ * telemóvel, email, NIF e concelho/município.
+ * 
+ * Documentos e moradas foram separados em tabelas próprias
+ * para deixar a tabela principal mais limpa e organizada.
  * 
  * A Secretaria pode visualizar, editar e remover pessoas daqui.
  */
@@ -99,13 +102,16 @@ const formatGender = (gender) => {
                                             Idade
                                         </th>
                                         <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                            Telefone
+                                            Telemóvel
                                         </th>
                                         <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                             Email
                                         </th>
                                         <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-                                            Cidade
+                                            NIF
+                                        </th>
+                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                            Concelho
                                         </th>
                                         <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                             Status
@@ -137,7 +143,7 @@ const formatGender = (gender) => {
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="text-sm text-gray-900">
-                                                {{ person.phone || '-' }}
+                                                {{ person.primary_phone || '-' }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -147,7 +153,12 @@ const formatGender = (gender) => {
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="text-sm text-gray-900">
-                                                {{ person.city || '-' }}
+                                                {{ person.document?.nif || '-' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="text-sm text-gray-900">
+                                                {{ person.primaryAddress?.municipality_name || '-' }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">

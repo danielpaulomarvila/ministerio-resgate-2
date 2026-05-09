@@ -144,40 +144,81 @@ Este documento serve como checklist para validar que a fundação do sistema foi
   - [x] Pastoral
 - [x] Seeder executado com sucesso
 
-### ✅ People CRUD (Fase 2.1)
-- [x] Migration para adicionar novos campos à tabela people
-  - [x] marital_status (single, married, divorced, widowed, separated)
-  - [x] education_level (elementary, high_school, college, postgraduate, other)
-  - [x] secondary_phone
-  - [x] secondary_document
-  - [x] Campos de endereço estruturados (address, address_number, address_complement, neighborhood, postal_code, city, state, country)
-  - [x] conversion_date
-  - [x] invited_by_person_id (foreign key self-referential)
-  - [x] Atualização de person_status (active, inactive, visitor, congregant, discipling, new_convert, regularization)
-- [x] Migration executada com sucesso
-- [x] Model Person atualizado com novos campos
-  - [x] Fillable atualizado
-  - [x] Casts atualizado
-  - [x] Relacionamentos invitedBy e invitedPeople
-  - [x] Métodos auxiliares ageGroupLabel(), canHaveUser(), canBeMember()
-- [x] StorePersonRequest atualizado com novas validações
-- [x] UpdatePersonRequest atualizado com novas validações
-- [x] PersonController já suporta novos campos automaticamente
+### ✅ People CRUD (Fase 2.1) - Refatorado para Portugal
+- [x] Migration para criar tabela person_documents
+  - [x] Campos: nif, citizen_card_number, passport_number, residence_permit_number, other_document, document_notes
+  - [x] person_id como foreign key para people
+  - [x] Índices: person_id, nif (único)
+- [x] Migration para criar tabela person_addresses
+  - [x] Campos: country_name, district_name, municipality_name, parish_name, locality_name, locality_manual, address_line, door_number, floor_or_unit, address_complement, postal_code, full_address, is_primary
+  - [x] person_id como foreign key para people
+  - [x] Índices: person_id, is_primary, postal_code, municipality_name
+- [x] Migration para migrar dados de people para person_documents e person_addresses
+  - [x] Migração de nif/document_number para person_documents.nif
+  - [x] Migração de secondary_document para person_documents.other_document
+  - [x] Migração de campos de endereço para person_addresses
+  - [x] Compatibilidade antiga: city -> municipality_name, state -> district_name, neighborhood -> parish_name, address_number -> door_number
+- [x] Migration para reestruturar tabela people
+  - [x] Adição de campos novos: last_name, nationality, birthplace, profession, occupation, primary_phone, whatsapp, contact_notes, general_notes
+  - [x] Renomeação: phone -> primary_phone, notes -> general_notes
+  - [x] Remoção de campos migrados: nif, secondary_document, campos de endereço
+- [x] Model PersonDocument criado
+  - [x] Relacionamento: belongsTo Person
+  - [x] Fillable configurado
+- [x] Model PersonAddress criado
+  - [x] Relacionamento: belongsTo Person
+  - [x] Fillable configurado
+  - [x] Scope para morada principal
+- [x] Model Person atualizado com novos relacionamentos
+  - [x] Relacionamento: hasOne PersonDocument (document)
+  - [x] Relacionamento: hasMany PersonAddress (addresses)
+  - [x] Relacionamento: hasOne PersonAddress (primaryAddress)
+  - [x] Fillable atualizado com novos campos
+  - [x] Casts atualizado com novos campos
+- [x] PersonController atualizado
+  - [x] Uso de transações de banco para integridade
+  - [x] Carregamento de documentos e moradas (with)
+  - [x] Criação/atualização de person, document e address
+- [x] StorePersonRequest atualizado com estrutura separada
+  - [x] Validação para person, document e address
+  - [x] Mensagens de erro em português
+  - [x] Validação de NIF única
+  - [x] Validação de código postal (regex 0000-000)
+- [x] UpdatePersonRequest atualizado com estrutura separada
+  - [x] Validação para person, document e address
+  - [x] Mensagens de erro em português
+  - [x] Validação de NIF única ignorando o próprio registro
+  - [x] Validação de código postal (regex 0000-000)
 - [x] Página People/Index.vue atualizada
-  - [x] Coluna Cidade adicionada
-  - [x] Cores atualizadas para novos status
+  - [x] Coluna NIF adicionada
+  - [x] Coluna Concelho adicionada (municipality_name)
+  - [x] Terminologia portuguesa (telemóvel, contactos, morada)
 - [x] Página People/Create.vue atualizada
-  - [x] Campos organizados em seções: A) Dados Pessoais, B) Contatos, C) Endereço, D) Vida Cristã/Igreja, E) Observações
-  - [x] Todos os novos campos incluídos no formulário
+  - [x] Estrutura separada do form (person, document, address)
+  - [x] Campos organizados em seções: A) Dados Pessoais, B) Contactos, C) Documentos, D) Morada, E) Vida Cristã/Igreja, F) Observações
+  - [x] Novos campos: last_name, nationality, birthplace, profession, occupation, whatsapp, contact_notes
+  - [x] Campos de documentos: NIF, Cartão de Cidadão, Passaporte, Título de Residência
+  - [x] Campos de morada portuguesa: distrito, concelho/município, freguesia, localidade, código postal
+  - [x] Terminologia portuguesa: telemóvel, contactos, morada, freguesia, concelho
 - [x] Página People/Edit.vue atualizada
-  - [x] Campos organizados em seções: A) Dados Pessoais, B) Contatos, C) Endereço, D) Vida Cristã/Igreja, E) Observações
-  - [x] Todos os novos campos incluídos no formulário
+  - [x] Estrutura separada do form (person, document, address)
+  - [x] Campos organizados em seções: A) Dados Pessoais, B) Contactos, C) Documentos, D) Morada, E) Vida Cristã/Igreja, F) Observações
+  - [x] Carregamento de dados existentes (person.document, person.primaryAddress)
+  - [x] Terminologia portuguesa
 - [x] Página People/Show.vue atualizada
-  - [x] Campos organizados em seções: A) Dados Pessoais, B) Contatos, C) Endereço, D) Vida Cristã/Igreja, E) Observações
-  - [x] Formatters novos para marital_status e education_level
-  - [x] Avisos de elegibilidade para usuário, membro e departamento Resgatados
-- [x] DOCUMENTO_BANCO_DADOS_INICIAL.md atualizado com novos campos
-- [x] DOCUMENTO_ARQUITETURA_INICIAL.md atualizado com detalhes da Fase 2.1
+  - [x] Campos organizados em seções: A) Dados Pessoais, B) Contactos, C) Documentos, D) Morada, E) Vida Cristã/Igreja, F) Observações
+  - [x] Exibição de dados de person.document e person.primaryAddress
+  - [x] Terminologia portuguesa
+- [x] DOCUMENTO_BANCO_DADOS_INICIAL.md atualizado
+  - [x] Tabela people atualizada (sem documentos e moradas)
+  - [x] Tabela person_documents adicionada
+  - [x] Tabela person_addresses adicionada
+  - [x] Relacionamentos Eloquent atualizados
+  - [x] Números de tabelas atualizados (people=1, users=2, person_documents=3, person_addresses=4, etc.)
+- [x] DOCUMENTO_ARQUITETURA_INICIAL.md atualizado
+  - [x] Fase 2.1 atualizada com nova estrutura separada
+  - [x] Detalhes das tabelas person_documents e person_addresses
+  - [x] Terminologia portuguesa documentada
 
 ### ✅ Comentários no Código
 - [x] Todas as migrations têm comentários explicativos

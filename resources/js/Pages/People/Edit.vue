@@ -9,6 +9,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
  * Esta página permite que a Secretaria atualize os dados
  * de uma pessoa já cadastrada. Mantém a integridade dos
  * dados e respeita as regras de validação.
+ * 
+ * Documentos e moradas foram separados em tabelas próprias
+ * para deixar a tabela principal mais limpa e organizada.
  */
 
 const props = defineProps({
@@ -19,31 +22,53 @@ const props = defineProps({
 });
 
 const form = useForm({
-    full_name: props.person.full_name,
-    preferred_name: props.person.preferred_name || '',
-    birth_date: props.person.birth_date || '',
-    gender: props.person.gender || '',
-    marital_status: props.person.marital_status || '',
-    education_level: props.person.education_level || '',
-    email: props.person.email || '',
-    phone: props.person.phone || '',
-    secondary_phone: props.person.secondary_phone || '',
-    nif: props.person.nif || '',
-    secondary_document: props.person.secondary_document || '',
-    address: props.person.address || '',
-    address_number: props.person.address_number || '',
-    address_complement: props.person.address_complement || '',
-    neighborhood: props.person.neighborhood || '',
-    postal_code: props.person.postal_code || '',
-    city: props.person.city || '',
-    state: props.person.state || '',
-    country: props.person.country || 'Portugal',
-    is_baptized: props.person.is_baptized,
-    baptism_date: props.person.baptism_date || '',
-    conversion_date: props.person.conversion_date || '',
-    invited_by_person_id: props.person.invited_by_person_id || null,
-    person_status: props.person.person_status,
-    notes: props.person.notes || ''
+    person: {
+        full_name: props.person.full_name,
+        preferred_name: props.person.preferred_name || '',
+        last_name: props.person.last_name || '',
+        birth_date: props.person.birth_date || '',
+        gender: props.person.gender || '',
+        marital_status: props.person.marital_status || '',
+        education_level: props.person.education_level || '',
+        nationality: props.person.nationality || '',
+        birthplace: props.person.birthplace || '',
+        profession: props.person.profession || '',
+        occupation: props.person.occupation || '',
+        primary_phone: props.person.primary_phone || '',
+        secondary_phone: props.person.secondary_phone || '',
+        whatsapp: props.person.whatsapp || '',
+        email: props.person.email || '',
+        contact_notes: props.person.contact_notes || '',
+        photo_path: props.person.photo_path || '',
+        is_baptized: props.person.is_baptized,
+        baptism_date: props.person.baptism_date || '',
+        conversion_date: props.person.conversion_date || '',
+        invited_by_person_id: props.person.invited_by_person_id || null,
+        person_status: props.person.person_status,
+        general_notes: props.person.general_notes || ''
+    },
+    document: {
+        nif: props.person.document?.nif || '',
+        citizen_card_number: props.person.document?.citizen_card_number || '',
+        passport_number: props.person.document?.passport_number || '',
+        residence_permit_number: props.person.document?.residence_permit_number || '',
+        other_document: props.person.document?.other_document || '',
+        document_notes: props.person.document?.document_notes || ''
+    },
+    address: {
+        country_name: props.person.primaryAddress?.country_name || 'Portugal',
+        district_name: props.person.primaryAddress?.district_name || '',
+        municipality_name: props.person.primaryAddress?.municipality_name || '',
+        parish_name: props.person.primaryAddress?.parish_name || '',
+        locality_name: props.person.primaryAddress?.locality_name || '',
+        locality_manual: props.person.primaryAddress?.locality_manual || '',
+        address_line: props.person.primaryAddress?.address_line || '',
+        door_number: props.person.primaryAddress?.door_number || '',
+        floor_or_unit: props.person.primaryAddress?.floor_or_unit || '',
+        address_complement: props.person.primaryAddress?.address_complement || '',
+        postal_code: props.person.primaryAddress?.postal_code || '',
+        full_address: props.person.primaryAddress?.full_address || ''
+    }
 });
 
 /**
@@ -87,61 +112,77 @@ const submit = () => {
                                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                                     <!-- Nome Completo -->
                                     <div class="col-span-2">
-                                        <label for="full_name" class="block text-sm font-medium text-gray-700">
+                                        <label for="person.full_name" class="block text-sm font-medium text-gray-700">
                                             Nome Completo <span class="text-red-500">*</span>
                                         </label>
                                         <input
-                                            id="full_name"
-                                            v-model="form.full_name"
+                                            id="person.full_name"
+                                            v-model="form.person.full_name"
                                             type="text"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                             required
                                         />
-                                        <div v-if="form.errors.full_name" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.full_name }}
+                                        <div v-if="form.errors['person.full_name']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.full_name'] }}
                                         </div>
                                     </div>
 
                                     <!-- Nome Preferido -->
                                     <div>
-                                        <label for="preferred_name" class="block text-sm font-medium text-gray-700">
+                                        <label for="person.preferred_name" class="block text-sm font-medium text-gray-700">
                                             Nome Preferido
                                         </label>
                                         <input
-                                            id="preferred_name"
-                                            v-model="form.preferred_name"
+                                            id="person.preferred_name"
+                                            v-model="form.person.preferred_name"
                                             type="text"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
-                                        <div v-if="form.errors.preferred_name" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.preferred_name }}
+                                        <div v-if="form.errors['person.preferred_name']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.preferred_name'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Apelido/Sobrenome -->
+                                    <div>
+                                        <label for="person.last_name" class="block text-sm font-medium text-gray-700">
+                                            Apelido/Sobrenome
+                                        </label>
+                                        <input
+                                            id="person.last_name"
+                                            v-model="form.person.last_name"
+                                            type="text"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                        <div v-if="form.errors['person.last_name']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.last_name'] }}
                                         </div>
                                     </div>
 
                                     <!-- Data de Nascimento -->
                                     <div>
-                                        <label for="birth_date" class="block text-sm font-medium text-gray-700">
+                                        <label for="person.birth_date" class="block text-sm font-medium text-gray-700">
                                             Data de Nascimento
                                         </label>
                                         <input
-                                            id="birth_date"
-                                            v-model="form.birth_date"
+                                            id="person.birth_date"
+                                            v-model="form.person.birth_date"
                                             type="date"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
-                                        <div v-if="form.errors.birth_date" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.birth_date }}
+                                        <div v-if="form.errors['person.birth_date']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.birth_date'] }}
                                         </div>
                                     </div>
 
                                     <!-- Gênero -->
                                     <div>
-                                        <label for="gender" class="block text-sm font-medium text-gray-700">
+                                        <label for="person.gender" class="block text-sm font-medium text-gray-700">
                                             Gênero
                                         </label>
                                         <select
-                                            id="gender"
-                                            v-model="form.gender"
+                                            id="person.gender"
+                                            v-model="form.person.gender"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         >
                                             <option value="">Selecione</option>
@@ -149,19 +190,19 @@ const submit = () => {
                                             <option value="female">Feminino</option>
                                             <option value="other">Outro</option>
                                         </select>
-                                        <div v-if="form.errors.gender" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.gender }}
+                                        <div v-if="form.errors['person.gender']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.gender'] }}
                                         </div>
                                     </div>
 
                                     <!-- Estado Civil -->
                                     <div>
-                                        <label for="marital_status" class="block text-sm font-medium text-gray-700">
+                                        <label for="person.marital_status" class="block text-sm font-medium text-gray-700">
                                             Estado Civil
                                         </label>
                                         <select
-                                            id="marital_status"
-                                            v-model="form.marital_status"
+                                            id="person.marital_status"
+                                            v-model="form.person.marital_status"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         >
                                             <option value="">Selecione</option>
@@ -171,19 +212,19 @@ const submit = () => {
                                             <option value="widowed">Viúvo</option>
                                             <option value="separated">Separado</option>
                                         </select>
-                                        <div v-if="form.errors.marital_status" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.marital_status }}
+                                        <div v-if="form.errors['person.marital_status']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.marital_status'] }}
                                         </div>
                                     </div>
 
                                     <!-- Nível de Escolaridade -->
                                     <div>
-                                        <label for="education_level" class="block text-sm font-medium text-gray-700">
+                                        <label for="person.education_level" class="block text-sm font-medium text-gray-700">
                                             Nível de Escolaridade
                                         </label>
                                         <select
-                                            id="education_level"
-                                            v-model="form.education_level"
+                                            id="person.education_level"
+                                            v-model="form.person.education_level"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         >
                                             <option value="">Selecione</option>
@@ -193,258 +234,479 @@ const submit = () => {
                                             <option value="postgraduate">Pós-graduação</option>
                                             <option value="other">Outro</option>
                                         </select>
-                                        <div v-if="form.errors.education_level" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.education_level }}
+                                        <div v-if="form.errors['person.education_level']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.education_level'] }}
                                         </div>
                                     </div>
 
-                                    <!-- NIF -->
+                                    <!-- Nacionalidade -->
                                     <div>
-                                        <label for="nif" class="block text-sm font-medium text-gray-700">
-                                            NIF
+                                        <label for="person.nationality" class="block text-sm font-medium text-gray-700">
+                                            Nacionalidade
                                         </label>
                                         <input
-                                            id="nif"
-                                            v-model="form.nif"
+                                            id="person.nationality"
+                                            v-model="form.person.nationality"
                                             type="text"
-                                            placeholder="Ex.: 123456789"
+                                            placeholder="Ex.: Portuguesa"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
-                                        <div v-if="form.errors.nif" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.nif }}
+                                        <div v-if="form.errors['person.nationality']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.nationality'] }}
                                         </div>
                                     </div>
 
-                                    <!-- Outro documento -->
+                                    <!-- Naturalidade -->
                                     <div>
-                                        <label for="secondary_document" class="block text-sm font-medium text-gray-700">
-                                            Outro documento
+                                        <label for="person.birthplace" class="block text-sm font-medium text-gray-700">
+                                            Naturalidade
                                         </label>
                                         <input
-                                            id="secondary_document"
-                                            v-model="form.secondary_document"
+                                            id="person.birthplace"
+                                            v-model="form.person.birthplace"
                                             type="text"
-                                            placeholder="Cartão de Cidadão, Título de Residência, Passaporte..."
+                                            placeholder="Ex.: Lisboa"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
-                                        <div v-if="form.errors.secondary_document" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.secondary_document }}
+                                        <div v-if="form.errors['person.birthplace']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.birthplace'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Profissão -->
+                                    <div>
+                                        <label for="person.profession" class="block text-sm font-medium text-gray-700">
+                                            Profissão
+                                        </label>
+                                        <input
+                                            id="person.profession"
+                                            v-model="form.person.profession"
+                                            type="text"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                        <div v-if="form.errors['person.profession']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.profession'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Ocupação -->
+                                    <div>
+                                        <label for="person.occupation" class="block text-sm font-medium text-gray-700">
+                                            Ocupação
+                                        </label>
+                                        <input
+                                            id="person.occupation"
+                                            v-model="form.person.occupation"
+                                            type="text"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                        <div v-if="form.errors['person.occupation']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.occupation'] }}
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- B) Contatos -->
+                            <!-- B) Contactos -->
                             <div class="mb-8">
                                 <h3 class="text-lg font-medium text-gray-900 mb-4">
-                                    B) Contatos
+                                    B) Contactos
                                 </h3>
                                 
                                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                                     <!-- Email -->
                                     <div>
-                                        <label for="email" class="block text-sm font-medium text-gray-700">
+                                        <label for="person.email" class="block text-sm font-medium text-gray-700">
                                             Email
                                         </label>
                                         <input
-                                            id="email"
-                                            v-model="form.email"
+                                            id="person.email"
+                                            v-model="form.person.email"
                                             type="email"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
-                                        <div v-if="form.errors.email" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.email }}
+                                        <div v-if="form.errors['person.email']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.email'] }}
                                         </div>
                                     </div>
 
-                                    <!-- Telefone Principal -->
+                                    <!-- Telemóvel Principal -->
                                     <div>
-                                        <label for="phone" class="block text-sm font-medium text-gray-700">
-                                            Telefone Principal
+                                        <label for="person.primary_phone" class="block text-sm font-medium text-gray-700">
+                                            Telemóvel Principal
                                         </label>
                                         <input
-                                            id="phone"
-                                            v-model="form.phone"
+                                            id="person.primary_phone"
+                                            v-model="form.person.primary_phone"
                                             type="text"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
-                                        <div v-if="form.errors.phone" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.phone }}
+                                        <div v-if="form.errors['person.primary_phone']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.primary_phone'] }}
                                         </div>
                                     </div>
 
-                                    <!-- Telefone Secundário -->
+                                    <!-- Telemóvel Secundário -->
                                     <div>
-                                        <label for="secondary_phone" class="block text-sm font-medium text-gray-700">
-                                            Telefone Secundário
+                                        <label for="person.secondary_phone" class="block text-sm font-medium text-gray-700">
+                                            Telemóvel Secundário
                                         </label>
                                         <input
-                                            id="secondary_phone"
-                                            v-model="form.secondary_phone"
+                                            id="person.secondary_phone"
+                                            v-model="form.person.secondary_phone"
                                             type="text"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
-                                        <div v-if="form.errors.secondary_phone" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.secondary_phone }}
+                                        <div v-if="form.errors['person.secondary_phone']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.secondary_phone'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- WhatsApp -->
+                                    <div>
+                                        <label for="person.whatsapp" class="block text-sm font-medium text-gray-700">
+                                            WhatsApp
+                                        </label>
+                                        <input
+                                            id="person.whatsapp"
+                                            v-model="form.person.whatsapp"
+                                            type="text"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                        <div v-if="form.errors['person.whatsapp']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.whatsapp'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Notas de Contacto -->
+                                    <div class="col-span-2">
+                                        <label for="person.contact_notes" class="block text-sm font-medium text-gray-700">
+                                            Notas de Contacto
+                                        </label>
+                                        <textarea
+                                            id="person.contact_notes"
+                                            v-model="form.person.contact_notes"
+                                            rows="2"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        ></textarea>
+                                        <div v-if="form.errors['person.contact_notes']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.contact_notes'] }}
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- C) Endereço -->
+                            <!-- C) Documentos -->
                             <div class="mb-8">
                                 <h3 class="text-lg font-medium text-gray-900 mb-4">
-                                    C) Endereço
+                                    C) Documentos
                                 </h3>
                                 
                                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                    <!-- Endereço -->
-                                    <div class="col-span-2">
-                                        <label for="address" class="block text-sm font-medium text-gray-700">
-                                            Endereço (Rua/Avenida)
+                                    <!-- NIF -->
+                                    <div>
+                                        <label for="document.nif" class="block text-sm font-medium text-gray-700">
+                                            NIF (Número de Identificação Fiscal)
                                         </label>
                                         <input
-                                            id="address"
-                                            v-model="form.address"
+                                            id="document.nif"
+                                            v-model="form.document.nif"
                                             type="text"
+                                            placeholder="Ex.: 123456789"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
-                                        <div v-if="form.errors.address" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.address }}
+                                        <div v-if="form.errors['document.nif']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['document.nif'] }}
                                         </div>
                                     </div>
 
-                                    <!-- Número -->
+                                    <!-- Cartão de Cidadão -->
                                     <div>
-                                        <label for="address_number" class="block text-sm font-medium text-gray-700">
-                                            Número
+                                        <label for="document.citizen_card_number" class="block text-sm font-medium text-gray-700">
+                                            Cartão de Cidadão
                                         </label>
                                         <input
-                                            id="address_number"
-                                            v-model="form.address_number"
+                                            id="document.citizen_card_number"
+                                            v-model="form.document.citizen_card_number"
                                             type="text"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
-                                        <div v-if="form.errors.address_number" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.address_number }}
+                                        <div v-if="form.errors['document.citizen_card_number']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['document.citizen_card_number'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Passaporte -->
+                                    <div>
+                                        <label for="document.passport_number" class="block text-sm font-medium text-gray-700">
+                                            Passaporte
+                                        </label>
+                                        <input
+                                            id="document.passport_number"
+                                            v-model="form.document.passport_number"
+                                            type="text"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                        <div v-if="form.errors['document.passport_number']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['document.passport_number'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Título de Residência -->
+                                    <div>
+                                        <label for="document.residence_permit_number" class="block text-sm font-medium text-gray-700">
+                                            Título de Residência
+                                        </label>
+                                        <input
+                                            id="document.residence_permit_number"
+                                            v-model="form.document.residence_permit_number"
+                                            type="text"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                        <div v-if="form.errors['document.residence_permit_number']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['document.residence_permit_number'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Outro Documento -->
+                                    <div>
+                                        <label for="document.other_document" class="block text-sm font-medium text-gray-700">
+                                            Outro Documento
+                                        </label>
+                                        <input
+                                            id="document.other_document"
+                                            v-model="form.document.other_document"
+                                            type="text"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                        <div v-if="form.errors['document.other_document']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['document.other_document'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Notas sobre Documentos -->
+                                    <div class="col-span-2">
+                                        <label for="document.document_notes" class="block text-sm font-medium text-gray-700">
+                                            Notas sobre Documentos
+                                        </label>
+                                        <textarea
+                                            id="document.document_notes"
+                                            v-model="form.document.document_notes"
+                                            rows="2"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        ></textarea>
+                                        <div v-if="form.errors['document.document_notes']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['document.document_notes'] }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- D) Morada -->
+                            <div class="mb-8">
+                                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                                    D) Morada
+                                </h3>
+                                
+                                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                    <!-- País -->
+                                    <div>
+                                        <label for="address.country_name" class="block text-sm font-medium text-gray-700">
+                                            País
+                                        </label>
+                                        <input
+                                            id="address.country_name"
+                                            v-model="form.address.country_name"
+                                            type="text"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                        <div v-if="form.errors['address.country_name']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['address.country_name'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Distrito -->
+                                    <div>
+                                        <label for="address.district_name" class="block text-sm font-medium text-gray-700">
+                                            Distrito
+                                        </label>
+                                        <input
+                                            id="address.district_name"
+                                            v-model="form.address.district_name"
+                                            type="text"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                        <div v-if="form.errors['address.district_name']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['address.district_name'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Concelho/Município -->
+                                    <div>
+                                        <label for="address.municipality_name" class="block text-sm font-medium text-gray-700">
+                                            Concelho/Município
+                                        </label>
+                                        <input
+                                            id="address.municipality_name"
+                                            v-model="form.address.municipality_name"
+                                            type="text"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                        <div v-if="form.errors['address.municipality_name']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['address.municipality_name'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Freguesia -->
+                                    <div>
+                                        <label for="address.parish_name" class="block text-sm font-medium text-gray-700">
+                                            Freguesia
+                                        </label>
+                                        <input
+                                            id="address.parish_name"
+                                            v-model="form.address.parish_name"
+                                            type="text"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                        <div v-if="form.errors['address.parish_name']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['address.parish_name'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Localidade -->
+                                    <div>
+                                        <label for="address.locality_name" class="block text-sm font-medium text-gray-700">
+                                            Localidade
+                                        </label>
+                                        <input
+                                            id="address.locality_name"
+                                            v-model="form.address.locality_name"
+                                            type="text"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                        <div v-if="form.errors['address.locality_name']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['address.locality_name'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Localidade Manual -->
+                                    <div>
+                                        <label for="address.locality_manual" class="block text-sm font-medium text-gray-700">
+                                            Localidade (Manual)
+                                        </label>
+                                        <input
+                                            id="address.locality_manual"
+                                            v-model="form.address.locality_manual"
+                                            type="text"
+                                            placeholder="Para casos especiais"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                        <div v-if="form.errors['address.locality_manual']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['address.locality_manual'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Rua/Avenida -->
+                                    <div class="col-span-2">
+                                        <label for="address.address_line" class="block text-sm font-medium text-gray-700">
+                                            Rua/Avenida
+                                        </label>
+                                        <input
+                                            id="address.address_line"
+                                            v-model="form.address.address_line"
+                                            type="text"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                        <div v-if="form.errors['address.address_line']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['address.address_line'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Número da Porta -->
+                                    <div>
+                                        <label for="address.door_number" class="block text-sm font-medium text-gray-700">
+                                            Número da Porta
+                                        </label>
+                                        <input
+                                            id="address.door_number"
+                                            v-model="form.address.door_number"
+                                            type="text"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                        <div v-if="form.errors['address.door_number']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['address.door_number'] }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Andar/Fração -->
+                                    <div>
+                                        <label for="address.floor_or_unit" class="block text-sm font-medium text-gray-700">
+                                            Andar/Fração
+                                        </label>
+                                        <input
+                                            id="address.floor_or_unit"
+                                            v-model="form.address.floor_or_unit"
+                                            type="text"
+                                            placeholder="Ex.: 1º Esq."
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                        <div v-if="form.errors['address.floor_or_unit']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['address.floor_or_unit'] }}
                                         </div>
                                     </div>
 
                                     <!-- Complemento -->
-                                    <div>
-                                        <label for="address_complement" class="block text-sm font-medium text-gray-700">
+                                    <div class="col-span-2">
+                                        <label for="address.address_complement" class="block text-sm font-medium text-gray-700">
                                             Complemento
                                         </label>
                                         <input
-                                            id="address_complement"
-                                            v-model="form.address_complement"
+                                            id="address.address_complement"
+                                            v-model="form.address.address_complement"
                                             type="text"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
-                                        <div v-if="form.errors.address_complement" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.address_complement }}
+                                        <div v-if="form.errors['address.address_complement']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['address.address_complement'] }}
                                         </div>
                                     </div>
 
-                                    <!-- Bairro/Freguesia -->
+                                    <!-- Código Postal -->
                                     <div>
-                                        <label for="neighborhood" class="block text-sm font-medium text-gray-700">
-                                            Bairro/Freguesia
+                                        <label for="address.postal_code" class="block text-sm font-medium text-gray-700">
+                                            Código Postal (0000-000)
                                         </label>
                                         <input
-                                            id="neighborhood"
-                                            v-model="form.neighborhood"
+                                            id="address.postal_code"
+                                            v-model="form.address.postal_code"
                                             type="text"
+                                            placeholder="Ex.: 1000-001"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
-                                        <div v-if="form.errors.neighborhood" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.neighborhood }}
-                                        </div>
-                                    </div>
-
-                                    <!-- Código Postal/CEP -->
-                                    <div>
-                                        <label for="postal_code" class="block text-sm font-medium text-gray-700">
-                                            Código Postal/CEP
-                                        </label>
-                                        <input
-                                            id="postal_code"
-                                            v-model="form.postal_code"
-                                            type="text"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        />
-                                        <div v-if="form.errors.postal_code" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.postal_code }}
-                                        </div>
-                                    </div>
-
-                                    <!-- Cidade -->
-                                    <div>
-                                        <label for="city" class="block text-sm font-medium text-gray-700">
-                                            Cidade
-                                        </label>
-                                        <input
-                                            id="city"
-                                            v-model="form.city"
-                                            type="text"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        />
-                                        <div v-if="form.errors.city" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.city }}
-                                        </div>
-                                    </div>
-
-                                    <!-- Estado/Distrito -->
-                                    <div>
-                                        <label for="state" class="block text-sm font-medium text-gray-700">
-                                            Estado/Distrito
-                                        </label>
-                                        <input
-                                            id="state"
-                                            v-model="form.state"
-                                            type="text"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        />
-                                        <div v-if="form.errors.state" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.state }}
-                                        </div>
-                                    </div>
-
-                                    <!-- País -->
-                                    <div>
-                                        <label for="country" class="block text-sm font-medium text-gray-700">
-                                            País
-                                        </label>
-                                        <input
-                                            id="country"
-                                            v-model="form.country"
-                                            type="text"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        />
-                                        <div v-if="form.errors.country" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.country }}
+                                        <div v-if="form.errors['address.postal_code']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['address.postal_code'] }}
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- D) Vida Cristã/Igreja -->
+                            <!-- E) Vida Cristã/Igreja -->
                             <div class="mb-8">
                                 <h3 class="text-lg font-medium text-gray-900 mb-4">
-                                    D) Vida Cristã/Igreja
+                                    E) Vida Cristã/Igreja
                                 </h3>
                                 
                                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                                     <!-- É Batizado -->
                                     <div>
-                                        <label for="is_baptized" class="block text-sm font-medium text-gray-700">
+                                        <label for="person.is_baptized" class="block text-sm font-medium text-gray-700">
                                             É Batizado? <span class="text-red-500">*</span>
                                         </label>
                                         <div class="mt-2">
                                             <label class="inline-flex items-center">
                                                 <input
-                                                    id="is_baptized"
-                                                    v-model="form.is_baptized"
+                                                    id="person.is_baptized"
+                                                    v-model="form.person.is_baptized"
                                                     type="radio"
                                                     :value="true"
                                                     class="text-blue-600 border-gray-300 focus:ring-blue-500"
@@ -454,7 +716,7 @@ const submit = () => {
                                             </label>
                                             <label class="inline-flex items-center ml-6">
                                                 <input
-                                                    v-model="form.is_baptized"
+                                                    v-model="form.person.is_baptized"
                                                     type="radio"
                                                     :value="false"
                                                     class="text-blue-600 border-gray-300 focus:ring-blue-500"
@@ -462,69 +724,68 @@ const submit = () => {
                                                 <span class="ml-2">Não</span>
                                             </label>
                                         </div>
-                                        <div v-if="form.errors.is_baptized" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.is_baptized }}
+                                        <div v-if="form.errors['person.is_baptized']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.is_baptized'] }}
                                         </div>
                                     </div>
 
                                     <!-- Data de Batismo -->
-                                    <div v-if="form.is_baptized">
-                                        <label for="baptism_date" class="block text-sm font-medium text-gray-700">
+                                    <div v-if="form.person.is_baptized">
+                                        <label for="person.baptism_date" class="block text-sm font-medium text-gray-700">
                                             Data de Batismo
                                         </label>
                                         <input
-                                            id="baptism_date"
-                                            v-model="form.baptism_date"
+                                            id="person.baptism_date"
+                                            v-model="form.person.baptism_date"
                                             type="date"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
-                                        <div v-if="form.errors.baptism_date" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.baptism_date }}
+                                        <div v-if="form.errors['person.baptism_date']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.baptism_date'] }}
                                         </div>
                                     </div>
 
                                     <!-- Data de Conversão -->
                                     <div>
-                                        <label for="conversion_date" class="block text-sm font-medium text-gray-700">
+                                        <label for="person.conversion_date" class="block text-sm font-medium text-gray-700">
                                             Data de Conversão
                                         </label>
                                         <input
-                                            id="conversion_date"
-                                            v-model="form.conversion_date"
+                                            id="person.conversion_date"
+                                            v-model="form.person.conversion_date"
                                             type="date"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
-                                        <div v-if="form.errors.conversion_date" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.conversion_date }}
+                                        <div v-if="form.errors['person.conversion_date']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.conversion_date'] }}
                                         </div>
                                     </div>
 
                                     <!-- Quem Convidou -->
                                     <div>
-                                        <label for="invited_by_person_id" class="block text-sm font-medium text-gray-700">
+                                        <label for="person.invited_by_person_id" class="block text-sm font-medium text-gray-700">
                                             Quem convidou/influenciou/indicou
                                         </label>
                                         <input
-                                            id="invited_by_person_id"
-                                            v-model="form.invited_by_person_id"
+                                            id="person.invited_by_person_id"
+                                            v-model="form.person.invited_by_person_id"
                                             type="text"
-                                            placeholder="ID da pessoa (futuro: autocomplete)
-"
+                                            placeholder="ID da pessoa (futuro: autocomplete)"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
-                                        <div v-if="form.errors.invited_by_person_id" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.invited_by_person_id }}
+                                        <div v-if="form.errors['person.invited_by_person_id']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.invited_by_person_id'] }}
                                         </div>
                                     </div>
 
                                     <!-- Status -->
                                     <div>
-                                        <label for="person_status" class="block text-sm font-medium text-gray-700">
+                                        <label for="person.person_status" class="block text-sm font-medium text-gray-700">
                                             Status <span class="text-red-500">*</span>
                                         </label>
                                         <select
-                                            id="person_status"
-                                            v-model="form.person_status"
+                                            id="person.person_status"
+                                            v-model="form.person.person_status"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                             required
                                         >
@@ -536,31 +797,31 @@ const submit = () => {
                                             <option value="new_convert">Novo convertido</option>
                                             <option value="regularization">Em regularização</option>
                                         </select>
-                                        <div v-if="form.errors.person_status" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.person_status }}
+                                        <div v-if="form.errors['person.person_status']" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors['person.person_status'] }}
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- E) Observações -->
+                            <!-- F) Observações -->
                             <div class="mb-8">
                                 <h3 class="text-lg font-medium text-gray-900 mb-4">
-                                    E) Observações
+                                    F) Observações
                                 </h3>
                                 
                                 <div>
-                                    <label for="notes" class="block text-sm font-medium text-gray-700">
-                                        Observações
+                                    <label for="person.general_notes" class="block text-sm font-medium text-gray-700">
+                                        Observações Gerais
                                     </label>
                                     <textarea
-                                        id="notes"
-                                        v-model="form.notes"
+                                        id="person.general_notes"
+                                        v-model="form.person.general_notes"
                                         rows="3"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                     ></textarea>
-                                    <div v-if="form.errors.notes" class="mt-1 text-sm text-red-600">
-                                        {{ form.errors.notes }}
+                                    <div v-if="form.errors['person.general_notes']" class="mt-1 text-sm text-red-600">
+                                        {{ form.errors['person.general_notes'] }}
                                     </div>
                                 </div>
                             </div>

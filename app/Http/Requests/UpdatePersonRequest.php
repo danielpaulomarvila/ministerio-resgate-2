@@ -44,7 +44,14 @@ class UpdatePersonRequest extends FormRequest
      * - conversion_date opcional, válida se preenchida
      * - person_status deve ter valores controlados (novos valores adicionados)
      * - invited_by_person_id opcional, mas deve existir em people se preenchido
-     * - Campos de endereço opcionais
+     * 
+     * Documentos (tabela separada):
+     * - NIF opcional, mas único se preenchido (exceto para o próprio documento da pessoa)
+     * - Cartão de Cidadão, Passaporte e Título de Residência opcionais
+     * 
+     * Morada (tabela separada):
+     * - Código postal no formato português 0000-000
+     * - Campos de morada opcionais
      * 
      * @return array<string, ValidationRule|array<mixed>|string> Regras de validação
      */
@@ -54,70 +61,60 @@ class UpdatePersonRequest extends FormRequest
         $personId = $this->route('person')->id;
 
         return [
-            // Nome completo obrigatório
-            'full_name' => 'required|string|max:255',
+            // Dados pessoais
+            'person.full_name' => 'required|string|max:255',
+            'person.preferred_name' => 'nullable|string|max:255',
+            'person.last_name' => 'nullable|string|max:255',
+            'person.birth_date' => 'nullable|date|before_or_equal:today',
+            'person.gender' => 'nullable|in:male,female,other',
+            'person.marital_status' => 'nullable|in:single,married,divorced,widowed,separated',
+            'person.education_level' => 'nullable|in:elementary,high_school,college,postgraduate,other',
+            'person.nationality' => 'nullable|string|max:100',
+            'person.birthplace' => 'nullable|string|max:150',
+            'person.profession' => 'nullable|string|max:150',
+            'person.occupation' => 'nullable|string|max:150',
             
-            // Nome preferido opcional
-            'preferred_name' => 'nullable|string|max:255',
+            // Contactos
+            'person.primary_phone' => 'nullable|string|max:50',
+            'person.secondary_phone' => 'nullable|string|max:50',
+            'person.whatsapp' => 'nullable|string|max:50',
+            'person.email' => 'nullable|email|unique:people,email,' . $personId,
+            'person.contact_notes' => 'nullable|string',
             
-            // Data de nascimento opcional, mas válida se preenchida (aceita hoje também)
-            'birth_date' => 'nullable|date|before_or_equal:today',
+            // Foto
+            'person.photo_path' => 'nullable|string|max:255',
             
-            // Gênero opcional, mas deve ter valor válido se preenchido
-            'gender' => 'nullable|in:male,female,other',
+            // Dados de vida cristã
+            'person.is_baptized' => 'required|boolean',
+            'person.baptism_date' => 'nullable|date|before_or_equal:today',
+            'person.conversion_date' => 'nullable|date|before_or_equal:today',
+            'person.invited_by_person_id' => 'nullable|exists:people,id',
+            'person.person_status' => 'required|in:active,inactive,visitor,congregant,discipling,new_convert,regularization',
             
-            // Estado civil opcional, mas com valores controlados
-            'marital_status' => 'nullable|in:single,married,divorced,widowed,separated',
+            // Observações gerais
+            'person.general_notes' => 'nullable|string',
             
-            // Nível de escolaridade opcional, mas com valores controlados
-            'education_level' => 'nullable|in:elementary,high_school,college,postgraduate,other',
+            // Documentos (tabela separada)
+            'document.nif' => 'nullable|string|max:50|unique:person_documents,nif,' . $personId . ',person_id',
+            'document.citizen_card_number' => 'nullable|string|max:100',
+            'document.passport_number' => 'nullable|string|max:100',
+            'document.residence_permit_number' => 'nullable|string|max:100',
+            'document.other_document' => 'nullable|string|max:150',
+            'document.document_notes' => 'nullable|string',
             
-            // Email opcional, mas válido e único se preenchido (exceto para a própria pessoa)
-            'email' => 'nullable|email|unique:people,email,' . $personId,
-            
-            // Telefone opcional
-            'phone' => 'nullable|string|max:50',
-            
-            // Telefone secundário opcional
-            'secondary_phone' => 'nullable|string|max:50',
-            
-            // NIF (Número de Identificação Fiscal) opcional, mas único se preenchido (exceto para a própria pessoa)
-            // Documento fiscal principal em Portugal
-            'nif' => 'nullable|string|max:50|unique:people,nif,' . $personId,
-            
-            // Outro documento opcional (Cartão de Cidadão, Título de Residência, Passaporte, etc.)
-            'secondary_document' => 'nullable|string|max:100',
-            
-            // Foto opcional (path no storage)
-            'photo_path' => 'nullable|string|max:255',
-            
-            // Endereço completo estruturado opcional
-            'address' => 'nullable|string|max:255',
-            'address_number' => 'nullable|string|max:50',
-            'address_complement' => 'nullable|string|max:255',
-            'neighborhood' => 'nullable|string|max:255',
-            'postal_code' => 'nullable|string|max:20',
-            'city' => 'nullable|string|max:255',
-            'state' => 'nullable|string|max:100',
-            'country' => 'nullable|string|max:100',
-            
-            // is_baptized deve ser boolean
-            'is_baptized' => 'required|boolean',
-            
-            // baptism_date opcional mesmo se is_baptized for true (pode não saber data exata)
-            'baptism_date' => 'nullable|date|before_or_equal:today',
-            
-            // conversion_date opcional, válida se preenchida
-            'conversion_date' => 'nullable|date|before_or_equal:today',
-            
-            // invited_by_person_id opcional, mas deve existir em people se preenchido
-            'invited_by_person_id' => 'nullable|exists:people,id',
-            
-            // person_status deve ter valores controlados (novos valores adicionados)
-            'person_status' => 'required|in:active,inactive,visitor,congregant,discipling,new_convert,regularization',
-            
-            // Observações opcionais
-            'notes' => 'nullable|string',
+            // Morada (tabela separada)
+            'address.country_name' => 'nullable|string|max:100',
+            'address.district_name' => 'nullable|string|max:100',
+            'address.municipality_name' => 'nullable|string|max:100',
+            'address.parish_name' => 'nullable|string|max:100',
+            'address.locality_name' => 'nullable|string|max:100',
+            'address.locality_manual' => 'nullable|string|max:150',
+            'address.address_line' => 'nullable|string|max:255',
+            'address.door_number' => 'nullable|string|max:50',
+            'address.floor_or_unit' => 'nullable|string|max:50',
+            'address.address_complement' => 'nullable|string|max:255',
+            'address.postal_code' => 'nullable|regex:/^\d{4}-\d{3}$/',
+            'address.full_address' => 'nullable|string',
         ];
     }
 
@@ -131,39 +128,40 @@ class UpdatePersonRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'full_name.required' => 'O nome completo é obrigatório.',
-            'full_name.max' => 'O nome completo não pode ter mais de 255 caracteres.',
+            // Dados pessoais
+            'person.full_name.required' => 'O nome completo é obrigatório.',
+            'person.full_name.max' => 'O nome completo não pode ter mais de 255 caracteres.',
+            'person.birth_date.date' => 'A data de nascimento deve ser uma data válida.',
+            'person.birth_date.before_or_equal' => 'A data de nascimento deve ser anterior ou igual a hoje.',
+            'person.gender.in' => 'O gênero deve ser masculino, feminino ou outro.',
+            'person.marital_status.in' => 'O estado civil deve ser solteiro, casado, divorciado, viúvo ou separado.',
+            'person.education_level.in' => 'O nível de escolaridade deve ser fundamental, médio, superior, pós-graduação ou outro.',
             
-            'birth_date.date' => 'A data de nascimento deve ser uma data válida.',
-            'birth_date.before_or_equal' => 'A data de nascimento deve ser anterior ou igual a hoje.',
+            // Contactos
+            'person.email.email' => 'O email deve ser um endereço válido.',
+            'person.email.unique' => 'Este email já está cadastrado.',
             
-            'gender.in' => 'O gênero deve ser masculino, feminino ou outro.',
+            // Dados de vida cristã
+            'person.is_baptized.required' => 'É necessário informar se a pessoa é batizada.',
+            'person.is_baptized.boolean' => 'O campo de batismo deve ser verdadeiro ou falso.',
+            'person.baptism_date.date' => 'A data de batismo deve ser uma data válida.',
+            'person.baptism_date.before_or_equal' => 'A data de batismo deve ser anterior ou igual a hoje.',
+            'person.conversion_date.date' => 'A data de conversão deve ser uma data válida.',
+            'person.conversion_date.before_or_equal' => 'A data de conversão deve ser anterior ou igual a hoje.',
+            'person.invited_by_person_id.exists' => 'A pessoa que convidou não foi encontrada no sistema.',
+            'person.person_status.required' => 'O status da pessoa é obrigatório.',
+            'person.person_status.in' => 'O status deve ser ativo, inativo, visitante, congregado, discipulando, novo convertido ou em regularização.',
             
-            'marital_status.in' => 'O estado civil deve ser solteiro, casado, divorciado, viúvo ou separado.',
+            // Documentos
+            'document.nif.unique' => 'O NIF informado já está cadastrado.',
+            'document.nif.max' => 'O NIF não pode ter mais de 50 caracteres.',
+            'document.citizen_card_number.max' => 'O número do Cartão de Cidadão não pode ter mais de 100 caracteres.',
+            'document.passport_number.max' => 'O número do Passaporte não pode ter mais de 100 caracteres.',
+            'document.residence_permit_number.max' => 'O número do Título de Residência não pode ter mais de 100 caracteres.',
+            'document.other_document.max' => 'O outro documento não pode ter mais de 150 caracteres.',
             
-            'education_level.in' => 'O nível de escolaridade deve ser fundamental, médio, superior, pós-graduação ou outro.',
-            
-            'email.email' => 'O email deve ser um endereço válido.',
-            'email.unique' => 'Este email já está cadastrado.',
-            
-            'nif.unique' => 'O NIF informado já está cadastrado.',
-            'nif.max' => 'O NIF não pode ter mais de 50 caracteres.',
-            
-            'secondary_document.max' => 'O outro documento não pode ter mais de 100 caracteres.',
-            
-            'is_baptized.required' => 'É necessário informar se a pessoa é batizada.',
-            'is_baptized.boolean' => 'O campo de batismo deve ser verdadeiro ou falso.',
-            
-            'baptism_date.date' => 'A data de batismo deve ser uma data válida.',
-            'baptism_date.before_or_equal' => 'A data de batismo deve ser anterior ou igual a hoje.',
-            
-            'conversion_date.date' => 'A data de conversão deve ser uma data válida.',
-            'conversion_date.before_or_equal' => 'A data de conversão deve ser anterior ou igual a hoje.',
-            
-            'invited_by_person_id.exists' => 'A pessoa que convidou não foi encontrada no sistema.',
-            
-            'person_status.required' => 'O status da pessoa é obrigatório.',
-            'person_status.in' => 'O status deve ser ativo, inativo, visitante, congregado, discipulando, novo convertido ou em regularização.',
+            // Morada
+            'address.postal_code.regex' => 'O código postal deve estar no formato 0000-000.',
         ];
     }
 }

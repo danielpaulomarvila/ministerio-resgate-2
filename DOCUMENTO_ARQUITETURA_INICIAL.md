@@ -147,17 +147,20 @@
 
 ### Fase 2: Secretaria e Gestão de Pessoas
 1. CRUD completo de People (COMPLETADO - Fase 2.1)
-   - Campos pessoais: nome completo, nome preferido, data de nascimento, gênero
+   - **Estrutura separada**: Documentos e moradas foram movidos para tabelas próprias (person_documents, person_addresses)
+   - Campos pessoais: nome completo, nome preferido, apelido/sobrenome, data de nascimento, gênero
    - Campos civis: estado civil (single, married, divorced, widowed, separated), nível de escolaridade (elementary, high_school, college, postgraduate, other)
-   - Contatos: email, telefone principal, telefone secundário
-   - Documentos: NIF (Número de Identificação Fiscal), outro documento (Cartão de Cidadão, Título de Residência, Passaporte, etc.)
-   - Endereço estruturado: rua, número, complemento, bairro/freguesia, CEP, cidade, estado/distrito, país
+   - Campos adicionais: nacionalidade, naturalidade, profissão, ocupação
+   - Contatos: email, telemóvel principal, telemóvel secundário, whatsapp, notas de contacto
+   - **Documentos (tabela person_documents)**: NIF (Número de Identificação Fiscal), Cartão de Cidadão, Passaporte, Título de Residência, outro documento, notas sobre documentos
+   - **Morada (tabela person_addresses)**: País, distrito, concelho/município, freguesia, localidade, localidade manual, rua/avenida, número da porta, andar/fração, complemento, código postal (formato 0000-000), endereço completo
    - Vida cristã: batismo (is_baptized, baptism_date), conversão (conversion_date), quem convidou (invited_by_person_id)
    - Status: active, inactive, visitor, congregant, discipling, new_convert, regularization
    - Métodos auxiliares: ageGroupLabel(), canHaveUser(), canBeMember()
-   - Relacionamentos: invitedBy (BelongsTo), invitedPeople (HasMany)
-   - Validações: StorePersonRequest e UpdatePersonRequest com mensagens em português
-   - Páginas Vue: Index, Create, Edit, Show organizadas em seções (A) Dados Pessoais, (B) Contatos, (C) Endereço, (D) Vida Cristã/Igreja, (E) Observações
+   - Relacionamentos: invitedBy (BelongsTo), invitedPeople (HasMany), document (hasOne - PersonDocument), addresses (hasMany - PersonAddress), primaryAddress (hasOne - PersonAddress)
+   - Validações: StorePersonRequest e UpdatePersonRequest com estrutura separada (person, document, address) e mensagens em português
+   - Páginas Vue: Index, Create, Edit, Show organizadas em seções (A) Dados Pessoais, (B) Contactos, (C) Documentos, (D) Morada, (E) Vida Cristã/Igreja, (F) Observações
+   - Terminologia portuguesa: telemóvel, contactos, morada, freguesia, concelho, código postal
    - Avisos de elegibilidade: usuário, membro, departamento Resgatados, alerta de 11 anos
 2. CRUD de Families
 3. Gestão de Guardianships
