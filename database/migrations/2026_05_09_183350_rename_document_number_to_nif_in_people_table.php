@@ -20,11 +20,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Renomear document_number para nif
-        // Laravel Schema::renameColumn funciona em MySQL e SQLite
-        Schema::table('people', function (Blueprint $table) {
-            $table->renameColumn('document_number', 'nif');
-        });
+        // Verificar se a coluna document_number existe antes de renomear
+        // Isso evita erro se a migration for executada em um banco onde já foi renomeado
+        if (Schema::hasColumn('people', 'document_number') && !Schema::hasColumn('people', 'nif')) {
+            Schema::table('people', function (Blueprint $table) {
+                $table->renameColumn('document_number', 'nif');
+            });
+        }
     }
 
     /**
@@ -32,9 +34,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Renomear nif de volta para document_number
-        Schema::table('people', function (Blueprint $table) {
-            $table->renameColumn('nif', 'document_number');
-        });
+        // Verificar se a coluna nif existe antes de reverter
+        // Isso evita erro se a migration for revertida em um banco onde já foi revertido
+        if (Schema::hasColumn('people', 'nif') && !Schema::hasColumn('people', 'document_number')) {
+            Schema::table('people', function (Blueprint $table) {
+                $table->renameColumn('nif', 'document_number');
+            });
+        }
     }
 };

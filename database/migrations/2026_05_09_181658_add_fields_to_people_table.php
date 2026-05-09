@@ -35,7 +35,7 @@ return new class extends Migration
             $table->string('education_level')->nullable()->after('marital_status');
             
             // Outro documento (Cartão de Cidadão, Título de Residência, Passaporte, etc.)
-            $table->string('secondary_document')->nullable()->after('nif');
+            $table->string('secondary_document')->nullable()->after('document_number');
             
             // Telefone secundário
             $table->string('secondary_phone')->nullable()->after('phone');
