@@ -34,8 +34,8 @@ return new class extends Migration
             // Nível de escolaridade (elementary, high_school, college, postgraduate, other)
             $table->string('education_level')->nullable()->after('marital_status');
             
-            // Documento secundário (RG, CNH, etc.)
-            $table->string('secondary_document')->nullable()->after('document_number');
+            // Outro documento (Cartão de Cidadão, Título de Residência, Passaporte, etc.)
+            $table->string('secondary_document')->nullable()->after('nif');
             
             // Telefone secundário
             $table->string('secondary_phone')->nullable()->after('phone');
@@ -48,7 +48,7 @@ return new class extends Migration
             $table->string('postal_code')->nullable()->after('neighborhood');
             $table->string('city')->nullable()->after('postal_code');
             $table->string('state')->nullable()->after('city');
-            $table->string('country')->nullable()->default('Brasil')->after('state');
+            $table->string('country')->nullable()->default('Portugal')->after('state');
             
             // Data de conversão
             $table->date('conversion_date')->nullable()->after('baptism_date');

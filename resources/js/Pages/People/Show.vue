@@ -215,11 +215,11 @@ const getMemberProfileWarning = (category, isBaptized) => {
                                     <p class="mt-1 text-sm text-gray-900">{{ formatEducationLevel(person.education_level) }}</p>
                                 </div>
                                 <div>
-                                    <span class="text-sm font-medium text-gray-500">Documento Principal (CPF/RG):</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.document_number || '-' }}</p>
+                                    <span class="text-sm font-medium text-gray-500">NIF:</span>
+                                    <p class="mt-1 text-sm text-gray-900">{{ person.nif || '-' }}</p>
                                 </div>
                                 <div>
-                                    <span class="text-sm font-medium text-gray-500">Documento Secundário:</span>
+                                    <span class="text-sm font-medium text-gray-500">Outro documento:</span>
                                     <p class="mt-1 text-sm text-gray-900">{{ person.secondary_document || '-' }}</p>
                                 </div>
                             </div>

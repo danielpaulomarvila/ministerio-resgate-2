@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('phone')->nullable(); // Telefone de contato
 
             // Documentação
-            $table->string('document_number')->unique()->nullable(); // CPF ou outro documento
+            $table->string('document_number')->unique()->nullable(); // NIF (Número de Identificação Fiscal) ou outro documento
             $table->string('photo_path')->nullable(); // Caminho da foto no storage
 
             // Dados de membresia e batismo

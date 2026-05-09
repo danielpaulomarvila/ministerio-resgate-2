@@ -150,7 +150,7 @@
    - Campos pessoais: nome completo, nome preferido, data de nascimento, gênero
    - Campos civis: estado civil (single, married, divorced, widowed, separated), nível de escolaridade (elementary, high_school, college, postgraduate, other)
    - Contatos: email, telefone principal, telefone secundário
-   - Documentos: CPF/documento principal, documento secundário (RG, CNH, etc.)
+   - Documentos: NIF (Número de Identificação Fiscal), outro documento (Cartão de Cidadão, Título de Residência, Passaporte, etc.)
    - Endereço estruturado: rua, número, complemento, bairro/freguesia, CEP, cidade, estado/distrito, país
    - Vida cristã: batismo (is_baptized, baptism_date), conversão (conversion_date), quem convidou (invited_by_person_id)
    - Status: active, inactive, visitor, congregant, discipling, new_convert, regularization

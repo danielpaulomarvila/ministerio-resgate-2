@@ -22,7 +22,7 @@ const form = useForm({
     email: '',
     phone: '',
     secondary_phone: '',
-    document_number: '',
+    nif: '',
     secondary_document: '',
     address: '',
     address_number: '',
@@ -31,7 +31,7 @@ const form = useForm({
     postal_code: '',
     city: '',
     state: '',
-    country: 'Brasil',
+    country: 'Portugal',
     is_baptized: false,
     baptism_date: '',
     conversion_date: '',
@@ -192,31 +192,33 @@ const submit = () => {
                                         </div>
                                     </div>
 
-                                    <!-- Documento Principal -->
+                                    <!-- NIF -->
                                     <div>
-                                        <label for="document_number" class="block text-sm font-medium text-gray-700">
-                                            Documento (CPF/RG)
+                                        <label for="nif" class="block text-sm font-medium text-gray-700">
+                                            NIF
                                         </label>
                                         <input
-                                            id="document_number"
-                                            v-model="form.document_number"
+                                            id="nif"
+                                            v-model="form.nif"
                                             type="text"
+                                            placeholder="Ex.: 123456789"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
-                                        <div v-if="form.errors.document_number" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors.document_number }}
+                                        <div v-if="form.errors.nif" class="mt-1 text-sm text-red-600">
+                                            {{ form.errors.nif }}
                                         </div>
                                     </div>
 
-                                    <!-- Documento Secundário -->
+                                    <!-- Outro documento -->
                                     <div>
                                         <label for="secondary_document" class="block text-sm font-medium text-gray-700">
-                                            Documento Secundário (RG/CNH/etc)
+                                            Outro documento
                                         </label>
                                         <input
                                             id="secondary_document"
                                             v-model="form.secondary_document"
                                             type="text"
+                                            placeholder="Cartão de Cidadão, Título de Residência, Passaporte..."
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
                                         <div v-if="form.errors.secondary_document" class="mt-1 text-sm text-red-600">

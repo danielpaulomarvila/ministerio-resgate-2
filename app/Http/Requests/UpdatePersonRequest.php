@@ -12,7 +12,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * Valida os dados enviados ao atualizar uma pessoa existente,
  * garantindo que as regras de negócio sejam respeitadas.
  * Diferente do StorePersonRequest, este permite que email e
- * document_number sejam iguais aos da própria pessoa sendo editada.
+ * nif sejam iguais aos da própria pessoa sendo editada.
  */
 class UpdatePersonRequest extends FormRequest
 {
@@ -81,11 +81,12 @@ class UpdatePersonRequest extends FormRequest
             // Telefone secundário opcional
             'secondary_phone' => 'nullable|string|max:50',
             
-            // Documento opcional, mas único se preenchido (exceto para a própria pessoa)
-            'document_number' => 'nullable|string|max:50|unique:people,document_number,' . $personId,
+            // NIF (Número de Identificação Fiscal) opcional, mas único se preenchido (exceto para a própria pessoa)
+            // Documento fiscal principal em Portugal
+            'nif' => 'nullable|string|max:50|unique:people,nif,' . $personId,
             
-            // Documento secundário opcional
-            'secondary_document' => 'nullable|string|max:50',
+            // Outro documento opcional (Cartão de Cidadão, Título de Residência, Passaporte, etc.)
+            'secondary_document' => 'nullable|string|max:100',
             
             // Foto opcional (path no storage)
             'photo_path' => 'nullable|string|max:255',
@@ -145,7 +146,10 @@ class UpdatePersonRequest extends FormRequest
             'email.email' => 'O email deve ser um endereço válido.',
             'email.unique' => 'Este email já está cadastrado.',
             
-            'document_number.unique' => 'Este documento já está cadastrado.',
+            'nif.unique' => 'O NIF informado já está cadastrado.',
+            'nif.max' => 'O NIF não pode ter mais de 50 caracteres.',
+            
+            'secondary_document.max' => 'O outro documento não pode ter mais de 100 caracteres.',
             
             'is_baptized.required' => 'É necessário informar se a pessoa é batizada.',
             'is_baptized.boolean' => 'O campo de batismo deve ser verdadeiro ou falso.',

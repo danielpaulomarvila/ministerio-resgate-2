@@ -40,8 +40,8 @@ Tabela principal de pessoas.
 - `email`: E-mail único
 - `phone`: Telefone principal de contato
 - `secondary_phone`: Telefone secundário
-- `document_number`: CPF ou documento principal
-- `secondary_document`: Documento secundário (RG, CNH, etc.)
+- `nif`: NIF (Número de Identificação Fiscal) - documento fiscal principal em Portugal
+- `secondary_document`: Outro documento (Cartão de Cidadão, Título de Residência, Passaporte, etc.)
 - `photo_path`: Caminho da foto no storage
 - `address`: Endereço (Rua/Avenida)
 - `address_number`: Número do endereço
@@ -64,7 +64,7 @@ Tabela principal de pessoas.
 - `birth_date`: Para cálculo de idade
 - `person_status`: Para filtrar por status
 - `email`: Para busca por email (único)
-- `document_number`: Para busca por documento (único)
+- `nif`: Para busca por NIF (único)
 - `invited_by_person_id`: Para buscar quem foi convidado por uma pessoa
 - `city`: Para busca por cidade
 

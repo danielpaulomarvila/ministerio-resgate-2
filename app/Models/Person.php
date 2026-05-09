@@ -24,8 +24,8 @@ class Person extends Model
         'email',
         'phone',
         'secondary_phone',
-        'document_number',
-        'secondary_document',
+        'nif', // Número de Identificação Fiscal - documento fiscal principal em Portugal
+        'secondary_document', // Outro documento: Cartão de Cidadão, Título de Residência, Passaporte, etc.
         'photo_path',
         'address',
         'address_number',
