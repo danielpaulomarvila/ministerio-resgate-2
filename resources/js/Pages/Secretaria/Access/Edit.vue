@@ -4,17 +4,20 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Link } from '@inertiajs/vue3';
 
 const props = defineProps({
-    user: Object,
+    userAccess: {
+        type: Object,
+        required: true,
+    },
 });
 
 const form = useForm({
-    name: props.user.name,
-    email: props.user.email,
-    access_notes: props.user.access_notes || '',
+    name: props.userAccess?.name ?? '',
+    email: props.userAccess?.email ?? '',
+    access_notes: props.userAccess?.access_notes ?? '',
 });
 
 const submit = () => {
-    form.put(route('secretaria.access.update', props.user.id), {
+    form.put(route('secretaria.access.update', props.userAccess.id), {
         preserveScroll: true,
     });
 };
@@ -80,11 +83,11 @@ const submit = () => {
                         </div>
 
                         <!-- Informação da pessoa vinculada (apenas leitura) -->
-                        <div v-if="user.person" class="rounded-md bg-gray-50 p-4">
+                        <div v-if="props.userAccess?.person" class="rounded-md bg-gray-50 p-4">
                             <div class="text-sm font-medium text-gray-700">Pessoa Vinculada</div>
-                            <div class="mt-1 text-sm text-gray-600">{{ user.person.full_name }}</div>
-                            <div class="mt-1 text-sm text-gray-600">{{ user.person.email || 'Sem email' }}</div>
-                            <div class="mt-1 text-sm text-gray-600">Idade: {{ user.person.age }} anos ({{ user.person.age_group_label() }})</div>
+                            <div class="mt-1 text-sm text-gray-600">{{ props.userAccess.person.full_name }}</div>
+                            <div class="mt-1 text-sm text-gray-600">{{ props.userAccess.person.email || 'Sem email' }}</div>
+                            <div class="mt-1 text-sm text-gray-600">Idade: {{ props.userAccess.person.age }} anos ({{ props.userAccess.person.age_group }})</div>
                             <p class="mt-2 text-xs text-gray-500">
                                 A pessoa vinculada não pode ser alterada nesta tela para manter a integridade do sistema.
                             </p>
@@ -93,7 +96,7 @@ const submit = () => {
                         <!-- Botões -->
                         <div class="flex justify-end space-x-3">
                             <Link
-                                :href="route('secretaria.access.show', user.id)"
+                                :href="route('secretaria.access.show', props.userAccess.id)"
                                 class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
                             >
                                 Cancelar

@@ -186,7 +186,7 @@ class SecretaryUserAccessController extends Controller
         ];
 
         return Inertia::render('Secretaria/Access/Show', [
-            'user' => $userData,
+            'userAccess' => $userData,
             'has_age_violation' => $hasAgeViolation,
             'active_guardians' => $activeGuardians,
         ]);
@@ -199,8 +199,33 @@ class SecretaryUserAccessController extends Controller
     {
         $user->load('person');
 
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'status' => $user->status,
+            'must_change_password' => (bool) $user->must_change_password,
+            'access_granted_at' => $user->access_granted_at ? $user->access_granted_at->format('Y-m-d H:i:s') : null,
+            'access_revoked_at' => $user->access_revoked_at ? $user->access_revoked_at->format('Y-m-d H:i:s') : null,
+            'access_revoked_reason' => $user->access_revoked_reason,
+            'access_notes' => $user->access_notes,
+            'created_at' => $user->created_at ? $user->created_at->format('Y-m-d H:i:s') : null,
+            'updated_at' => $user->updated_at ? $user->updated_at->format('Y-m-d H:i:s') : null,
+            'person' => $user->person ? [
+                'id' => $user->person->id,
+                'full_name' => $user->person->full_name,
+                'birth_date' => $user->person->birth_date ? $user->person->birth_date->format('Y-m-d') : null,
+                'email' => $user->person->email,
+                'primary_phone' => $user->person->primary_phone,
+                'age' => $user->person->age ?? null,
+                'age_group' => $user->person->ageGroupLabel(),
+                'is_baptized' => (bool) $user->person->is_baptized,
+                'can_be_member' => (bool) $user->person->canBeMember(),
+            ] : null,
+        ];
+
         return Inertia::render('Secretaria/Access/Edit', [
-            'user' => $user,
+            'userAccess' => $userData,
         ]);
     }
 
