@@ -18,8 +18,13 @@ const peopleResults = ref([]);
 const showPeopleDropdown = ref(false);
 const eligibility = ref(null);
 const selectedPerson = ref(null);
+const isSelectingPerson = ref(false);
 
 watch(peopleSearch, (value) => {
+    if (isSelectingPerson.value) {
+        return;
+    }
+
     if (value.length >= 2) {
         selectedPerson.value = null;
         form.person_id = '';
@@ -51,13 +56,20 @@ const checkEligibility = (personId) => {
 };
 
 const selectPerson = (person) => {
+    isSelectingPerson.value = true;
     selectedPerson.value = person;
+    personSearch.value = person.full_name;
     form.person_id = person.id;
     form.name = person.full_name;
     form.email = person.email || '';
-    peopleSearch.value = person.full_name;
     peopleResults.value = [];
     showPeopleDropdown.value = false;
+
+    checkEligibility(person.id);
+
+    setTimeout(() => {
+        isSelectingPerson.value = false;
+    }, 100);
 };
 
 const clearPerson = () => {
@@ -67,6 +79,7 @@ const clearPerson = () => {
     form.email = '';
     peopleSearch.value = '';
     eligibility.value = null;
+    isSelectingPerson.value = false;
 };
 
 const submit = () => {
@@ -129,7 +142,7 @@ const canSubmit = computed(() => {
                                 </button>
                             </div>
                             <div
-                                v-if="showPeopleDropdown && peopleResults.length > 0 && !selectedPerson"
+                                v-if="showPeopleDropdown && peopleResults.length > 0 && !selectedPerson && !isSelectingPerson"
                                 class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-white shadow-lg"
                             >
                                 <div
