@@ -138,7 +138,7 @@ class SecretaryAlertService
     {
         // Buscar pessoas sem vínculo familiar ativo
         $peopleWithoutFamily = Person::whereDoesntHave('families', function ($query) {
-                $query->whereNull('family_members.deleted_at');
+                $query->whereNull('family_members.left_at');
             })
             ->whereNull('deleted_at')
             ->get();
