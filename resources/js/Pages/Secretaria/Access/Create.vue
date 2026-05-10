@@ -15,38 +15,32 @@ const form = useForm({
 
 const personSearch = ref('');
 const peopleResults = ref([]);
-const showPeopleDropdown = ref(false);
-const eligibility = ref(null);
 const selectedPerson = ref(null);
+const eligibility = ref(null);
 const isSearchingPeople = ref(false);
+const searchWasPerformed = ref(false);
 
-const handlePersonInput = async () => {
-    console.log('handlePersonInput called, personSearch:', personSearch.value);
+const searchPeople = async () => {
+    const search = personSearch.value.trim();
+
     selectedPerson.value = null;
     form.person_id = null;
     eligibility.value = null;
-
-    const search = personSearch.value.trim();
+    peopleResults.value = [];
+    searchWasPerformed.value = true;
 
     if (search.length < 2) {
-        peopleResults.value = [];
-        showPeopleDropdown.value = false;
         return;
     }
 
-    await searchPeople(search);
-};
-
-const searchPeople = async (search) => {
-    console.log('searchPeople called with:', search);
     isSearchingPeople.value = true;
 
     try {
         const response = await axios.get('/people/search', {
             params: { q: search },
+            headers: { Accept: 'application/json' },
         });
 
-        console.log('search response:', response.data);
         const rawResults = response.data;
 
         if (Array.isArray(rawResults)) {
@@ -58,56 +52,50 @@ const searchPeople = async (search) => {
         } else {
             peopleResults.value = [];
         }
-
-        showPeopleDropdown.value = peopleResults.value.length > 0;
-        console.log('peopleResults:', peopleResults.value);
     } catch (error) {
-        console.error('search error:', error);
         peopleResults.value = [];
-        showPeopleDropdown.value = false;
     } finally {
         isSearchingPeople.value = false;
     }
+};
+
+const selectPerson = async (person) => {
+    selectedPerson.value = person;
+    form.person_id = person.id;
+    personSearch.value = person.full_name ?? person.name ?? '';
+    form.name = person.full_name ?? person.name ?? form.name;
+    form.email = person.email ?? form.email;
+
+    peopleResults.value = [];
+    searchWasPerformed.value = false;
+
+    await checkEligibility(person.id);
 };
 
 const checkEligibility = async (personId) => {
     eligibility.value = null;
 
     try {
-        const response = await axios.get(`/secretaria/acessos/elegibilidade/${personId}`);
+        const response = await axios.get(`/secretaria/acessos/elegibilidade/${personId}`, {
+            headers: { Accept: 'application/json' },
+        });
+
         eligibility.value = response.data;
     } catch (error) {
         eligibility.value = {
-            eligibility: {
-                allowed: false,
-                reason: 'Não foi possível verificar a elegibilidade desta pessoa.',
-            },
+            allowed: false,
+            reason: 'Não foi possível verificar a elegibilidade desta pessoa.',
         };
     }
 };
 
-const selectPerson = async (person) => {
-    selectedPerson.value = person;
-    personSearch.value = person.full_name;
-    form.person_id = person.id;
-    form.name = person.full_name ?? '';
-    form.email = person.email ?? '';
-
-    peopleResults.value = [];
-    showPeopleDropdown.value = false;
-
-    await checkEligibility(person.id);
-};
-
 const clearPerson = () => {
     selectedPerson.value = null;
-    personSearch.value = '';
     form.person_id = null;
-    form.name = '';
-    form.email = '';
-    eligibility.value = null;
+    personSearch.value = '';
     peopleResults.value = [];
-    showPeopleDropdown.value = false;
+    eligibility.value = null;
+    searchWasPerformed.value = false;
 };
 
 const submit = () => {
@@ -118,11 +106,10 @@ const submit = () => {
 
 const canSubmit = computed(() => {
     return Boolean(
-        form.person_id &&
         selectedPerson.value &&
+        form.person_id &&
         eligibility.value &&
-        eligibility.value.eligibility &&
-        eligibility.value.eligibility.allowed === true &&
+        eligibility.value.allowed === true &&
         !form.processing
     );
 });
@@ -151,37 +138,80 @@ const canSubmit = computed(() => {
                             <label for="person" class="block text-sm font-medium text-gray-700">
                                 Pessoa Vinculada
                             </label>
-                            <div class="relative mt-1">
-                                <input
-                                    id="person"
-                                    v-model="peopleSearch"
-                                    type="text"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                    placeholder="Digite o nome da pessoa..."
-                                    @input="handlePersonInput"
-                                />
-                                <button
-                                    v-if="selectedPerson"
-                                    type="button"
-                                    @click="clearPerson"
-                                    class="absolute right-2 top-2 text-gray-400 hover:text-gray-600"
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                            <div
-                                v-if="showPeopleDropdown && peopleResults.length > 0 && !selectedPerson"
-                                class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-white shadow-lg"
-                            >
+                            <div class="mt-2 space-y-3">
+                                <div class="flex gap-2">
+                                    <input
+                                        id="person"
+                                        v-model="personSearch"
+                                        type="text"
+                                        autocomplete="off"
+                                        class="block flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                        placeholder="Digite pelo menos 2 letras do nome"
+                                        @keydown.enter.prevent="searchPeople"
+                                    />
+                                    <button
+                                        type="button"
+                                        @click="searchPeople"
+                                        :disabled="isSearchingPeople || personSearch.trim().length < 2"
+                                        class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {{ isSearchingPeople ? 'Buscando...' : 'Buscar' }}
+                                    </button>
+                                </div>
+
+                                <p v-if="form.errors.person_id" class="mt-1 text-sm text-red-600">
+                                    {{ form.errors.person_id }}
+                                </p>
+
+                                <!-- Pessoa selecionada -->
+                                <div v-if="selectedPerson" class="rounded-md bg-gray-50 p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="font-medium text-gray-900">{{ selectedPerson.full_name }}</div>
+                                            <div class="text-sm text-gray-500">
+                                                {{ selectedPerson.email || selectedPerson.primary_phone || 'Sem contato informado' }}
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            @click="clearPerson"
+                                            class="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50"
+                                        >
+                                            Trocar pessoa
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Lista de resultados -->
+                                <div v-if="peopleResults.length > 0 && !selectedPerson" class="space-y-2">
+                                    <div class="text-sm text-gray-500">Resultados encontrados:</div>
+                                    <div
+                                        v-for="person in peopleResults"
+                                        :key="person.id"
+                                        class="flex items-center justify-between rounded-md border border-gray-200 bg-white p-3"
+                                    >
+                                        <div>
+                                            <div class="font-medium text-gray-900">{{ person.full_name }}</div>
+                                            <div class="text-sm text-gray-500">
+                                                {{ person.email || person.primary_phone || 'Sem contato informado' }}
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            @click="selectPerson(person)"
+                                            class="rounded-md bg-indigo-600 px-3 py-1 text-sm text-white hover:bg-indigo-700"
+                                        >
+                                            Selecionar
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Nenhum resultado -->
                                 <div
-                                    v-for="person in peopleResults"
-                                    :key="person.id"
-                                    class="cursor-pointer border-b px-4 py-2 hover:bg-gray-100"
-                                    @mousedown.prevent="selectPerson(person)"
+                                    v-if="searchWasPerformed && !isSearchingPeople && peopleResults.length === 0 && !selectedPerson && personSearch.trim().length >= 2"
+                                    class="text-sm text-gray-500"
                                 >
-                                    <div class="font-medium text-gray-900">{{ person.full_name }}</div>
-                                    <div class="text-sm text-gray-500">{{ person.email }}</div>
-                                    <div class="text-sm text-gray-500">{{ person.primary_phone }}</div>
+                                    Nenhuma pessoa encontrada.
                                 </div>
                             </div>
                         </div>
@@ -190,34 +220,34 @@ const canSubmit = computed(() => {
                         <div
                             v-if="eligibility && selectedPerson"
                             class="rounded-md p-4"
-                            :class="eligibility.eligibility.allowed ? 'bg-green-50' : 'bg-red-50'"
+                            :class="eligibility.eligibility && eligibility.eligibility.allowed ? 'bg-green-50' : 'bg-red-50'"
                         >
                             <div class="flex">
                                 <div class="flex-shrink-0">
                                     <span
                                         class="inline-flex h-6 w-6 items-center justify-center rounded-full"
-                                        :class="eligibility.eligibility.allowed ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'"
+                                        :class="eligibility.eligibility && eligibility.eligibility.allowed ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'"
                                     >
-                                        {{ eligibility.eligibility.allowed ? '✓' : '✕' }}
+                                        {{ eligibility.eligibility && eligibility.eligibility.allowed ? '✓' : '✕' }}
                                     </span>
                                 </div>
                                 <div class="ml-3">
                                     <h3
                                         class="text-sm font-medium"
-                                        :class="eligibility.eligibility.allowed ? 'text-green-800' : 'text-red-800'"
+                                        :class="eligibility.eligibility && eligibility.eligibility.allowed ? 'text-green-800' : 'text-red-800'"
                                     >
-                                        {{ eligibility.eligibility.allowed ? 'Acesso permitido' : 'Acesso bloqueado' }}
+                                        {{ eligibility.eligibility && eligibility.eligibility.allowed ? 'Acesso permitido' : 'Acesso bloqueado' }}
                                     </h3>
                                     <div
                                         class="mt-2 text-sm"
-                                        :class="eligibility.eligibility.allowed ? 'text-green-700' : 'text-red-700'"
+                                        :class="eligibility.eligibility && eligibility.eligibility.allowed ? 'text-green-700' : 'text-red-700'"
                                     >
-                                        {{ eligibility.eligibility.reason }}
+                                        {{ eligibility.eligibility && eligibility.eligibility.reason ? eligibility.eligibility.reason : 'Não foi possível verificar elegibilidade.' }}
                                     </div>
-                                    <div v-if="eligibility.eligibility.age" class="mt-1 text-sm text-gray-600">
+                                    <div v-if="eligibility.eligibility && eligibility.eligibility.age" class="mt-1 text-sm text-gray-600">
                                         Idade: {{ eligibility.eligibility.age }} anos
                                     </div>
-                                    <div v-if="eligibility.eligibility.age_group" class="mt-1 text-sm text-gray-600">
+                                    <div v-if="eligibility.eligibility && eligibility.eligibility.age_group" class="mt-1 text-sm text-gray-600">
                                         Grupo: {{ eligibility.eligibility.age_group }}
                                     </div>
                                     <div v-if="eligibility.has_active_user" class="mt-1 text-sm text-red-600">
