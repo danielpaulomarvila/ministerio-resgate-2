@@ -2,84 +2,94 @@
 import { Head, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Link } from '@inertiajs/vue3';
-import { ref, watch, computed } from 'vue';
+import { ref, computed } from 'vue';
 import axios from 'axios';
 
 const form = useForm({
-    person_id: '',
+    person_id: null,
     name: '',
     email: '',
     password: '',
     access_notes: '',
 });
 
-const peopleSearch = ref('');
+const personSearch = ref('');
 const peopleResults = ref([]);
 const showPeopleDropdown = ref(false);
 const eligibility = ref(null);
 const selectedPerson = ref(null);
-const isSelectingPerson = ref(false);
+const isSearchingPeople = ref(false);
 
-watch(peopleSearch, (value) => {
-    if (isSelectingPerson.value) {
+const handlePersonInput = async () => {
+    selectedPerson.value = null;
+    form.person_id = null;
+    eligibility.value = null;
+
+    if (personSearch.value.trim().length < 2) {
+        peopleResults.value = [];
+        showPeopleDropdown.value = false;
         return;
     }
 
-    if (value.length >= 2) {
-        selectedPerson.value = null;
-        form.person_id = '';
-        eligibility.value = null;
-        axios.get(`/people/search?q=${value}`)
-            .then(response => {
-                peopleResults.value = response.data;
-                showPeopleDropdown.value = true;
-            });
-    } else {
-        peopleResults.value = [];
-        showPeopleDropdown.value = false;
-    }
-});
-
-watch(() => form.person_id, (value) => {
-    if (value) {
-        checkEligibility(value);
-    } else {
-        eligibility.value = null;
-    }
-});
-
-const checkEligibility = (personId) => {
-    axios.get(`/secretaria/acessos/elegibilidade/${personId}`)
-        .then(response => {
-            eligibility.value = response.data;
-        });
+    await searchPeople();
 };
 
-const selectPerson = (person) => {
-    isSelectingPerson.value = true;
+const searchPeople = async () => {
+    isSearchingPeople.value = true;
+
+    try {
+        const response = await axios.get('/people/search', {
+            params: { q: personSearch.value },
+        });
+
+        peopleResults.value = response.data ?? [];
+        showPeopleDropdown.value = peopleResults.value.length > 0;
+    } catch (error) {
+        peopleResults.value = [];
+        showPeopleDropdown.value = false;
+    } finally {
+        isSearchingPeople.value = false;
+    }
+};
+
+const checkEligibility = async (personId) => {
+    eligibility.value = null;
+
+    try {
+        const response = await axios.get(`/secretaria/acessos/elegibilidade/${personId}`);
+        eligibility.value = response.data;
+    } catch (error) {
+        eligibility.value = {
+            eligibility: {
+                allowed: false,
+                reason: 'Não foi possível verificar a elegibilidade desta pessoa.',
+            },
+        };
+    }
+};
+
+const selectPerson = async (person) => {
     selectedPerson.value = person;
     personSearch.value = person.full_name;
     form.person_id = person.id;
-    form.name = person.full_name;
-    form.email = person.email || '';
+    form.name = person.full_name ?? '';
+    form.email = person.email ?? '';
+
     peopleResults.value = [];
     showPeopleDropdown.value = false;
 
-    checkEligibility(person.id);
-
-    setTimeout(() => {
-        isSelectingPerson.value = false;
-    }, 100);
+    await checkEligibility(person.id);
 };
 
 const clearPerson = () => {
     selectedPerson.value = null;
-    form.person_id = '';
+    personSearch.value = '';
+    form.person_id = null;
     form.name = '';
     form.email = '';
-    peopleSearch.value = '';
     eligibility.value = null;
-    isSelectingPerson.value = false;
+    peopleResults.value = [];
+    showPeopleDropdown.value = false;
 };
 
 const submit = () => {
@@ -130,7 +140,7 @@ const canSubmit = computed(() => {
                                     type="text"
                                     class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                     placeholder="Digite o nome da pessoa..."
-                                    @focus="showPeopleDropdown = true"
+                                    @input="handlePersonInput"
                                 />
                                 <button
                                     v-if="selectedPerson"
@@ -142,7 +152,7 @@ const canSubmit = computed(() => {
                                 </button>
                             </div>
                             <div
-                                v-if="showPeopleDropdown && peopleResults.length > 0 && !selectedPerson && !isSelectingPerson"
+                                v-if="showPeopleDropdown && peopleResults.length > 0 && !selectedPerson"
                                 class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-white shadow-lg"
                             >
                                 <div
