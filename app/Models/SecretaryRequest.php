@@ -37,6 +37,8 @@ class SecretaryRequest extends Model
         'rejected_by_user_id',
         'completed_at',
         'completed_by_user_id',
+        'cancelled_at',
+        'cancelled_by_user_id',
         'due_at',
         'metadata',
     ];
@@ -53,6 +55,7 @@ class SecretaryRequest extends Model
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
         'completed_at' => 'datetime',
+        'cancelled_at' => 'datetime',
         'due_at' => 'datetime',
     ];
 
@@ -110,6 +113,14 @@ class SecretaryRequest extends Model
     public function completedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'completed_by_user_id');
+    }
+
+    /**
+     * Relacionamento: Usuário que cancelou
+     */
+    public function cancelledByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by_user_id');
     }
 
     /**
@@ -227,6 +238,8 @@ class SecretaryRequest extends Model
     {
         $this->update([
             'status' => 'cancelled',
+            'cancelled_at' => now(),
+            'cancelled_by_user_id' => $userId,
             'decision_notes' => $notes,
         ]);
     }
