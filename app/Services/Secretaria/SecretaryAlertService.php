@@ -293,7 +293,6 @@ class SecretaryAlertService
             ->whereNotNull('ends_at')
             ->where('ends_at', '<=', Carbon::now()->addDays(30))
             ->where('ends_at', '>', Carbon::now())
-            ->whereNull('deleted_at')
             ->get();
 
         foreach ($guardianshipsEndingSoon as $guardianship) {
@@ -344,7 +343,6 @@ class SecretaryAlertService
         $guardianshipsExpired = GuardianShip::where('status', 'active')
             ->whereNotNull('ends_at')
             ->where('ends_at', '<', Carbon::now())
-            ->whereNull('deleted_at')
             ->get();
 
         foreach ($guardianshipsExpired as $guardianship) {
