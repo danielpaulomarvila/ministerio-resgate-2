@@ -190,20 +190,20 @@ const canSubmit = computed(() => {
                                     <div
                                         v-for="person in peopleResults"
                                         :key="person.id"
-                                        class="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4"
+                                        class="grid grid-cols-[1fr_auto] items-center gap-4 rounded-xl border border-slate-200 bg-white p-4"
                                     >
-                                        <div class="min-w-0 flex-1">
-                                            <p class="font-semibold text-slate-900">
+                                        <div class="min-w-0">
+                                            <p class="truncate font-semibold text-slate-900">
                                                 {{ person.full_name }}
                                             </p>
-                                            <p class="text-sm text-slate-500">
+                                            <p class="truncate text-sm text-slate-500">
                                                 {{ person.email || person.primary_phone || 'Sem contato informado' }}
                                             </p>
                                         </div>
                                         <button
                                             type="button"
                                             @click="selectPerson(person)"
-                                            class="shrink-0 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+                                            class="min-w-[120px] rounded-lg bg-indigo-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-indigo-700"
                                         >
                                             Selecionar
                                         </button>
