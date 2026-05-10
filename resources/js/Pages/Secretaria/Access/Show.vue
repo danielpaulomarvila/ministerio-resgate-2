@@ -5,9 +5,18 @@ import { Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 const props = defineProps({
-    user: Object,
-    has_age_violation: Boolean,
-    active_guardians: Array,
+    user: {
+        type: Object,
+        required: true,
+    },
+    has_age_violation: {
+        type: Boolean,
+        default: false,
+    },
+    active_guardians: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const showSuspendModal = ref(false);
@@ -48,6 +57,15 @@ const formatDate = (dateString) => {
     const minutes = String(date.getMinutes()).padStart(2, '0');
     return `${day}/${month}/${date.getFullYear()} ${hours}:${minutes}`;
 };
+
+const ageGroupLabel = () => {
+    if (!props.user.person || !props.user.person.birth_date) return '-';
+    const age = props.user.person.age;
+    if (age < 11) return 'Criança (menos de 11)';
+    if (age >= 11 && age < 14) return 'Júnior (11-13)';
+    if (age >= 14 && age < 18) return 'Jovem (14-17)';
+    return 'Adulto (18+)';
+};
 </script>
 
 <template>
@@ -61,7 +79,7 @@ const formatDate = (dateString) => {
                 </h2>
                 <div class="flex space-x-2">
                     <Link
-                        :href="route('secretaria.access.edit', user.id)"
+                        :href="route('secretaria.access.edit', props.user.id)"
                         class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
                     >
                         Editar
@@ -80,7 +98,7 @@ const formatDate = (dateString) => {
             <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                 <!-- Alerta de violação de idade -->
                 <div
-                    v-if="has_age_violation"
+                    v-if="props.has_age_violation"
                     class="mb-6 rounded-md bg-red-50 p-4"
                 >
                     <div class="flex">
@@ -109,11 +127,11 @@ const formatDate = (dateString) => {
                         <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Nome</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ user.name }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ props.user.name }}</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Email</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ user.email }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ props.user.email }}</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Status</dt>
@@ -121,47 +139,47 @@ const formatDate = (dateString) => {
                                     <span
                                         class="inline-flex rounded-full px-2 py-1 text-xs font-semibold"
                                         :class="{
-                                            'bg-green-100 text-green-800': user.status === 'active',
-                                            'bg-red-100 text-red-800': user.status === 'suspended',
-                                            'bg-gray-100 text-gray-800': user.status === 'inactive',
+                                            'bg-green-100 text-green-800': props.user.status === 'active',
+                                            'bg-red-100 text-red-800': props.user.status === 'suspended',
+                                            'bg-gray-100 text-gray-800': props.user.status === 'inactive',
                                         }"
                                     >
-                                        {{ user.status === 'active' ? 'Ativo' : user.status === 'suspended' ? 'Suspenso' : 'Inativo' }}
+                                        {{ props.user.status === 'active' ? 'Ativo' : props.user.status === 'suspended' ? 'Suspenso' : 'Inativo' }}
                                     </span>
                                 </dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Troca de Senha Pendente</dt>
                                 <dd class="mt-1 text-sm text-gray-900">
-                                    {{ user.must_change_password ? 'Sim' : 'Não' }}
+                                    {{ props.user.must_change_password ? 'Sim' : 'Não' }}
                                 </dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Acesso Concedido em</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ formatDate(user.access_granted_at) }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ formatDate(props.user.access_granted_at) }}</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Acesso Revogado em</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ formatDate(user.access_revoked_at) }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ formatDate(props.user.access_revoked_at) }}</dd>
                             </div>
-                            <div v-if="user.access_revoked_reason">
+                            <div v-if="props.user.access_revoked_reason">
                                 <dt class="text-sm font-medium text-gray-500">Motivo da Revogação</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ user.access_revoked_reason }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ props.user.access_revoked_reason }}</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Criado em</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ formatDate(user.created_at) }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ formatDate(props.user.created_at) }}</dd>
                             </div>
                         </dl>
-                        <div v-if="user.access_notes" class="mt-4">
+                        <div v-if="props.user.access_notes" class="mt-4">
                             <dt class="text-sm font-medium text-gray-500">Observações</dt>
-                            <dd class="mt-1 text-sm text-gray-900">{{ user.access_notes }}</dd>
+                            <dd class="mt-1 text-sm text-gray-900">{{ props.user.access_notes }}</dd>
                         </div>
                     </div>
                 </div>
 
                 <!-- Dados da pessoa vinculada -->
-                <div v-if="user.person" class="mb-6 rounded-lg bg-white shadow">
+                <div v-if="props.user.person" class="mb-6 rounded-lg bg-white shadow">
                     <div class="border-b border-gray-200 p-6">
                         <h3 class="text-lg font-medium text-gray-900">Pessoa Vinculada</h3>
                     </div>
@@ -169,39 +187,39 @@ const formatDate = (dateString) => {
                         <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Nome Completo</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ user.person.full_name }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ props.user.person.full_name }}</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Email da Pessoa</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ user.person.email || '-' }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ props.user.person.email || '-' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Idade</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ user.person.age }} anos</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ props.user.person.age }} anos</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Grupo de Idade</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ user.person.age_group_label() }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ ageGroupLabel() }}</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Batizado</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ user.person.is_baptized ? 'Sim' : 'Não' }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ props.user.person.is_baptized ? 'Sim' : 'Não' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Pode ser Membro</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ user.person.can_be_member ? 'Sim' : 'Não' }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ props.user.person.can_be_member ? 'Sim' : 'Não' }}</dd>
                             </div>
                         </dl>
                     </div>
                 </div>
 
                 <!-- Responsáveis ativos (se for Júnior) -->
-                <div v-if="active_guardians.length > 0" class="mb-6 rounded-lg bg-white shadow">
+                <div v-if="props.active_guardians.length > 0" class="mb-6 rounded-lg bg-white shadow">
                     <div class="border-b border-gray-200 p-6">
                         <h3 class="text-lg font-medium text-gray-900">Responsáveis Ativos Autorizados</h3>
                     </div>
                     <div class="p-6">
-                        <div v-for="guardian in active_guardians" :key="guardian.id" class="mb-3">
+                        <div v-for="guardian in props.active_guardians" :key="guardian.id" class="mb-3">
                             <div class="text-sm font-medium text-gray-900">{{ guardian.name }}</div>
                             <div class="text-sm text-gray-500">Autorizado para login: {{ guardian.can_authorize_login ? 'Sim' : 'Não' }}</div>
                         </div>
@@ -216,13 +234,13 @@ const formatDate = (dateString) => {
                     <div class="p-6">
                         <div class="flex space-x-3">
                             <Link
-                                :href="route('secretaria.access.edit', user.id)"
+                                :href="route('secretaria.access.edit', props.user.id)"
                                 class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
                             >
                                 Editar
                             </Link>
                             <button
-                                v-if="user.status === 'active'"
+                                v-if="props.user.status === 'active'"
                                 @click="showSuspendModal = true"
                                 class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
                             >
