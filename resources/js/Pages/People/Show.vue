@@ -8,7 +8,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
  * 
  * Esta página exibe todos os dados da pessoa, incluindo:
  * - Dados principais (nome, telefone, email, etc.)
- * - Documentos (NIF, Cartão de Cidadão, Passaporte, etc.)
+ * - Documentos (NIF, Título de Residência, Outro Documento, etc.)
  * - Morada (com estrutura portuguesa)
  * - Idade calculada
  * - Situação de batismo
@@ -284,14 +284,6 @@ const getMemberProfileWarning = (category, isBaptized) => {
                                     <p class="mt-1 text-sm text-gray-900">{{ person.document?.nif || '-' }}</p>
                                 </div>
                                 <div>
-                                    <span class="text-sm font-medium text-gray-500">Cartão de Cidadão:</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.document?.citizen_card_number || '-' }}</p>
-                                </div>
-                                <div>
-                                    <span class="text-sm font-medium text-gray-500">Passaporte:</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.document?.passport_number || '-' }}</p>
-                                </div>
-                                <div>
                                     <span class="text-sm font-medium text-gray-500">Título de Residência:</span>
                                     <p class="mt-1 text-sm text-gray-900">{{ person.document?.residence_permit_number || '-' }}</p>
                                 </div>
@@ -332,10 +324,6 @@ const getMemberProfileWarning = (category, isBaptized) => {
                                 <div>
                                     <span class="text-sm font-medium text-gray-500">Localidade:</span>
                                     <p class="mt-1 text-sm text-gray-900">{{ person.primaryAddress?.locality_name || '-' }}</p>
-                                </div>
-                                <div>
-                                    <span class="text-sm font-medium text-gray-500">Localidade (Manual):</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ person.primaryAddress?.locality_manual || '-' }}</p>
                                 </div>
                                 <div class="col-span-2">
                                     <span class="text-sm font-medium text-gray-500">Rua/Avenida:</span>

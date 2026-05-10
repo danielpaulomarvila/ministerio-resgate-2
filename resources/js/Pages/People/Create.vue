@@ -43,8 +43,6 @@ const form = useForm({
     },
     document: {
         nif: '',
-        citizen_card_number: '',
-        passport_number: '',
         residence_permit_number: '',
         other_document: '',
         document_notes: ''
@@ -55,7 +53,6 @@ const form = useForm({
         municipality_name: '',
         parish_name: '',
         locality_name: '',
-        locality_manual: '',
         address_line: '',
         door_number: '',
         floor_or_unit: '',
@@ -414,37 +411,6 @@ const submit = () => {
                                         </div>
                                     </div>
 
-                                    <!-- Cartão de Cidadão -->
-                                    <div>
-                                        <label for="document.citizen_card_number" class="block text-sm font-medium text-gray-700">
-                                            Cartão de Cidadão
-                                        </label>
-                                        <input
-                                            id="document.citizen_card_number"
-                                            v-model="form.document.citizen_card_number"
-                                            type="text"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        />
-                                        <div v-if="form.errors['document.citizen_card_number']" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors['document.citizen_card_number'] }}
-                                        </div>
-                                    </div>
-
-                                    <!-- Passaporte -->
-                                    <div>
-                                        <label for="document.passport_number" class="block text-sm font-medium text-gray-700">
-                                            Passaporte
-                                        </label>
-                                        <input
-                                            id="document.passport_number"
-                                            v-model="form.document.passport_number"
-                                            type="text"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        />
-                                        <div v-if="form.errors['document.passport_number']" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors['document.passport_number'] }}
-                                        </div>
-                                    </div>
 
                                     <!-- Título de Residência -->
                                     <div>
@@ -583,22 +549,6 @@ const submit = () => {
                                         </div>
                                     </div>
 
-                                    <!-- Localidade Manual -->
-                                    <div>
-                                        <label for="address.locality_manual" class="block text-sm font-medium text-gray-700">
-                                            Localidade (Manual)
-                                        </label>
-                                        <input
-                                            id="address.locality_manual"
-                                            v-model="form.address.locality_manual"
-                                            type="text"
-                                            placeholder="Para casos especiais"
-                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        />
-                                        <div v-if="form.errors['address.locality_manual']" class="mt-1 text-sm text-red-600">
-                                            {{ form.errors['address.locality_manual'] }}
-                                        </div>
-                                    </div>
 
                                     <!-- Rua/Avenida -->
                                     <div class="col-span-2">

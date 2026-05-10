@@ -47,7 +47,7 @@ class UpdatePersonRequest extends FormRequest
      * 
      * Documentos (tabela separada):
      * - NIF opcional, mas único se preenchido (exceto para o próprio documento da pessoa)
-     * - Cartão de Cidadão, Passaporte e Título de Residência opcionais
+     * - Título de Residência, Outro Documento opcionais
      * 
      * Morada (tabela separada):
      * - Código postal no formato português 0000-000
@@ -96,8 +96,6 @@ class UpdatePersonRequest extends FormRequest
             
             // Documentos (tabela separada)
             'document.nif' => 'nullable|string|max:50|unique:person_documents,nif,' . $personId . ',person_id',
-            'document.citizen_card_number' => 'nullable|string|max:100',
-            'document.passport_number' => 'nullable|string|max:100',
             'document.residence_permit_number' => 'nullable|string|max:100',
             'document.other_document' => 'nullable|string|max:150',
             'document.document_notes' => 'nullable|string',
@@ -108,7 +106,6 @@ class UpdatePersonRequest extends FormRequest
             'address.municipality_name' => 'nullable|string|max:100',
             'address.parish_name' => 'nullable|string|max:100',
             'address.locality_name' => 'nullable|string|max:100',
-            'address.locality_manual' => 'nullable|string|max:150',
             'address.address_line' => 'nullable|string|max:255',
             'address.door_number' => 'nullable|string|max:50',
             'address.floor_or_unit' => 'nullable|string|max:50',
@@ -155,8 +152,6 @@ class UpdatePersonRequest extends FormRequest
             // Documentos
             'document.nif.unique' => 'O NIF informado já está cadastrado.',
             'document.nif.max' => 'O NIF não pode ter mais de 50 caracteres.',
-            'document.citizen_card_number.max' => 'O número do Cartão de Cidadão não pode ter mais de 100 caracteres.',
-            'document.passport_number.max' => 'O número do Passaporte não pode ter mais de 100 caracteres.',
             'document.residence_permit_number.max' => 'O número do Título de Residência não pode ter mais de 100 caracteres.',
             'document.other_document.max' => 'O outro documento não pode ter mais de 150 caracteres.',
             
