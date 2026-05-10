@@ -254,6 +254,66 @@ Todos os acessos no PHP e no Vue usam acesso seguro (nullsafe operators, valores
 
 ---
 
+## Etapa 5 - Alertas Internos da Secretaria
+
+### Objetivo
+Criar uma central simples de alertas internos da Secretaria para transformar as atenções do painel em itens acompanháveis.
+
+### Implementação
+- ✅ Migration para adicionar campo `resolution_notes` à tabela `system_alerts`
+- ✅ Model `SystemAlert` ajustado com métodos adicionais (isOpen, isIgnored, markAsResolved, markAsIgnored)
+- ✅ Service `SecretaryAlertService` criado para geração automática de alertas
+- ✅ Controller `SecretaryAlertController` criado com CRUD básico
+- ✅ Rotas criadas (index, show, resolve, ignore, regenerate)
+- ✅ Menu autenticado atualizado com link "Alertas"
+- ✅ Página `Alerts/Index.vue` criada com filtros e lista de alertas
+- ✅ Página `Alerts/Show.vue` criada com detalhes completos
+- ✅ Painel da Secretaria atualizado com card de alertas
+
+### Tipos de Alertas Implementados
+1. **Criança Próxima dos 11 Anos** (child_turning_11)
+   - Severity: low (informativo)
+   - Crianças que completarão 11 anos nos próximos 60 dias
+
+2. **Menor sem Responsável Ativo** (minor_without_guardian)
+   - Severity: critical (perigo)
+   - Menores de 18 anos sem responsável legal ativo
+
+3. **Pessoa sem Família** (person_without_family)
+   - Severity: medium (atenção)
+   - Pessoas sem vínculo familiar ativo
+
+4. **Cadastro Incompleto** (incomplete_registration)
+   - Severity: medium (atenção)
+   - Pessoas sem data de nascimento, telefone principal, ou ambos
+
+5. **Responsabilidade com Data de Fim Próxima** (guardianship_ending_soon)
+   - Severity: medium (atenção)
+   - Responsabilidades ativas com ends_at nos próximos 30 dias
+
+6. **Responsabilidade Vencida** (guardianship_expired)
+   - Severity: critical (perigo)
+   - Responsabilidades ativas com ends_at menor que hoje
+
+### Regras Importantes
+- ✅ Não apagar alerta ao resolver (histórico preservado)
+- ✅ Não duplicar alerta aberto igual (regra: type + related_person_id + status pending)
+- ✅ Resolver preenche: status resolved, resolved_at, resolved_by_user_id, resolution_notes
+- ✅ Ignorar preenche: status dismissed, resolved_at, resolved_by_user_id, resolution_notes
+- ✅ Usar dados reais (sem seeders fake)
+
+### Não Implementado Nesta Etapa
+- ❌ Sistema completo de notificações externas (e-mail, WhatsApp, push)
+- ❌ Alertas automáticos em tempo real
+- ❌ Tarefas recorrentes avançadas
+- ❌ IA para análise de alertas
+
+### Documentação Adicional
+- ✅ `DOCUMENTO_ALERTAS_SECRETARIA.md` - Documentação detalhada dos alertas
+- ✅ `CHECKLIST_ALERTAS_SECRETARIA.md` - Checklist de implementação
+
+---
+
 ## Próximos Passos Futuros
 
 1. **Sistema de Alertas**

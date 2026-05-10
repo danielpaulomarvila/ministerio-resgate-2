@@ -577,6 +577,58 @@ php artisan db:seed --class=DepartmentSeeder
 - [x] Pontuação/gamificação de evangelismo
 - [x] Ranking de quem indicou pessoas
 
+---
+
+## Etapa 5 - Alertas Internos da Secretaria
+
+### ✅ Banco de Dados
+- [x] Migration para adicionar resolution_notes criada e executada
+- [x] Tabela system_alerts verificada e ajustada
+
+### ✅ Model
+- [x] SystemAlert ajustado com métodos isOpen(), isIgnored(), markAsResolved(), markAsIgnored()
+- [x] resolution_notes adicionado ao fillable
+
+### ✅ Service
+- [x] SecretaryAlertService criado com geração de 6 tipos de alertas
+- [x] Regra de unicidade implementada (type + related_person_id + status pending)
+- [x] Dados reais usados (sem seeders fake)
+
+### ✅ Controller
+- [x] SecretaryAlertController criado com index, show, resolve, ignore, regenerate
+- [x] Filtros por status, tipo e severidade implementados
+
+### ✅ Rotas
+- [x] Rotas criadas para alertas (index, show, resolve, ignore, regenerate)
+- [x] Middleware auth aplicado
+
+### ✅ Menu
+- [x] Link "Alertas" adicionado ao menu desktop
+- [x] Link "Alertas" adicionado ao menu responsivo
+
+### ✅ Páginas Vue
+- [x] Alerts/Index.vue criada com resumo, filtros e lista
+- [x] Alerts/Show.vue criada com detalhes e ações
+
+### ✅ Integração com Painel
+- [x] Dashboard.vue atualizado com card de alertas
+- [x] SecretaryDashboardController atualizado com dados de alertas
+
+### ✅ Documentação
+- [x] DOCUMENTO_ALERTAS_SECRETARIA.md criado
+- [x] CHECKLIST_ALERTAS_SECRETARIA.md criado
+- [x] DOCUMENTO_SECRETARIA.md atualizado com Etapa 5
+- [x] CHECKLIST_SECRETARIA.md atualizado com Etapa 5
+- [x] DOCUMENTO_BANCO_DADOS_INICIAL.md atualizado com Etapa 5
+- [x] DOCUMENTO_ARQUITETURA_INICIAL.md atualizado com Etapa 5
+- [x] CHECKLIST_INICIAL.md atualizado com Etapa 5
+
+### ✅ Não Implementado Nesta Etapa
+- [x] Sistema completo de notificações externas
+- [x] Alertas automáticos em tempo real
+- [x] Tarefas recorrentes avançadas
+- [x] IA para análise de alertas
+
 ## Status Final
 
 ### ✅ Concluído

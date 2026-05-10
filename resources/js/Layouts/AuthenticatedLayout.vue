@@ -46,6 +46,12 @@ const showingNavigationDropdown = ref(false);
                                     Secretaria
                                 </NavLink>
                                 <NavLink
+                                    :href="route('secretaria.alerts.index')"
+                                    :active="route().current('secretaria.alerts.index')"
+                                >
+                                    Alertas
+                                </NavLink>
+                                <NavLink
                                     :href="route('people.index')"
                                     :active="route().current('people.index')"
                                 >
@@ -175,6 +181,12 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('secretaria.dashboard')"
                         >
                             Secretaria
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('secretaria.alerts.index')"
+                            :active="route().current('secretaria.alerts.index')"
+                        >
+                            Alertas
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('people.index')"

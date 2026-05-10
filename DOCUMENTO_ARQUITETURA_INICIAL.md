@@ -473,6 +473,95 @@ O campo `invited_by_person_id` está preservado para uso futuro:
 - Gráficos complexos
 - Relatórios exportáveis
 
+---
+
+## Etapa 5 - Alertas Internos da Secretaria
+
+### Arquitetura do Sistema de Alertas
+
+**Camada de Dados:**
+- Tabela `system_alerts` já existente, ajustada com campo `resolution_notes`
+- Model `SystemAlert` com relacionamentos para Person, Family e User
+- Índices para performance em consultas por type, status e severity
+
+**Camada de Serviço:**
+- Service `SecretaryAlertService` centraliza a lógica de geração de alertas
+- Métodos específicos para cada tipo de alerta
+- Regra de unicidade para evitar duplicação (type + related_person_id + status pending)
+
+**Camada de Controller:**
+- Controller `SecretaryAlertController` com CRUD básico
+- Métodos: index, show, resolve, ignore, regenerate
+- Filtros por status, tipo e severidade
+
+**Camada de View:**
+- Página `Alerts/Index.vue` com resumo, filtros e lista de alertas
+- Página `Alerts/Show.vue` com detalhes e ações
+- Integração com painel da Secretaria via card de alertas
+
+### Padrões Utilizados
+
+**Service Pattern:**
+- Lógica de negócio isolada em service
+- Facilita testes e reutilização
+- Centraliza regras de geração de alertas
+
+**Unicidade Lógica:**
+- Verifica se alerta já existe antes de criar
+- Atualiza alerta existente se necessário
+- Evita poluição do banco com alertas duplicados
+
+**Histórico Preservado:**
+- Resolver NÃO apaga o alerta
+- Mantém auditoria completa
+- Permite análise de tendências
+
+### Integração com Módulos Existentes
+
+**Painel da Secretaria:**
+- Card de alertas abertos (contagem de status pending)
+- Card de alertas urgentes (contagem de severity high/critical)
+- Link para página de alertas
+
+**Models:**
+- Person: usado para alertas de pessoas
+- Family: usado para alertas de famílias
+- GuardianShip: usado para alertas de responsabilidades
+- User: usado para rastrear quem resolveu alertas
+
+### Tipos de Alertas Implementados
+
+1. **child_turning_11** (severity: low)
+   - Crianças completando 11 anos nos próximos 60 dias
+   - Informativo para planejamento
+
+2. **minor_without_guardian** (severity: critical)
+   - Menores sem responsável ativo
+   - Urgente para segurança
+
+3. **person_without_family** (severity: medium)
+   - Pessoas sem vínculo familiar
+   - Atenção para organização
+
+4. **incomplete_registration** (severity: medium)
+   - Cadastros incompletos
+   - Atenção para qualidade de dados
+
+5. **guardianship_ending_soon** (severity: medium)
+   - Responsabilidades terminando
+   - Planejamento necessário
+
+6. **guardianship_expired** (severity: critical)
+   - Responsabilidades vencidas
+   - Urgente para revisão
+
+### Não Implementado Nesta Etapa
+
+- Sistema completo de notificações externas (e-mail, WhatsApp, push)
+- Alertas automáticos em tempo real
+- Tarefas recorrentes avançadas
+- IA para análise de alertas
+
 ## Conclusão
 
 Esta arquitetura foi projetada para ser:

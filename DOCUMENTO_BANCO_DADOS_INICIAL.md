@@ -621,3 +621,97 @@ O campo `invited_by_person_id` está preservado no banco para uso futuro:
 - Departamento Resgatados automático
 - Pontuação/gamificação de evangelismo
 - Ranking de quem indicou pessoas
+
+---
+
+## Etapa 5 - Alertas Internos da Secretaria
+
+### Tabela system_alerts
+
+A tabela `system_alerts` já existia no projeto. Foi ajustada para suportar o sistema de alertas internos da Secretaria.
+
+**Migration criada:**
+- `2026_05_10_124945_add_resolution_notes_to_system_alerts_table.php`
+- Adicionou campo `resolution_notes` (text, nullable) para guardar observações de resolução
+
+**Estrutura da tabela:**
+- `id`: Identificador único
+- `type`: Tipo do alerta (string) - ex: child_turning_11, minor_without_guardian
+- `title`: Título do alerta (string)
+- `message`: Mensagem detalhada (text)
+- `related_person_id`: Pessoa relacionada (nullable, foreign key para people)
+- `related_family_id`: Família relacionada (nullable, foreign key para families)
+- `severity`: Severidade (enum: low, medium, high, critical)
+- `status`: Status (enum: pending, in_progress, resolved, dismissed)
+- `due_date`: Data limite para resolução (date, nullable)
+- `resolved_at`: Data de resolução (timestamp, nullable)
+- `resolved_by_user_id`: Usuário que resolveu (nullable, foreign key para users)
+- `resolution_notes`: Observações de resolução (text, nullable) - **Adicionado na Etapa 5**
+- `created_at`: Data de criação (usado como detected_at)
+- `updated_at`: Data de atualização
+
+**Índices:**
+- `type`
+- `status`
+- `severity`
+- `due_date`
+- `related_person_id`
+- `related_family_id`
+
+### Tipos de Alertas Implementados
+
+1. **child_turning_11**: Crianças que completarão 11 anos nos próximos 60 dias
+2. **minor_without_guardian**: Menores de 18 anos sem responsável legal ativo
+3. **person_without_family**: Pessoas sem vínculo familiar ativo
+4. **incomplete_registration**: Pessoas com cadastro incompleto (sem birth_date, primary_phone, ou ambos)
+5. **guardianship_ending_soon**: Responsabilidades ativas com ends_at nos próximos 30 dias
+6. **guardianship_expired**: Responsabilidades ativas com ends_at menor que hoje
+
+### Regras de Dados
+
+**Unicidade lógica:**
+- type + related_person_id + status pending
+- Se já existe alerta aberto igual, atualiza em vez de criar novo
+
+**Histórico preservado:**
+- Resolver NÃO apaga o alerta
+- Alertas resolvidos permanecem com status resolved
+- Alertas ignorados permanecem com status dismissed
+
+**Dados reais:**
+- Service usa dados reais do banco
+- Não usa seeders fake
+- Trata dados nulos de forma segura
+
+### Model SystemAlert
+
+**Métodos adicionados:**
+- `isOpen()`: Verifica se status é pending
+- `isIgnored()`: Verifica se status é dismissed
+- `markAsResolved(int $userId, ?string $notes = null)`: Marca como resolvido com observações
+- `markAsIgnored(int $userId, ?string $notes = null)`: Marca como ignorado com observações
+
+**Relacionamentos:**
+- `relatedPerson`: BelongsTo Person
+- `relatedFamily`: BelongsTo Family
+- `resolvedBy`: BelongsTo User
+
+### Service SecretaryAlertService
+
+**Local:** `app/Services/Secretaria/SecretaryAlertService.php`
+
+**Métodos:**
+- `regenerateAlerts()`: Regera todos os alertas com base nas regras atuais
+- `generateChildTurning11Alerts()`: Gera alertas para crianças próximas dos 11 anos
+- `generateMinorWithoutGuardianAlerts()`: Gera alertas para menores sem responsável
+- `generatePersonWithoutFamilyAlerts()`: Gera alertas para pessoas sem família
+- `generateIncompleteRegistrationAlerts()`: Gera alertas para cadastros incompletos
+- `generateGuardianshipEndingSoonAlerts()`: Gera alertas para responsabilidades terminando
+- `generateGuardianshipExpiredAlerts()`: Gera alertas para responsabilidades vencidas
+
+### Não Implementado Nesta Etapa
+
+- Sistema completo de notificações externas (e-mail, WhatsApp, push)
+- Alertas automáticos em tempo real
+- Tarefas recorrentes avançadas
+- IA para análise de alertas

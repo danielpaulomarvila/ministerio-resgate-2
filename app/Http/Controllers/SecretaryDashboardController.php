@@ -6,6 +6,7 @@ use App\Models\Person;
 use App\Models\Family;
 use App\Models\GuardianShip;
 use App\Models\FamilyMember;
+use App\Models\SystemAlert;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -152,6 +153,12 @@ class SecretaryDashboardController extends Controller
                 ];
             });
 
+        // 15. Alertas abertos e urgentes (Etapa 5)
+        $openAlerts = SystemAlert::where('status', 'pending')->count();
+        $urgentAlerts = SystemAlert::where('status', 'pending')
+            ->whereIn('severity', ['high', 'critical'])
+            ->count();
+
         return Inertia::render('Secretaria/Dashboard', [
             // Totais
             'total_people' => $totalPeople,
@@ -176,6 +183,10 @@ class SecretaryDashboardController extends Controller
             'recent_people' => $recentPeople,
             'recent_families' => $recentFamilies,
             'recent_guardianships' => $recentGuardianships,
+            
+            // Alertas (Etapa 5)
+            'open_alerts' => $openAlerts,
+            'urgent_alerts' => $urgentAlerts,
         ]);
     }
 }

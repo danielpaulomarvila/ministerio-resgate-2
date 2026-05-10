@@ -93,6 +93,16 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
+    
+    // Alertas (Etapa 5)
+    open_alerts: {
+        type: Number,
+        default: 0
+    },
+    urgent_alerts: {
+        type: Number,
+        default: 0
+    },
 });
 </script>
 
@@ -155,6 +165,30 @@ const props = defineProps({
                             <div v-else class="mt-3 text-sm text-green-600">
                                 Todos cobertos
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Alertas (Etapa 5) -->
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-8">
+                    <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+                        <div class="p-6">
+                            <div class="text-sm font-medium text-gray-500">Alertas Abertos</div>
+                            <div class="mt-2 text-3xl font-bold text-green-600">{{ open_alerts }}</div>
+                            <Link :href="route('secretaria.alerts.index')" class="mt-3 text-sm text-blue-600 hover:text-blue-800">
+                                Ver alertas →
+                            </Link>
+                        </div>
+                    </div>
+                    <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+                        <div class="p-6">
+                            <div class="text-sm font-medium text-gray-500">Alertas Urgentes</div>
+                            <div class="mt-2 text-3xl font-bold" :class="urgent_alerts > 0 ? 'text-red-600' : 'text-gray-900'">
+                                {{ urgent_alerts }}
+                            </div>
+                            <Link :href="route('secretaria.alerts.index')" class="mt-3 text-sm text-blue-600 hover:text-blue-800">
+                                Ver alertas →
+                            </Link>
                         </div>
                     </div>
                 </div>

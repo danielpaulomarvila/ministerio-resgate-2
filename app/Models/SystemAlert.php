@@ -24,6 +24,7 @@ class SystemAlert extends Model
         'due_date',
         'resolved_at',
         'resolved_by_user_id',
+        'resolution_notes',
     ];
 
     // Cast de tipos de dados
@@ -60,6 +61,15 @@ class SystemAlert extends Model
     }
 
     /**
+     * Verifica se o alerta está pendente (aberto)
+     * Mapeado para status 'pending' da tabela existente
+     */
+    public function isOpen(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    /**
      * Verifica se o alerta está pendente
      */
     public function isPending(): bool
@@ -84,6 +94,15 @@ class SystemAlert extends Model
     }
 
     /**
+     * Verifica se o alerta foi ignorado
+     * Mapeado para status 'dismissed' da tabela existente
+     */
+    public function isIgnored(): bool
+    {
+        return $this->status === 'dismissed';
+    }
+
+    /**
      * Verifica se o alerta é crítico
      */
     public function isCritical(): bool
@@ -94,12 +113,27 @@ class SystemAlert extends Model
     /**
      * Marca o alerta como resolvido
      */
-    public function markAsResolved(int $userId): void
+    public function markAsResolved(int $userId, ?string $notes = null): void
     {
         $this->update([
             'status' => 'resolved',
             'resolved_at' => now(),
             'resolved_by_user_id' => $userId,
+            'resolution_notes' => $notes,
+        ]);
+    }
+
+    /**
+     * Marca o alerta como ignorado
+     * Mapeado para status 'dismissed' da tabela existente
+     */
+    public function markAsIgnored(int $userId, ?string $notes = null): void
+    {
+        $this->update([
+            'status' => 'dismissed',
+            'resolved_at' => now(),
+            'resolved_by_user_id' => $userId,
+            'resolution_notes' => $notes,
         ]);
     }
 }

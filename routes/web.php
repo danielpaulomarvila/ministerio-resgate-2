@@ -4,6 +4,7 @@ use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\GuardianshipController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SecretaryAlertController;
 use App\Http\Controllers\SecretaryDashboardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,25 @@ Route::get('/dashboard', function () {
 Route::get('/secretaria', [SecretaryDashboardController::class, 'index'])
     ->middleware(['auth'])
     ->name('secretaria.dashboard');
+
+// Rotas para Alertas da Secretaria - Etapa 5
+// Todas as rotas exigem autenticação para segurança
+Route::prefix('secretaria/alertas')->name('secretaria.alerts.')->group(function () {
+    // Listar todos os alertas
+    Route::get('/', [SecretaryAlertController::class, 'index'])->name('index');
+    
+    // Mostrar detalhes de um alerta específico
+    Route::get('/{systemAlert}', [SecretaryAlertController::class, 'show'])->name('show');
+    
+    // Marcar alerta como resolvido
+    Route::patch('/{systemAlert}/resolver', [SecretaryAlertController::class, 'resolve'])->name('resolve');
+    
+    // Marcar alerta como ignorado
+    Route::patch('/{systemAlert}/ignorar', [SecretaryAlertController::class, 'ignore'])->name('ignore');
+    
+    // Regenerar alertas com base nas regras atuais
+    Route::post('/regenerar', [SecretaryAlertController::class, 'regenerate'])->name('regenerate');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
