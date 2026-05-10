@@ -3,6 +3,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
     userAccess: {
@@ -20,18 +21,15 @@ const props = defineProps({
 });
 
 const showSuspendModal = ref(false);
-const showReactivateModal = ref(false);
 
 const suspendForm = useForm({
-    access_revoked_reason: '',
-});
-
-const reactivateForm = useForm({
-    access_notes: '',
+    reason: '',
 });
 
 const suspend = () => {
-    suspendForm.patch(route('secretaria.access.suspend', props.userAccess.id), {
+    suspendForm.patch(`/secretaria/acessos/${props.userAccess.id}/suspender`, {
+        preserveScroll: true,
+        preserveState: false,
         onSuccess: () => {
             showSuspendModal.value = false;
             suspendForm.reset();
@@ -40,11 +38,9 @@ const suspend = () => {
 };
 
 const reactivate = () => {
-    reactivateForm.patch(route('secretaria.access.reactivate', props.userAccess.id), {
-        onSuccess: () => {
-            showReactivateModal.value = false;
-            reactivateForm.reset();
-        },
+    router.patch(`/secretaria/acessos/${props.userAccess.id}/reativar`, {}, {
+        preserveScroll: true,
+        preserveState: false,
     });
 };
 
@@ -248,7 +244,7 @@ const ageGroupLabel = () => {
                             </button>
                             <button
                                 v-else-if="props.userAccess?.status === 'suspended'"
-                                @click="showReactivateModal = true"
+                                @click="reactivate"
                                 class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
                             >
                                 Reativar
@@ -260,83 +256,46 @@ const ageGroupLabel = () => {
         </div>
 
         <!-- Modal de Suspensão -->
-        <div v-if="showSuspendModal" class="fixed inset-0 z-50 overflow-y-auto">
-            <div class="flex min-h-screen items-center justify-center p-4">
-                <div class="rounded-lg bg-white shadow-xl">
-                    <div class="p-6">
-                        <h3 class="mb-4 text-lg font-medium text-gray-900">Suspender Acesso</h3>
-                        <form @submit.prevent="suspend">
-                            <div class="mb-4">
-                                <label for="reason" class="block text-sm font-medium text-gray-700">
-                                    Motivo da Suspensão
-                                </label>
-                                <textarea
-                                    id="reason"
-                                    v-model="suspendForm.access_revoked_reason"
-                                    rows="3"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                    required
-                                />
-                            </div>
-                            <div class="flex justify-end space-x-3">
-                                <button
-                                    type="button"
-                                    @click="showSuspendModal = false"
-                                    class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    :disabled="suspendForm.processing"
-                                    class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:opacity-50"
-                                >
-                                    Suspender
-                                </button>
-                            </div>
-                        </form>
+        <div v-if="showSuspendModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+            <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+                <h3 class="mb-4 text-lg font-semibold text-slate-900">Suspender Acesso</h3>
+                <form @submit.prevent="suspend">
+                    <div class="mb-4">
+                        <label for="reason" class="block text-sm font-medium text-slate-700">
+                            Motivo da Suspensão
+                        </label>
+                        <textarea
+                            id="reason"
+                            v-model="suspendForm.reason"
+                            rows="4"
+                            class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                            placeholder="Explique o motivo da suspensão..."
+                            required
+                        />
+                        <p
+                            v-if="suspendForm.errors.reason"
+                            class="mt-2 text-sm text-red-600"
+                        >
+                            {{ suspendForm.errors.reason }}
+                        </p>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal de Reativação -->
-        <div v-if="showReactivateModal" class="fixed inset-0 z-50 overflow-y-auto">
-            <div class="flex min-h-screen items-center justify-center p-4">
-                <div class="rounded-lg bg-white shadow-xl">
-                    <div class="p-6">
-                        <h3 class="mb-4 text-lg font-medium text-gray-900">Reativar Acesso</h3>
-                        <form @submit.prevent="reactivate">
-                            <div class="mb-4">
-                                <label for="notes" class="block text-sm font-medium text-gray-700">
-                                    Observações (opcional)
-                                </label>
-                                <textarea
-                                    id="notes"
-                                    v-model="reactivateForm.access_notes"
-                                    rows="3"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                />
-                            </div>
-                            <div class="flex justify-end space-x-3">
-                                <button
-                                    type="button"
-                                    @click="showReactivateModal = false"
-                                    class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    :disabled="reactivateForm.processing"
-                                    class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 disabled:opacity-50"
-                                >
-                                    Reativar
-                                </button>
-                            </div>
-                        </form>
+                    <div class="flex justify-end gap-3">
+                        <button
+                            type="button"
+                            @click="showSuspendModal = false"
+                            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            :disabled="suspendForm.processing || !suspendForm.reason.trim()"
+                            class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            Suspender
+                        </button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </AuthenticatedLayout>

@@ -59,6 +59,7 @@ const confirmSuspend = () => {
 const reactivateAccess = (user) => {
     router.patch(`/secretaria/acessos/${user.id}/reativar`, {}, {
         preserveScroll: true,
+        preserveState: false,
     });
 };
 

@@ -266,12 +266,14 @@ class Person extends Model
     /**
      * Verifica se a pessoa pode ser membro
      * Regra: Pessoa batizada com 11 anos ou mais pode ser membro
-     * 
+     *
      * @return bool True se pode ser membro (é batizada e tem 11+ anos)
      */
     public function canBeMember(): bool
     {
-        return $this->is_baptized && $this->age >= 11;
+        return (bool) $this->is_baptized
+            && $this->age !== null
+            && $this->age >= 11;
     }
 
     /**

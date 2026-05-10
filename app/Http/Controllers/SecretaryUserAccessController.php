@@ -277,25 +277,18 @@ class SecretaryUserAccessController extends Controller
         if ($user->person) {
             $eligibility = $this->eligibilityService->check($user->person);
             if (!$eligibility['allowed']) {
-                return redirect()->route('secretaria.access.show', $user)
-                    ->with('error', 'Não é possível reativar: ' . $eligibility['reason']);
+                return back()->with('error', 'Não é possível reativar: ' . $eligibility['reason']);
             }
         }
-
-        $validated = $request->validate([
-            'access_notes' => 'nullable|string',
-        ]);
 
         $user->update([
             'status' => 'active',
             'access_revoked_at' => null,
             'access_revoked_reason' => null,
             'access_granted_at' => now(),
-            'access_notes' => $validated['access_notes'] ?? $user->access_notes,
         ]);
 
-        return redirect()->route('secretaria.access.show', $user)
-            ->with('success', 'Acesso reativado com sucesso.');
+        return back()->with('success', 'Acesso reativado com sucesso.');
     }
 
     /**
