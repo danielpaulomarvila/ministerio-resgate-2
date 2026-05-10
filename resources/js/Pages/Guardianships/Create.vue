@@ -1,5 +1,6 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 /**
@@ -13,7 +14,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 const props = defineProps({
     people: {
         type: Array,
-        required: true
+        default: () => []
     }
 });
 
@@ -106,6 +107,14 @@ const adults = computed(() => {
                             <!-- Bloco Menor -->
                             <div class="mb-8">
                                 <h4 class="text-md font-medium text-gray-900 mb-4">Menor</h4>
+                                <div v-if="minors.length === 0" class="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+                                    <p class="text-sm text-yellow-800">
+                                        ⚠️ Nenhuma pessoa menor de idade cadastrada.
+                                        <Link :href="route('people.index')" class="text-blue-600 hover:text-blue-800 underline ml-2">
+                                            Cadastre primeiro uma pessoa menor de idade em Pessoas.
+                                        </Link>
+                                    </p>
+                                </div>
                                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                                     <div>
                                         <label for="minor_person_id" class="block text-sm font-medium text-gray-700">
@@ -115,6 +124,7 @@ const adults = computed(() => {
                                             id="minor_person_id"
                                             v-model="form.minor_person_id"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :disabled="minors.length === 0"
                                             required
                                         >
                                             <option value="">Selecione uma pessoa menor (menos de 18 anos)</option>
@@ -132,6 +142,14 @@ const adults = computed(() => {
                             <!-- Bloco Responsável -->
                             <div class="mb-8">
                                 <h4 class="text-md font-medium text-gray-900 mb-4">Responsável</h4>
+                                <div v-if="adults.length === 0" class="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+                                    <p class="text-sm text-yellow-800">
+                                        ⚠️ Nenhuma pessoa adulta cadastrada.
+                                        <Link :href="route('people.index')" class="text-blue-600 hover:text-blue-800 underline ml-2">
+                                            Cadastre primeiro uma pessoa adulta para ser responsável.
+                                        </Link>
+                                    </p>
+                                </div>
                                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                                     <div>
                                         <label for="guardian_person_id" class="block text-sm font-medium text-gray-700">
@@ -141,6 +159,7 @@ const adults = computed(() => {
                                             id="guardian_person_id"
                                             v-model="form.guardian_person_id"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            :disabled="adults.length === 0"
                                             required
                                         >
                                             <option value="">Selecione um responsável adulto (18 anos ou mais)</option>
