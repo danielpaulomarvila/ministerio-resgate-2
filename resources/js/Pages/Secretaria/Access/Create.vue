@@ -2,7 +2,7 @@
 import { Head, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Link } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import axios from 'axios';
 
 const form = useForm({
@@ -44,9 +44,6 @@ const checkEligibility = (personId) => {
     axios.get(`/secretaria/acessos/elegibilidade/${personId}`)
         .then(response => {
             eligibility.value = response.data;
-            if (!response.data.eligibility.allowed) {
-                form.person_id = '';
-            }
         });
 };
 
@@ -56,6 +53,7 @@ const selectPerson = (person) => {
     form.name = person.full_name;
     form.email = person.email || '';
     peopleSearch.value = person.full_name;
+    peopleResults.value = [];
     showPeopleDropdown.value = false;
 };
 
@@ -74,9 +72,16 @@ const submit = () => {
     });
 };
 
-const canSubmit = () => {
-    return form.person_id && eligibility && eligibility.eligibility.allowed;
-};
+const canSubmit = computed(() => {
+    return Boolean(
+        form.person_id &&
+        selectedPerson.value &&
+        eligibility.value &&
+        eligibility.value.eligibility &&
+        eligibility.value.eligibility.allowed === true &&
+        !form.processing
+    );
+});
 </script>
 
 <template>
@@ -128,7 +133,7 @@ const canSubmit = () => {
                                     v-for="person in peopleResults"
                                     :key="person.id"
                                     class="cursor-pointer border-b px-4 py-2 hover:bg-gray-100"
-                                    @click="selectPerson(person)"
+                                    @mousedown.prevent="selectPerson(person)"
                                 >
                                     <div class="font-medium text-gray-900">{{ person.full_name }}</div>
                                     <div class="text-sm text-gray-500">{{ person.email }}</div>
@@ -252,7 +257,7 @@ const canSubmit = () => {
                             </Link>
                             <button
                                 type="submit"
-                                :disabled="!canSubmit()"
+                                :disabled="!canSubmit"
                                 class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Criar Usuário
