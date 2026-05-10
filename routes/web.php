@@ -9,6 +9,8 @@ use App\Http\Controllers\SecretaryDashboardController;
 use App\Http\Controllers\SecretaryRequestController;
 use App\Http\Controllers\SecretaryUserAccessController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\Secretaria\AccessProfileController;
+use App\Http\Controllers\Secretaria\UserAccessProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
