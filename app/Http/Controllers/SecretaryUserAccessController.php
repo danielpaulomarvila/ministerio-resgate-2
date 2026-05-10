@@ -256,17 +256,16 @@ class SecretaryUserAccessController extends Controller
     public function suspend(Request $request, User $user)
     {
         $validated = $request->validate([
-            'access_revoked_reason' => 'required|string|max:500',
+            'reason' => 'required|string|max:500',
         ]);
 
         $user->update([
             'status' => 'suspended',
             'access_revoked_at' => now(),
-            'access_revoked_reason' => $validated['access_revoked_reason'],
+            'access_revoked_reason' => $validated['reason'],
         ]);
 
-        return redirect()->route('secretaria.access.show', $user)
-            ->with('success', 'Acesso suspenso com sucesso.');
+        return back()->with('success', 'Acesso suspenso com sucesso.');
     }
 
     /**

@@ -2,6 +2,8 @@
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { router, useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
     users: {
@@ -19,6 +21,46 @@ const props = defineProps({
         }),
     },
 });
+
+const selectedAccess = ref(null);
+const showSuspendModal = ref(false);
+
+const suspendForm = useForm({
+    reason: '',
+});
+
+const openSuspendModal = (user) => {
+    selectedAccess.value = user;
+    suspendForm.reason = '';
+    suspendForm.clearErrors();
+    showSuspendModal.value = true;
+};
+
+const closeSuspendModal = () => {
+    showSuspendModal.value = false;
+    selectedAccess.value = null;
+    suspendForm.reason = '';
+    suspendForm.clearErrors();
+};
+
+const confirmSuspend = () => {
+    if (!selectedAccess.value) {
+        return;
+    }
+
+    suspendForm.patch(`/secretaria/acessos/${selectedAccess.value.id}/suspender`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            closeSuspendModal();
+        },
+    });
+};
+
+const reactivateAccess = (user) => {
+    router.patch(`/secretaria/acessos/${user.id}/reativar`, {}, {
+        preserveScroll: true,
+    });
+};
 
 const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -163,24 +205,22 @@ const formatDate = (dateString) => {
                                     >
                                         Editar
                                     </Link>
-                                    <Link
+                                    <button
                                         v-if="user.status === 'active'"
-                                        :href="route('secretaria.access.suspend', user.id)"
-                                        class="text-red-600 hover:text-red-900"
-                                        method="PATCH"
-                                        as="button"
+                                        type="button"
+                                        @click="openSuspendModal(user)"
+                                        class="text-red-600 hover:text-red-800"
                                     >
                                         Suspender
-                                    </Link>
-                                    <Link
+                                    </button>
+                                    <button
                                         v-else-if="user.status === 'suspended'"
-                                        :href="route('secretaria.access.reactivate', user.id)"
-                                        class="text-green-600 hover:text-green-900"
-                                        method="PATCH"
-                                        as="button"
+                                        type="button"
+                                        @click="reactivateAccess(user)"
+                                        class="text-green-600 hover:text-green-800"
                                     >
                                         Reativar
-                                    </Link>
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -203,6 +243,62 @@ const formatDate = (dateString) => {
                             v-html="link.label"
                         />
                     </template>
+                </div>
+
+                <!-- Modal de Suspensão -->
+                <div
+                    v-if="showSuspendModal"
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+                >
+                    <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+                        <h2 class="text-lg font-semibold text-slate-900">
+                            Suspender acesso
+                        </h2>
+
+                        <p class="mt-2 text-sm text-slate-600">
+                            Informe o motivo para suspender o acesso de
+                            <strong>{{ selectedAccess?.name }}</strong>.
+                        </p>
+
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-slate-700">
+                                Motivo da suspensão
+                            </label>
+
+                            <textarea
+                                v-model="suspendForm.reason"
+                                rows="4"
+                                class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                placeholder="Explique o motivo da suspensão..."
+                            ></textarea>
+
+                            <p
+                                v-if="suspendForm.errors.reason"
+                                class="mt-2 text-sm text-red-600"
+                            >
+                                {{ suspendForm.errors.reason }}
+                            </p>
+                        </div>
+
+                        <div class="mt-6 flex justify-end gap-3">
+                            <button
+                                type="button"
+                                @click="closeSuspendModal"
+                                class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                type="button"
+                                @click="confirmSuspend"
+                                :disabled="suspendForm.processing || !suspendForm.reason.trim()"
+                                class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                Confirmar suspensão
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
