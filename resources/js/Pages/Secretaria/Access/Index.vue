@@ -3,10 +3,28 @@ import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Link } from '@inertiajs/vue3';
 
-defineProps({
-    users: Object,
-    stats: Object,
+const props = defineProps({
+    users: {
+        type: Object,
+        required: true,
+    },
+    stats: {
+        type: Object,
+        default: () => ({
+            active: 0,
+            suspended: 0,
+            people_without_user: 0,
+            juniors_with_access: 0,
+            pending_password_change: 0,
+        }),
+    },
 });
+
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+};
 </script>
 
 <template>
@@ -31,23 +49,23 @@ defineProps({
                 <div class="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
                     <div class="rounded-lg bg-white p-6 shadow">
                         <div class="text-sm font-medium text-gray-500">Usuários Ativos</div>
-                        <div class="mt-2 text-3xl font-bold text-green-600">{{ stats.active }}</div>
+                        <div class="mt-2 text-3xl font-bold text-green-600">{{ props.stats?.active ?? 0 }}</div>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow">
                         <div class="text-sm font-medium text-gray-500">Usuários Suspensos</div>
-                        <div class="mt-2 text-3xl font-bold text-red-600">{{ stats.suspended }}</div>
+                        <div class="mt-2 text-3xl font-bold text-red-600">{{ props.stats?.suspended ?? 0 }}</div>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow">
                         <div class="text-sm font-medium text-gray-500">Pessoas sem Usuário</div>
-                        <div class="mt-2 text-3xl font-bold text-gray-600">{{ stats.people_without_user }}</div>
+                        <div class="mt-2 text-3xl font-bold text-gray-600">{{ props.stats?.people_without_user ?? 0 }}</div>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow">
                         <div class="text-sm font-medium text-gray-500">Júniores com Acesso</div>
-                        <div class="mt-2 text-3xl font-bold text-blue-600">{{ stats.juniors_with_access }}</div>
+                        <div class="mt-2 text-3xl font-bold text-blue-600">{{ props.stats?.juniors_with_access ?? 0 }}</div>
                     </div>
                     <div class="rounded-lg bg-white p-6 shadow">
                         <div class="text-sm font-medium text-gray-500">Troca de Senha Pendente</div>
-                        <div class="mt-2 text-3xl font-bold text-orange-600">{{ stats.pending_password_change }}</div>
+                        <div class="mt-2 text-3xl font-bold text-orange-600">{{ props.stats?.pending_password_change ?? 0 }}</div>
                     </div>
                 </div>
 
@@ -93,7 +111,7 @@ defineProps({
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-white">
-                            <tr v-for="user in users.data" :key="user.id">
+                            <tr v-for="user in props.users?.data ?? []" :key="user.id">
                                 <td class="whitespace-nowrap px-6 py-4">
                                     <div class="text-sm font-medium text-gray-900">{{ user.name }}</div>
                                 </td>
@@ -102,12 +120,12 @@ defineProps({
                                 </td>
                                 <td class="whitespace-nowrap px-6 py-4">
                                     <div class="text-sm text-gray-500">
-                                        {{ user.person ? user.person.full_name : '-' }}
+                                        {{ user.person?.full_name ?? '-' }}
                                     </div>
                                 </td>
                                 <td class="whitespace-nowrap px-6 py-4">
                                     <div class="text-sm text-gray-500">
-                                        {{ user.person ? user.person.age_group_label() : '-' }}
+                                        {{ user.person?.age_group ?? '-' }}
                                     </div>
                                 </td>
                                 <td class="whitespace-nowrap px-6 py-4">
@@ -129,7 +147,7 @@ defineProps({
                                 </td>
                                 <td class="whitespace-nowrap px-6 py-4">
                                     <div class="text-sm text-gray-500">
-                                        {{ new Date(user.created_at).toLocaleDateString('pt-BR') }}
+                                        {{ formatDate(user.created_at) }}
                                     </div>
                                 </td>
                                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
@@ -149,16 +167,16 @@ defineProps({
                                         v-if="user.status === 'active'"
                                         :href="route('secretaria.access.suspend', user.id)"
                                         class="text-red-600 hover:text-red-900"
-                                        method="POST"
+                                        method="PATCH"
                                         as="button"
                                     >
                                         Suspender
                                     </Link>
                                     <Link
-                                        v-else
+                                        v-else-if="user.status === 'suspended'"
                                         :href="route('secretaria.access.reactivate', user.id)"
                                         class="text-green-600 hover:text-green-900"
-                                        method="POST"
+                                        method="PATCH"
                                         as="button"
                                     >
                                         Reativar
@@ -170,8 +188,8 @@ defineProps({
                 </div>
 
                 <!-- Paginação -->
-                <div v-if="users.links" class="mt-6 flex justify-center">
-                    <template v-for="link in users.links" :key="link.label">
+                <div v-if="props.users?.links" class="mt-6 flex justify-center">
+                    <template v-for="link in props.users.links" :key="link.label">
                         <Link
                             v-if="link.url"
                             :href="link.url"

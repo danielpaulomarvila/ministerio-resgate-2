@@ -32,7 +32,31 @@ class SecretaryUserAccessController extends Controller
     {
         $users = User::with('person')
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->paginate(20)
+            ->through(fn (User $user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'status' => $user->status,
+                'must_change_password' => (bool) $user->must_change_password,
+                'access_granted_at' => $user->access_granted_at ? $user->access_granted_at->format('Y-m-d H:i:s') : null,
+                'access_revoked_at' => $user->access_revoked_at ? $user->access_revoked_at->format('Y-m-d H:i:s') : null,
+                'access_revoked_reason' => $user->access_revoked_reason,
+                'access_notes' => $user->access_notes,
+                'created_at' => $user->created_at ? $user->created_at->format('Y-m-d H:i:s') : null,
+                'updated_at' => $user->updated_at ? $user->updated_at->format('Y-m-d H:i:s') : null,
+                'person' => $user->person ? [
+                    'id' => $user->person->id,
+                    'full_name' => $user->person->full_name,
+                    'birth_date' => $user->person->birth_date ? $user->person->birth_date->format('Y-m-d') : null,
+                    'email' => $user->person->email,
+                    'primary_phone' => $user->person->primary_phone,
+                    'age' => $user->person->age ?? null,
+                    'age_group' => $user->person->ageGroupLabel(),
+                    'is_baptized' => (bool) $user->person->is_baptized,
+                    'can_be_member' => (bool) $user->person->canBeMember(),
+                ] : null,
+            ]);
 
         $stats = [
             'active' => User::where('status', 'active')->count(),
