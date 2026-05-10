@@ -236,7 +236,7 @@ const ageGroupLabel = () => {
                                 Editar
                             </Link>
                             <Link
-                                :href="route('secretaria.acessos.perfis.edit', props.userAccess.id)"
+                                :href="route('secretaria.access.perfis.edit', props.userAccess.id)"
                                 class="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
                             >
                                 Gerenciar Perfis
