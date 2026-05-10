@@ -105,7 +105,7 @@ const props = defineProps({
                                     Nome
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                                    Slug
+                                    Identificador
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                                     Status
@@ -128,7 +128,7 @@ const props = defineProps({
                                     <div class="text-sm text-slate-500">{{ profile.description || '-' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-slate-900 font-mono">{{ profile.slug }}</div>
+                                    <code class="notranslate rounded bg-slate-100 px-2 py-1 font-mono text-sm text-slate-700" translate="no">{{ profile.slug }}</code>
                                     <div v-if="profile.is_system" class="text-xs text-slate-500">Sistema</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">

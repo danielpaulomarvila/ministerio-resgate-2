@@ -38,7 +38,7 @@ const props = defineProps({
                         <div class="flex items-start justify-between">
                             <div>
                                 <h3 class="text-2xl font-bold text-slate-900">{{ profile.name }}</h3>
-                                <p class="text-sm font-mono text-slate-500 mt-1">{{ profile.slug }}</p>
+                                <code class="notranslate rounded bg-slate-100 px-2 py-1 font-mono text-sm text-slate-700 mt-1 block" translate="no">{{ profile.slug }}</code>
                                 <p class="text-slate-600 mt-2">{{ profile.description || 'Sem descrição' }}</p>
                             </div>
                             <div class="flex gap-3">
@@ -130,7 +130,7 @@ const props = defineProps({
                                         </svg>
                                         <div>
                                             <div class="text-sm font-medium text-slate-900">{{ permission.name }}</div>
-                                            <div class="text-xs text-slate-500 font-mono">{{ permission.slug }}</div>
+                                            <code class="notranslate text-xs text-slate-500 font-mono rounded bg-slate-100 px-1 py-0.5" translate="no">{{ permission.slug }}</code>
                                         </div>
                                     </div>
                                 </div>

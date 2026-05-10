@@ -77,16 +77,16 @@ const generateSlug = () => {
                             </p>
                         </div>
 
-                        <!-- Slug -->
+                        <!-- Identificador -->
                         <div>
                             <label for="slug" class="block text-sm font-medium text-slate-700">
-                                Slug *
+                                Identificador *
                             </label>
                             <input
                                 id="slug"
                                 v-model="form.slug"
                                 type="text"
-                                class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-3 text-sm font-mono focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                                 placeholder="Ex: secretaria"
                                 required
                             />

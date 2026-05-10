@@ -98,7 +98,7 @@ const toggleProfile = (profileId) => {
                             >
                                 <div>
                                     <div class="text-sm font-medium text-slate-900">{{ profile.name }}</div>
-                                    <div class="text-xs text-slate-500 font-mono">{{ profile.slug }}</div>
+                                    <code class="notranslate text-xs text-slate-500 font-mono rounded bg-slate-100 px-1 py-0.5" translate="no">{{ profile.slug }}</code>
                                 </div>
                                 <span
                                     v-if="profile.is_system"
