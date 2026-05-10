@@ -28,7 +28,7 @@ const form = useForm({
     can_approve_changes: false,
     can_view_financial: false,
     can_receive_canteen_debts: false,
-    starts_at: '',
+    starts_at: new Date().toISOString().split('T')[0],
     ends_at: '',
     status: 'active',
     notes: ''
@@ -82,6 +82,31 @@ const minors = computed(() => {
  */
 const adults = computed(() => {
     return props.people.filter(p => p.age !== null && p.age >= 18);
+});
+
+/**
+ * Obtém o menor selecionado
+ */
+const selectedMinor = computed(() => {
+    return props.people.find(p => p.id === form.minor_person_id);
+});
+
+/**
+ * Obtém o aviso baseado na idade do menor
+ */
+const ageWarning = computed(() => {
+    const minor = selectedMinor.value;
+    if (!minor || minor.age === null) return null;
+
+    if (minor.age < 11) {
+        return 'Esta criança não pode ter usuário próprio até completar 11 anos. Até lá, ações futuras como cantina e financeiro devem ser vinculadas ao responsável financeiro. Ao completar 11 anos, a Secretaria deve revisar o cadastro para possível transição para Júnior/Resgatados com usuário supervisionado.';
+    } else if (minor.age >= 11 && minor.age < 14) {
+        return 'Esta pessoa está na fase Júnior. Pode ter usuário futuramente, mas deve continuar com supervisão dos responsáveis.';
+    } else if (minor.age >= 14 && minor.age < 18) {
+        return 'Esta pessoa está na fase Jovem. Pode ter usuário, mas só será membro se for batizada.';
+    }
+
+    return null;
 });
 </script>
 
@@ -284,7 +309,7 @@ const adults = computed(() => {
 
                             <!-- Bloco Período -->
                             <div class="mb-8">
-                                <h4 class="text-md font-medium text-gray-900 mb-4">Período de Responsabilidade</h4>
+                                <h4 class="text-md font-medium text-gray-900 mb-4">Período e regra da responsabilidade</h4>
                                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                                     <div>
                                         <label for="starts_at" class="block text-sm font-medium text-gray-700">
@@ -310,8 +335,33 @@ const adults = computed(() => {
                                             type="date"
                                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
+                                        <p class="mt-1 text-xs text-gray-500">Use apenas se esta responsabilidade tiver uma data real de encerramento.</p>
                                         <div v-if="form.errors.ends_at" class="mt-1 text-sm text-red-600">
                                             {{ form.errors.ends_at }}
+                                        </div>
+                                    </div>
+                                    <div v-if="selectedMinor">
+                                        <label class="block text-sm font-medium text-gray-700">
+                                            Idade atual do menor
+                                        </label>
+                                        <div class="mt-1 text-sm text-gray-900 font-medium">
+                                            {{ selectedMinor.age || '-' }} anos
+                                        </div>
+                                    </div>
+                                    <div v-if="selectedMinor">
+                                        <label class="block text-sm font-medium text-gray-700">
+                                            Fase atual do menor
+                                        </label>
+                                        <div class="mt-1 text-sm text-gray-900 font-medium">
+                                            {{ selectedMinor.age_group_label || '-' }}
+                                        </div>
+                                    </div>
+                                    <div v-if="selectedMinor && selectedMinor.turns_11_at">
+                                        <label class="block text-sm font-medium text-gray-700">
+                                            Data em que completa 11 anos
+                                        </label>
+                                        <div class="mt-1 text-sm text-gray-900 font-medium">
+                                            {{ selectedMinor.turns_11_at }}
                                         </div>
                                     </div>
                                     <div>
@@ -332,6 +382,11 @@ const adults = computed(() => {
                                             {{ form.errors.status }}
                                         </div>
                                     </div>
+                                </div>
+                                <div v-if="ageWarning" class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+                                    <p class="text-sm text-blue-800">
+                                        ℹ️ {{ ageWarning }}
+                                    </p>
                                 </div>
                             </div>
 

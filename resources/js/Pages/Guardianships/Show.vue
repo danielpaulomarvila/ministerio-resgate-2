@@ -206,7 +206,7 @@ const formatStatus = (status) => {
                     <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div class="p-6 bg-white border-b border-gray-200">
                             <h3 class="text-lg font-medium text-gray-900 mb-6">
-                                Período e Status
+                                Período e regra da responsabilidade
                             </h3>
 
                             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -217,6 +217,18 @@ const formatStatus = (status) => {
                                 <div>
                                     <span class="text-sm font-medium text-gray-500">Data de Fim:</span>
                                     <p class="mt-1 text-sm text-gray-900">{{ guardianship.ends_at || '-' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Idade atual do menor:</span>
+                                    <p class="mt-1 text-sm text-gray-900 font-medium">{{ guardianship.minor.age || '-' }} anos</p>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">Fase atual do menor:</span>
+                                    <p class="mt-1 text-sm text-gray-900 font-medium">{{ guardianship.minor.age_group_label || '-' }}</p>
+                                </div>
+                                <div v-if="guardianship.minor.turns_11_at">
+                                    <span class="text-sm font-medium text-gray-500">Data em que completa 11 anos:</span>
+                                    <p class="mt-1 text-sm text-gray-900 font-medium">{{ guardianship.minor.turns_11_at }}</p>
                                 </div>
                                 <div>
                                     <span class="text-sm font-medium text-gray-500">Status:</span>
@@ -244,6 +256,26 @@ const formatStatus = (status) => {
                                     <span class="text-sm font-medium text-gray-500">Observações:</span>
                                     <p class="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{{ guardianship.notes || '-' }}</p>
                                 </div>
+                            </div>
+
+                            <!-- Aviso por idade -->
+                            <div v-if="guardianship.minor.is_under_11" class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+                                <h4 class="text-sm font-medium text-blue-800 mb-2">ℹ️ Regra do Sistema</h4>
+                                <p class="text-sm text-blue-700">
+                                    Esta criança não pode ter usuário próprio até completar 11 anos. Até lá, ações futuras como cantina e financeiro devem ser vinculadas ao responsável financeiro. Ao completar 11 anos, a Secretaria deve revisar o cadastro para possível transição para Júnior/Resgatados com usuário supervisionado.
+                                </p>
+                            </div>
+                            <div v-else-if="guardianship.minor.is_junior" class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+                                <h4 class="text-sm font-medium text-blue-800 mb-2">ℹ️ Regra do Sistema</h4>
+                                <p class="text-sm text-blue-700">
+                                    Esta pessoa está na fase Júnior. Pode ter usuário futuramente, mas deve continuar com supervisão dos responsáveis.
+                                </p>
+                            </div>
+                            <div v-else-if="guardianship.minor.is_young" class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
+                                <h4 class="text-sm font-medium text-blue-800 mb-2">ℹ️ Regra do Sistema</h4>
+                                <p class="text-sm text-blue-700">
+                                    Esta pessoa está na fase Jovem. Pode ter usuário, mas só será membro se for batizada.
+                                </p>
                             </div>
                         </div>
                     </div>

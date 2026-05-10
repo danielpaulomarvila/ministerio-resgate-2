@@ -73,12 +73,21 @@ class GuardianshipController extends Controller
             ->orderBy('full_name')
             ->get()
             ->map(function ($person) {
+                $age = $person->age;
+                $turns11At = $age !== null && $age < 11
+                    ? $person->birth_date?->addYears(11)?->format('Y-m-d')
+                    : null;
+
                 return [
                     'id' => $person->id,
                     'full_name' => $person->full_name,
-                    'age' => $person->age,
+                    'birth_date' => $person->birth_date?->format('Y-m-d'),
+                    'age' => $age,
                     'age_group_label' => $person->ageGroupLabel(),
                     'is_adult' => $person->isAdult(),
+                    'turns_11_at' => $turns11At,
+                    'can_have_user' => $age !== null && $age >= 11,
+                    'can_be_member' => $age !== null && $age >= 11,
                 ];
             });
 
@@ -126,14 +135,23 @@ class GuardianshipController extends Controller
     {
         $guardianship->load(['minor', 'guardian']);
 
+        $minorAge = $guardianship->minor?->age;
+        $minorTurns11At = $minorAge !== null && $minorAge < 11
+            ? $guardianship->minor->birth_date?->addYears(11)?->format('Y-m-d')
+            : null;
+
         return Inertia::render('Guardianships/Show', [
             'guardianship' => [
                 'id' => $guardianship->id,
                 'minor' => [
                     'id' => $guardianship->minor?->id,
                     'full_name' => $guardianship->minor?->full_name ?? 'Menor não informado',
-                    'age' => $guardianship->minor?->age,
+                    'birth_date' => $guardianship->minor?->birth_date?->format('Y-m-d'),
+                    'age' => $minorAge,
                     'age_group_label' => $guardianship->minor?->ageGroupLabel(),
+                    'turns_11_at' => $minorTurns11At,
+                    'can_have_user' => $minorAge !== null && $minorAge >= 11,
+                    'can_be_member' => $minorAge !== null && $minorAge >= 11,
                     'is_under_11' => $guardianship->minor?->isUnder11YearsOld(),
                     'is_junior' => $guardianship->minor?->isJunior(),
                     'is_young' => $guardianship->minor?->isYoung(),
@@ -175,14 +193,28 @@ class GuardianshipController extends Controller
             ->orderBy('full_name')
             ->get()
             ->map(function ($person) {
+                $age = $person->age;
+                $turns11At = $age !== null && $age < 11
+                    ? $person->birth_date?->addYears(11)?->format('Y-m-d')
+                    : null;
+
                 return [
                     'id' => $person->id,
                     'full_name' => $person->full_name,
-                    'age' => $person->age,
+                    'birth_date' => $person->birth_date?->format('Y-m-d'),
+                    'age' => $age,
                     'age_group_label' => $person->ageGroupLabel(),
                     'is_adult' => $person->isAdult(),
+                    'turns_11_at' => $turns11At,
+                    'can_have_user' => $age !== null && $age >= 11,
+                    'can_be_member' => $age !== null && $age >= 11,
                 ];
             });
+
+        $minorAge = $guardianship->minor?->age;
+        $minorTurns11At = $minorAge !== null && $minorAge < 11
+            ? $guardianship->minor->birth_date?->addYears(11)?->format('Y-m-d')
+            : null;
 
         return Inertia::render('Guardianships/Edit', [
             'guardianship' => [
@@ -203,8 +235,12 @@ class GuardianshipController extends Controller
                 'minor' => [
                     'id' => $guardianship->minor?->id,
                     'full_name' => $guardianship->minor?->full_name ?? 'Menor não informado',
-                    'age' => $guardianship->minor?->age,
+                    'birth_date' => $guardianship->minor?->birth_date?->format('Y-m-d'),
+                    'age' => $minorAge,
                     'age_group_label' => $guardianship->minor?->ageGroupLabel(),
+                    'turns_11_at' => $minorTurns11At,
+                    'can_have_user' => $minorAge !== null && $minorAge >= 11,
+                    'can_be_member' => $minorAge !== null && $minorAge >= 11,
                 ],
                 'guardian' => [
                     'id' => $guardianship->guardian?->id,

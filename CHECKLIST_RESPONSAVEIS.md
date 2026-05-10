@@ -72,6 +72,16 @@ Este checklist documenta o processo de implementação do módulo de responsáve
 - Se não estiver na mesma família, avisa mas não bloqueia
 - Ao encerrar responsabilidade, usa soft delete marcando status como 'ended' com data atual
 - Avisos por idade implementados na página Show.vue
+- [x] Validações customizadas implementadas
+- [x] Avisos por idade implementados nas páginas Vue
+- [x] Regras de idade ajustadas (responsabilidade legal não acaba automaticamente aos 11 anos)
+- [x] Bloco "Período e regra da responsabilidade" implementado com:
+  - [x] Idade atual do menor (somente leitura)
+  - [x] Fase atual do menor (somente leitura)
+  - [x] Data em que completa 11 anos (somente leitura, se menor de 11)
+  - [x] Aviso automático por idade
+- [x] Controller envia dados adicionais de idade (turns_11_at, can_have_user, can_be_member)
+- [x] DOCUMENTO_RESPONSAVEIS.md atualizado com regras de idade
 
 ---
 

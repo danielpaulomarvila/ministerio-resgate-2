@@ -177,6 +177,20 @@ Armazena as responsabilidades sobre menores de idade.
 
 ## Regras de Idade
 
+### Importante: Responsabilidade Legal Não Acaba Automaticamente
+
+**A responsabilidade legal/familiar dos pais NÃO acaba automaticamente aos 11 anos.**
+
+O que muda aos 11 anos é a regra do sistema:
+- A criança deixa a fase "menor de 11 sem usuário próprio"
+- Entra na fase "Júnior com possível usuário supervisionado"
+
+Portanto:
+- **Não preencher automaticamente ends_at** como fim da responsabilidade legal aos 11 anos
+- Em vez disso, o sistema mostra informações calculadas e avisos
+- A Secretaria deve revisar o cadastro quando a criança completar 11 anos
+- O vínculo de responsabilidade pode continuar ativo conforme necessário
+
 ### Crianças Menores de 11 Anos
 
 - **Não têm usuário próprio**
@@ -189,7 +203,7 @@ Armazena as responsabilidades sobre menores de idade.
 - **Não possuem login próprio**
 
 **Aviso no sistema:**
-"Este menor não deve ter utilizador próprio. As ações financeiras futuras devem ser vinculadas ao responsável financeiro."
+"Esta criança não pode ter usuário próprio até completar 11 anos. Até lá, ações futuras como cantina e financeiro devem ser vinculadas ao responsável financeiro. Ao completar 11 anos, a Secretaria deve revisar o cadastro para possível transição para Júnior/Resgatados com usuário supervisionado."
 
 ### Júniores (11 até antes de 14 anos)
 
@@ -199,9 +213,10 @@ Armazena as responsabilidades sobre menores de idade.
 - **Pode ser membro se for batizado**
 - **Continua vinculado à família**
 - **Responsável pode autorizar login via `can_authorize_login`**
+- **Responsabilidade legal dos pais continua conforme necessário**
 
 **Aviso no sistema:**
-"Esta pessoa se enquadra como Júnior pela idade. Poderá ter utilizador futuramente, com supervisão dos responsáveis."
+"Esta pessoa está na fase Júnior. Pode ter usuário futuramente, mas deve continuar com supervisão dos responsáveis."
 
 ### Jovens (14 até antes de 18 anos)
 
@@ -211,15 +226,51 @@ Armazena as responsabilidades sobre menores de idade.
 - **Pode ser membro se for batizado**
 - **Continua vinculado à família**
 - **Pode ter responsável, mas a supervisão obrigatória pode ser menor**
+- **Responsabilidade legal dos pais pode continuar conforme necessário**
 
 **Aviso no sistema:**
-"Esta pessoa se enquadra como Jovem pela idade. Poderá ter utilizador futuramente."
+"Esta pessoa está na fase Jovem. Pode ter usuário, mas só será membro se for batizada."
 
 ### Adultos (18 anos ou mais)
 
 - **Podem ter usuário**
 - **São membros se forem batizados**
 - **Não devem ser cadastrados como minor_person_id** em guardianships
+
+---
+
+## Bloco "Período e Regra da Responsabilidade"
+
+Nas páginas de criação, edição e visualização, o bloco "Período de Responsabilidade" foi renomeado para "Período e regra da responsabilidade" e agora mostra:
+
+**Campos exibidos:**
+1. **Data de início** - Padrão: data atual
+2. **Data de fim** - Opcional. Aviso: "Use apenas se esta responsabilidade tiver uma data real de encerramento."
+3. **Idade atual do menor** - Somente leitura, calculada pela birth_date
+4. **Fase atual do menor** - Somente leitura (Criança menor de 11 anos, Júnior, Jovem)
+5. **Data em que completa 11 anos** - Somente leitura, mostrada apenas se a pessoa tiver menos de 11 anos
+6. **Aviso automático por idade** - Baseado na fase atual do menor
+
+**Avisos por idade:**
+
+**Se menor de 11 anos:**
+"Esta criança não pode ter usuário próprio até completar 11 anos. Até lá, ações futuras como cantina e financeiro devem ser vinculadas ao responsável financeiro. Ao completar 11 anos, a Secretaria deve revisar o cadastro para possível transição para Júnior/Resgatados com usuário supervisionado."
+
+**Se Júnior:**
+"Esta pessoa está na fase Júnior. Pode ter usuário futuramente, mas deve continuar com supervisão dos responsáveis."
+
+**Se Jovem:**
+"Esta pessoa está na fase Jovem. Pode ter usuário, mas só será membro se for batizada."
+
+**Dados enviados pelo Controller:**
+
+O GuardianshipController envia para as páginas Vue:
+- `id`, `full_name`, `birth_date`, `age`, `age_group_label`
+- `turns_11_at` - Data em que a pessoa completa 11 anos (calculada: birth_date + 11 anos)
+- `can_have_user` - Boolean: pode ter usuário (idade >= 11)
+- `can_be_member` - Boolean: pode ser membro (idade >= 11)
+
+---
 
 ---
 
