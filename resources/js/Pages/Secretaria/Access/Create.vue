@@ -46,7 +46,6 @@ const checkEligibility = (personId) => {
             eligibility.value = response.data;
             if (!response.data.eligibility.allowed) {
                 form.person_id = '';
-                selectedPerson.value = null;
             }
         });
 };
@@ -73,6 +72,10 @@ const submit = () => {
     form.post(route('secretaria.access.store'), {
         preserveScroll: true,
     });
+};
+
+const canSubmit = () => {
+    return form.person_id && eligibility && eligibility.eligibility.allowed;
 };
 </script>
 
@@ -136,7 +139,7 @@ const submit = () => {
 
                         <!-- Painel de elegibilidade -->
                         <div
-                            v-if="eligibility"
+                            v-if="eligibility && selectedPerson"
                             class="rounded-md p-4"
                             :class="eligibility.eligibility.allowed ? 'bg-green-50' : 'bg-red-50'"
                         >
@@ -154,7 +157,7 @@ const submit = () => {
                                         class="text-sm font-medium"
                                         :class="eligibility.eligibility.allowed ? 'text-green-800' : 'text-red-800'"
                                     >
-                                        {{ eligibility.eligibility.allowed ? 'Permitido' : 'Bloqueado' }}
+                                        {{ eligibility.eligibility.allowed ? 'Acesso permitido' : 'Acesso bloqueado' }}
                                     </h3>
                                     <div
                                         class="mt-2 text-sm"
@@ -249,7 +252,7 @@ const submit = () => {
                             </Link>
                             <button
                                 type="submit"
-                                :disabled="!form.person_id || (eligibility && !eligibility.eligibility.allowed)"
+                                :disabled="!canSubmit()"
                                 class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Criar Usuário
