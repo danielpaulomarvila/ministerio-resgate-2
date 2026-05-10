@@ -183,23 +183,27 @@ const canSubmit = computed(() => {
                                 </div>
 
                                 <!-- Lista de resultados -->
-                                <div v-if="peopleResults.length > 0 && !selectedPerson" class="space-y-2">
-                                    <div class="text-sm text-gray-500">Resultados encontrados:</div>
+                                <div v-if="peopleResults.length > 0 && !selectedPerson" class="space-y-3">
+                                    <p class="text-sm font-medium text-slate-600">
+                                        {{ peopleResults.length === 1 ? 'Resultado encontrado:' : 'Resultados encontrados:' }}
+                                    </p>
                                     <div
                                         v-for="person in peopleResults"
                                         :key="person.id"
-                                        class="flex items-center justify-between rounded-md border border-gray-200 bg-white p-3"
+                                        class="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4"
                                     >
-                                        <div>
-                                            <div class="font-medium text-gray-900">{{ person.full_name }}</div>
-                                            <div class="text-sm text-gray-500">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="font-semibold text-slate-900">
+                                                {{ person.full_name }}
+                                            </p>
+                                            <p class="text-sm text-slate-500">
                                                 {{ person.email || person.primary_phone || 'Sem contato informado' }}
-                                            </div>
+                                            </p>
                                         </div>
                                         <button
                                             type="button"
                                             @click="selectPerson(person)"
-                                            class="rounded-md bg-indigo-600 px-3 py-1 text-sm text-white hover:bg-indigo-700"
+                                            class="shrink-0 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
                                         >
                                             Selecionar
                                         </button>
