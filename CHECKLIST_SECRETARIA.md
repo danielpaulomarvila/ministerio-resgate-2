@@ -37,7 +37,7 @@ Este checklist acompanha a implementação do painel inicial da Secretaria.
 - [x] Crianças próximas dos 11 anos (menores de 11 anos que completarão 11 anos nos próximos 60 dias)
   - [x] Mostra nome, idade atual e data em que completa 11
 - [x] Pessoas sem data de nascimento (sem birth_date)
-- [x] Pessoas sem telefone principal (sem phone)
+- [x] Pessoas sem telefone principal (sem primary_phone)
 - [x] Pessoas sem email e sem telefone
 - [x] Pessoas recentemente cadastradas (últimas 5)
 - [x] Famílias recentemente criadas (últimas 5)

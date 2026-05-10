@@ -89,7 +89,7 @@ O painel não cria sistema completo de alertas, notificações reais, gráficos 
     - Aviso para revisar cadastros
 
 11. **Sem Telefone**
-    - Pessoas sem phone preenchido
+    - Pessoas sem primary_phone preenchido
     - Indicador em âmbar se > 0
     - Aviso para adicionar contato
 

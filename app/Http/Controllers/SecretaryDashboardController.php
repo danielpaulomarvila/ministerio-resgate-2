@@ -104,11 +104,11 @@ class SecretaryDashboardController extends Controller
         $peopleWithoutBirthDate = Person::whereNull('birth_date')->count();
         
         // Sem telefone principal
-        $peopleWithoutPhone = Person::whereNull('phone')->count();
+        $peopleWithoutPhone = Person::whereNull('primary_phone')->count();
         
         // Sem email e sem telefone
         $peopleWithoutEmailOrPhone = Person::whereNull('email')
-            ->whereNull('phone')
+            ->whereNull('primary_phone')
             ->count();
 
         // 12. Pessoas recentemente cadastradas (últimas 5)
