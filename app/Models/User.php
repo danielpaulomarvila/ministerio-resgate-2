@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -46,6 +47,17 @@ class User extends Authenticatable
     }
 
     /**
+     * Relacionamento: Um usuário pode ter múltiplos perfis de acesso
+     * Ex: Secretaria, Tesouraria, Membro
+     */
+    public function accessProfiles(): BelongsToMany
+    {
+        return $this->belongsToMany(AccessProfile::class, 'access_profile_user')
+            ->withPivot(['assigned_by_user_id', 'assigned_at', 'notes'])
+            ->withTimestamps();
+    }
+
+    /**
      * Relacionamento: Um usuário pode ter múltiplos logs de atividade
      * Usado para auditoria e rastreamento de ações
      */
@@ -70,6 +82,62 @@ class User extends Authenticatable
     public function resolvedAlerts(): HasMany
     {
         return $this->hasMany(SystemAlert::class, 'resolved_by_user_id');
+    }
+
+    /**
+     * Obtém todas as permissões do usuário através de seus perfis
+     * Retorna uma coleção de Permission
+     */
+    public function permissions()
+    {
+        return $this->accessProfiles()
+            ->with('permissions')
+            ->get()
+            ->pluck('permissions')
+            ->flatten()
+            ->unique('id');
+    }
+
+    /**
+     * Verifica se o usuário tem um perfil específico
+     * 
+     * @param string $slug Slug do perfil (ex: 'secretaria', 'super-admin')
+     * @return bool
+     */
+    public function hasAccessProfile(string $slug): bool
+    {
+        return $this->accessProfiles()->where('slug', $slug)->exists();
+    }
+
+    /**
+     * Verifica se o usuário tem uma permissão específica
+     * Usuários com perfil super-admin têm todas as permissões
+     * 
+     * @param string $slug Slug da permissão (ex: 'people.view', 'accesses.suspend')
+     * @return bool
+     */
+    public function hasPermission(string $slug): bool
+    {
+        // Super-admin tem todas as permissões
+        if ($this->hasAccessProfile('super-admin')) {
+            return true;
+        }
+
+        return $this->accessProfiles()
+            ->whereHas('permissions', function ($query) use ($slug) {
+                $query->where('slug', $slug);
+            })
+            ->exists();
+    }
+
+    /**
+     * Verifica se o usuário é Super Administrador
+     * 
+     * @return bool
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasAccessProfile('super-admin');
     }
 
     /**

@@ -64,6 +64,12 @@ const showingNavigationDropdown = ref(false);
                                     Acessos
                                 </NavLink>
                                 <NavLink
+                                    :href="route('secretaria.access-profiles.index')"
+                                    :active="route().current('secretaria.access-profiles.*')"
+                                >
+                                    Perfis de Acesso
+                                </NavLink>
+                                <NavLink
                                     :href="route('people.index')"
                                     :active="route().current('people.index')"
                                 >

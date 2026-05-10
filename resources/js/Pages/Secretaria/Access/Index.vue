@@ -206,6 +206,12 @@ const formatDate = (dateString) => {
                                     >
                                         Editar
                                     </Link>
+                                    <Link
+                                        :href="route('secretaria.acessos.perfis.edit', user.id)"
+                                        class="text-indigo-600 hover:text-indigo-900 mr-3"
+                                    >
+                                        Perfis
+                                    </Link>
                                     <button
                                         v-if="user.status === 'active'"
                                         type="button"

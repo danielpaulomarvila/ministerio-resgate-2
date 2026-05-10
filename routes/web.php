@@ -122,6 +122,21 @@ Route::prefix('secretaria/acessos')->name('secretaria.access.')->group(function 
     
     // Reativar acesso
     Route::patch('/{user}/reativar', [SecretaryUserAccessController::class, 'reactivate'])->name('reactivate');
+    
+    // Gerenciar perfis de acesso de um usuário
+    Route::get('/{user}/perfis', [UserAccessProfileController::class, 'edit'])->name('perfis.edit');
+    Route::put('/{user}/perfis', [UserAccessProfileController::class, 'update'])->name('perfis.update');
+});
+
+// Rotas para Perfis de Acesso - Secretaria - Etapa 8
+Route::prefix('secretaria/perfis-acesso')->name('secretaria.access-profiles.')->middleware(['auth'])->group(function () {
+    Route::get('/', [AccessProfileController::class, 'index'])->name('index');
+    Route::get('/criar', [AccessProfileController::class, 'create'])->name('create');
+    Route::post('/', [AccessProfileController::class, 'store'])->name('store');
+    Route::get('/{accessProfile}', [AccessProfileController::class, 'show'])->name('show');
+    Route::get('/{accessProfile}/editar', [AccessProfileController::class, 'edit'])->name('edit');
+    Route::put('/{accessProfile}', [AccessProfileController::class, 'update'])->name('update');
+    Route::delete('/{accessProfile}', [AccessProfileController::class, 'destroy'])->name('destroy');
 });
 
 Route::middleware('auth')->group(function () {
