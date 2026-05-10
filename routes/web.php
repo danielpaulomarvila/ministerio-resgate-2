@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SecretaryAlertController;
 use App\Http\Controllers\SecretaryDashboardController;
 use App\Http\Controllers\SecretaryRequestController;
+use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -119,6 +120,15 @@ Route::middleware('auth')->group(function () {
         
         // Remover pessoa (soft delete)
         Route::delete('/{person}', [PersonController::class, 'destroy'])->name('destroy');
+        
+        // Buscar pessoas por nome para autocomplete
+        Route::get('/search', [PersonController::class, 'search'])->name('search');
+    });
+    
+    // Rotas para busca de usuários - Autocomplete
+    Route::prefix('users')->name('users.')->group(function () {
+        // Buscar usuários por nome para autocomplete
+        Route::get('/search', [UserController::class, 'search'])->name('search');
     });
     
     // Rotas para CRUD de Famílias - Módulo Secretaria - Etapa 2

@@ -1,6 +1,8 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { ref, watch, onMounted } from 'vue';
+import axios from 'axios';
 
 const props = defineProps({
     request: {
@@ -19,6 +21,86 @@ const form = useForm({
     due_at: props.request.due_at,
     internal_notes: props.request.internal_notes,
 });
+
+// Autocomplete para pessoas
+const personSearch = ref('');
+const personResults = ref([]);
+const selectedPerson = ref(null);
+
+// Inicializar com a pessoa relacionada existente
+onMounted(() => {
+    if (props.request.requesterPerson) {
+        personSearch.value = props.request.requesterPerson.full_name;
+        selectedPerson.value = props.request.requesterPerson;
+    }
+    if (props.request.assignedToUser) {
+        userSearch.value = props.request.assignedToUser.name;
+        selectedUser.value = props.request.assignedToUser;
+    }
+});
+
+watch(personSearch, async (newValue) => {
+    if (newValue.length >= 2) {
+        try {
+            const response = await axios.get(route('people.search'), {
+                params: { q: newValue }
+            });
+            personResults.value = response.data;
+        } catch (error) {
+            console.error('Erro ao buscar pessoas:', error);
+        }
+    } else {
+        personResults.value = [];
+    }
+});
+
+const selectPerson = (person) => {
+    form.requester_person_id = person.id;
+    personSearch.value = person.full_name;
+    personResults.value = [];
+    selectedPerson.value = person;
+};
+
+const clearPerson = () => {
+    form.requester_person_id = null;
+    personSearch.value = '';
+    personResults.value = [];
+    selectedPerson.value = null;
+};
+
+// Autocomplete para usuários
+const userSearch = ref('');
+const userResults = ref([]);
+const selectedUser = ref(null);
+
+watch(userSearch, async (newValue) => {
+    if (newValue.length >= 2) {
+        try {
+            const response = await axios.get(route('users.search'), {
+                params: { q: newValue }
+            });
+            userResults.value = response.data;
+        } catch (error) {
+            console.error('Erro ao buscar usuários:', error);
+        }
+    } else {
+        userResults.value = [];
+    }
+});
+
+const selectUser = (user) => {
+    form.assigned_to_user_id = user.id;
+    userSearch.value = user.name;
+    userResults.value = [];
+    selectedUser.value = user;
+};
+
+const clearUser = () => {
+    form.assigned_to_user_id = null;
+    userSearch.value = '';
+    userResults.value = [];
+    selectedUser.value = null;
+};
 
 const submit = () => {
     form.put(route('secretaria.requests.update', props.request.id), {
@@ -122,32 +204,86 @@ const submit = () => {
                                 </div>
 
                                 <!-- Pessoa relacionada -->
-                                <div>
+                                <div class="relative">
                                     <label class="mb-2 block text-sm font-medium text-gray-700">
                                         Pessoa relacionada
                                     </label>
-                                    <input
-                                        v-model="form.requester_person_id"
-                                        type="number"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                        placeholder="ID da pessoa"
-                                    />
+                                    <div class="relative">
+                                        <input
+                                            v-model="personSearch"
+                                            type="text"
+                                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                            placeholder="Digite o nome da pessoa..."
+                                            @input="personResults = []"
+                                        />
+                                        <button
+                                            v-if="personSearch || selectedPerson"
+                                            type="button"
+                                            @click="clearPerson"
+                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                    <!-- Dropdown de resultados -->
+                                    <div
+                                        v-if="personResults.length > 0"
+                                        class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white shadow-lg"
+                                    >
+                                        <ul class="py-1">
+                                            <li
+                                                v-for="person in personResults"
+                                                :key="person.id"
+                                                @click="selectPerson(person)"
+                                                class="cursor-pointer px-4 py-2 hover:bg-gray-100"
+                                            >
+                                                {{ person.full_name }}
+                                            </li>
+                                        </ul>
+                                    </div>
                                     <p class="mt-1 text-xs text-gray-500">
                                         Deixe vazio se não houver pessoa relacionada.
                                     </p>
                                 </div>
 
                                 <!-- Responsável pela análise -->
-                                <div>
+                                <div class="relative">
                                     <label class="mb-2 block text-sm font-medium text-gray-700">
                                         Responsável pela análise
                                     </label>
-                                    <input
-                                        v-model="form.assigned_to_user_id"
-                                        type="number"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                        placeholder="ID do usuário"
-                                    />
+                                    <div class="relative">
+                                        <input
+                                            v-model="userSearch"
+                                            type="text"
+                                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                            placeholder="Digite o nome do usuário..."
+                                            @input="userResults = []"
+                                        />
+                                        <button
+                                            v-if="userSearch || selectedUser"
+                                            type="button"
+                                            @click="clearUser"
+                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                    <!-- Dropdown de resultados -->
+                                    <div
+                                        v-if="userResults.length > 0"
+                                        class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white shadow-lg"
+                                    >
+                                        <ul class="py-1">
+                                            <li
+                                                v-for="user in userResults"
+                                                :key="user.id"
+                                                @click="selectUser(user)"
+                                                class="cursor-pointer px-4 py-2 hover:bg-gray-100"
+                                            >
+                                                {{ user.name }}
+                                            </li>
+                                        </ul>
+                                    </div>
                                     <p class="mt-1 text-xs text-gray-500">
                                         Deixe vazio para não atribuir responsável.
                                     </p>

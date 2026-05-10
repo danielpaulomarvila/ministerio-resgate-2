@@ -7,7 +7,9 @@ use App\Http\Requests\UpdatePersonRequest;
 use App\Models\Person;
 use App\Models\PersonDocument;
 use App\Models\PersonAddress;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
@@ -265,5 +267,24 @@ class PersonController extends Controller
         // Redireciona para a lista de pessoas com mensagem de sucesso
         return Redirect::route('people.index')
             ->with('success', 'Pessoa removida com sucesso!');
+    }
+
+    /**
+     * Busca pessoas por nome para autocomplete
+     * 
+     * @param Request $request Request com parâmetro 'q' para busca
+     * @return JsonResponse JSON com resultados da busca
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $query = $request->input('q', '');
+        
+        $people = Person::where('full_name', 'like', "%{$query}%")
+            ->whereNull('deleted_at')
+            ->orderBy('full_name')
+            ->limit(20)
+            ->get(['id', 'full_name']);
+        
+        return response()->json($people);
     }
 }
