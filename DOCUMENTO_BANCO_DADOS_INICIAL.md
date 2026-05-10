@@ -165,36 +165,43 @@ Tabela para membresia oficial.
 - `membership_date`: Para ordenar por data de entrada
 
 ### 6. families
-Tabela de famílias.
+Tabela de famílias (ajustada na Etapa 2).
 
 **Campos principais:**
 - `id`: Identificador único
 - `name`: Nome da família (ex: Família Silva)
-- `main_responsible_person_id`: Responsável principal (foreign key para people)
-- `address`: Endereço residencial
-- `phone`: Telefone principal da família
+- `description`: Descrição da família
+- `responsible_person_id`: Responsável principal (foreign key para people, nullable)
 - `status`: Status da família (active, inactive)
 - `notes`: Observações sobre a família
 - `created_at`, `updated_at`, `deleted_at`: Timestamps e soft delete
 
 **Relacionamentos:**
-- `main_responsible_person_id` → people (foreign key)
+- `responsible_person_id` → people (foreign key)
+- `belongsToMany(Person)` através de `family_members`
 
 **Índices:**
 - `name`: Para buscar por nome da família
 - `status`: Para filtrar famílias ativas
 
+**Observações da Etapa 2:**
+- Campo renomeado de `main_responsible_person_id` para `responsible_person_id`
+- Campo `description` adicionado
+- Campos `address` e `phone` removidos (morada pertence à pessoa em `person_addresses`)
+- Não guardar morada diretamente na família nesta etapa
+
 ### 7. family_members
-Tabela de vínculo entre pessoas e famílias (pivot table).
+Tabela de vínculo entre pessoas e famílias (pivot table, ajustada na Etapa 2).
 
 **Campos principais:**
 - `id`: Identificador único
 - `family_id`: Foreign key para families
 - `person_id`: Foreign key para people
-- `relationship_type`: Tipo de relacionamento (father, mother, son, daughter, spouse, guardian, other)
-- `is_main_responsible`: Indica se é o responsável principal
-- `starts_at`: Data de início do vínculo
-- `ends_at`: Data de fim do vínculo (nullable, para histórico)
+- `role`: Papel familiar (father, mother, son, daughter, spouse, guardian, relative, other)
+- `is_responsible`: Indica se é responsável familiar (boolean)
+- `joined_at`: Data de entrada na família
+- `left_at`: Data de saída da família (nullable, para histórico)
+- `notes`: Observações sobre o vínculo (nullable)
 - `created_at`, `updated_at`: Timestamps
 
 **Relacionamentos:**
@@ -204,8 +211,17 @@ Tabela de vínculo entre pessoas e famílias (pivot table).
 **Índices:**
 - `family_id`: Para buscar membros de uma família
 - `person_id`: Para buscar famílias de uma pessoa
-- `relationship_type`: Para filtrar por tipo de relacionamento
+- `role`: Para filtrar por papel familiar
 - Unique: `[family_id, person_id, ends_at]` para evitar duplicidade de vínculo ativo
+
+**Observações da Etapa 2:**
+- Campo renomeado de `relationship_type` para `role`
+- Campo renomeado de `is_main_responsible` para `is_responsible`
+- Campo renomeado de `starts_at` para `joined_at`
+- Campo renomeado de `ends_at` para `left_at`
+- Campo `notes` adicionado
+- Enum de `role` atualizado para incluir `relative`
+- `is_responsible` indica responsável familiar, NÃO substitui guardianships (responsável legal)
 
 ### 8. guardianships
 Tabela para responsáveis por menores de idade.

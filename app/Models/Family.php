@@ -15,9 +15,8 @@ class Family extends Model
     // Campos que podem ser preenchidos em massa
     protected $fillable = [
         'name',
-        'main_responsible_person_id',
-        'address',
-        'phone',
+        'description',
+        'responsible_person_id',
         'status',
         'notes',
     ];
@@ -26,9 +25,9 @@ class Family extends Model
      * Relacionamento: Uma família tem um responsável principal
      * Responsável principal é uma pessoa
      */
-    public function mainResponsible(): BelongsTo
+    public function responsible(): BelongsTo
     {
-        return $this->belongsTo(Person::class, 'main_responsible_person_id');
+        return $this->belongsTo(Person::class, 'responsible_person_id');
     }
 
     /**
@@ -38,7 +37,7 @@ class Family extends Model
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(Person::class, 'family_members')
-            ->withPivot('relationship_type', 'is_main_responsible', 'starts_at', 'ends_at')
+            ->withPivot('role', 'is_responsible', 'joined_at', 'left_at', 'notes')
             ->withTimestamps();
     }
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -47,6 +48,40 @@ Route::middleware('auth')->group(function () {
         
         // Remover pessoa (soft delete)
         Route::delete('/{person}', [PersonController::class, 'destroy'])->name('destroy');
+    });
+    
+    // Rotas para CRUD de Famílias - Módulo Secretaria - Etapa 2
+    // Todas as rotas exigem autenticação para segurança
+    Route::prefix('families')->name('families.')->group(function () {
+        // Listar todas as famílias
+        Route::get('/', [FamilyController::class, 'index'])->name('index');
+        
+        // Mostrar formulário para criar nova família
+        Route::get('/create', [FamilyController::class, 'create'])->name('create');
+        
+        // Salvar nova família
+        Route::post('/', [FamilyController::class, 'store'])->name('store');
+        
+        // Mostrar detalhes de uma família específica
+        Route::get('/{family}', [FamilyController::class, 'show'])->name('show');
+        
+        // Mostrar formulário para editar família existente
+        Route::get('/{family}/edit', [FamilyController::class, 'edit'])->name('edit');
+        
+        // Atualizar família existente
+        Route::put('/{family}', [FamilyController::class, 'update'])->name('update');
+        
+        // Remover família (soft delete)
+        Route::delete('/{family}', [FamilyController::class, 'destroy'])->name('destroy');
+        
+        // Vincular pessoa à família
+        Route::post('/{family}/attach', [FamilyController::class, 'attachPerson'])->name('attachPerson');
+        
+        // Atualizar vínculo de membro
+        Route::put('/{family}/members/{member}', [FamilyController::class, 'updateMember'])->name('updateMember');
+        
+        // Desvincular pessoa da família (soft detach)
+        Route::delete('/{family}/members/{member}', [FamilyController::class, 'detachPerson'])->name('detachPerson');
     });
 });
 

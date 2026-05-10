@@ -16,17 +16,18 @@ class FamilyMember extends Model
     protected $fillable = [
         'family_id',
         'person_id',
-        'relationship_type',
-        'is_main_responsible',
-        'starts_at',
-        'ends_at',
+        'role',
+        'is_responsible',
+        'joined_at',
+        'left_at',
+        'notes',
     ];
 
     // Cast de tipos de dados
     protected $casts = [
-        'is_main_responsible' => 'boolean',
-        'starts_at' => 'date',
-        'ends_at' => 'date',
+        'is_responsible' => 'boolean',
+        'joined_at' => 'date',
+        'left_at' => 'date',
     ];
 
     /**

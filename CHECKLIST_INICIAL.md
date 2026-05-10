@@ -84,16 +84,20 @@ Este documento serve como checklist para validar que a fundação do sistema foi
   - [x] Relacionamento: belongsTo User (approvedBy)
   - [x] Método: isActive()
 
-- [x] `Family` - Model de famílias
-  - [x] Relacionamento: belongsTo Person (mainResponsible)
-  - [x] Relacionamento: belongsToMany Person (members)
+- [x] `Family` - Model de famílias (ajustado na Etapa 2)
+  - [x] Relacionamento: belongsTo Person (responsible) - renomeado de mainResponsible
+  - [x] Relacionamento: belongsToMany Person (members) com withPivot correto
   - [x] Relacionamento: hasMany SystemAlert
   - [x] Método: isActive()
+  - [x] Fillable atualizado: name, description, responsible_person_id, status, notes
+  - [x] Removidos: main_responsible_person_id, address, phone
 
-- [x] `FamilyMember` - Model pivot de vínculo familiar
+- [x] `FamilyMember` - Model pivot de vínculo familiar (ajustado na Etapa 2)
   - [x] Relacionamento: belongsTo Family
   - [x] Relacionamento: belongsTo Person
   - [x] Método: isActive()
+  - [x] Fillable atualizado: family_id, person_id, role, is_responsible, joined_at, left_at, notes
+  - [x] Removidos: relationship_type, is_main_responsible, starts_at, ends_at
 
 - [x] `GuardianShip` - Model de responsáveis por menores
   - [x] Relacionamento: belongsTo Person (minor)
@@ -217,6 +221,41 @@ Este documento serve como checklist para validar que a fundação do sistema foi
   - [x] Fase 2.1 atualizada com nova estrutura separada
   - [x] Detalhes das tabelas person_documents e person_addresses
   - [x] Terminologia portuguesa documentada
+
+### ✅ Etapa 2 - Famílias e Vínculos Familiares (Módulo Secretaria)
+- [x] Migration de ajuste criada: `2026_05_10_104608_adjust_families_and_family_members_structure`
+  - [x] Renomeado `main_responsible_person_id` para `responsible_person_id` em families
+  - [x] Adicionado `description` em families
+  - [x] Removidos `address` e `phone` de families
+  - [x] Renomeado `relationship_type` para `role` em family_members
+  - [x] Renomeado `is_main_responsible` para `is_responsible` em family_members
+  - [x] Renomeado `starts_at` para `joined_at` em family_members
+  - [x] Renomeado `ends_at` para `left_at` em family_members
+  - [x] Adicionado `notes` em family_members
+  - [x] Atualizado enum de `role` para incluir `relative`
+- [x] Migration de ajuste executada com sucesso
+- [x] Model Family ajustado com novos campos e relacionamentos
+- [x] Model FamilyMember ajustado com novos campos e relacionamentos
+- [x] FamilyController criado com todos os métodos
+  - [x] index, create, store, show, edit, update, destroy
+  - [x] attachPerson, updateMember, detachPerson
+  - [x] Lógica para vincular responsável automaticamente
+  - [x] Cálculo de faixa etária de membros
+- [x] Requests criados
+  - [x] StoreFamilyRequest com validações
+  - [x] UpdateFamilyRequest com validações
+  - [x] StoreFamilyMemberRequest com validações
+- [x] Páginas Vue criadas
+  - [x] Families/Index.vue - listagem de famílias
+  - [x] Families/Create.vue - formulário de criação
+  - [x] Families/Edit.vue - formulário de edição
+  - [x] Families/Show.vue - visualização com gestão de membros
+- [x] Menu de navegação atualizado com link Famílias
+- [x] Rotas configuradas em routes/web.php
+- [x] DOCUMENTO_FAMILIAS.md criado com documentação completa
+- [x] CHECKLIST_FAMILIAS.md criado com checklist de implementação
+- [x] DOCUMENTO_BANCO_DADOS_INICIAL.md atualizado com tabelas families e family_members
+- [x] CHECKLIST_INICIAL.md atualizado com ajustes dos models Family e FamilyMember
 
 ### ✅ Comentários no Código
 - [x] Todas as migrations têm comentários explicativos
