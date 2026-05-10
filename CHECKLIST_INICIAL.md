@@ -99,12 +99,14 @@ Este documento serve como checklist para validar que a fundação do sistema foi
   - [x] Fillable atualizado: family_id, person_id, role, is_responsible, joined_at, left_at, notes
   - [x] Removidos: relationship_type, is_main_responsible, starts_at, ends_at
 
-- [x] `GuardianShip` - Model de responsáveis por menores
+- [x] `GuardianShip` - Model pivot de responsáveis por menores (ajustado na Etapa 3)
   - [x] Relacionamento: belongsTo Person (minor)
   - [x] Relacionamento: belongsTo Person (guardian)
   - [x] Método: isActive()
   - [x] Método: isLegalGuardian()
   - [x] Método: isFinancialResponsible()
+  - [x] Fillable atualizado: minor_person_id, guardian_person_id, relationship_type, is_legal_guardian, is_financial_responsible, can_approve_changes, can_view_financial, can_authorize_login, can_receive_canteen_debts, starts_at, ends_at, status, notes
+  - [x] Métodos adicionados na Etapa 3: canAuthorizeLogin(), canApproveChanges(), canViewFinancial(), canReceiveCanteenDebts()
 
 - [x] `Department` - Model de departamentos
   - [x] Relacionamento: belongsToMany Person
@@ -256,6 +258,38 @@ Este documento serve como checklist para validar que a fundação do sistema foi
 - [x] CHECKLIST_FAMILIAS.md criado com checklist de implementação
 - [x] DOCUMENTO_BANCO_DADOS_INICIAL.md atualizado com tabelas families e family_members
 - [x] CHECKLIST_INICIAL.md atualizado com ajustes dos models Family e FamilyMember
+
+### ✅ Etapa 3 - Responsáveis Legais e Supervisores (Módulo Secretaria)
+- [x] Migration de ajuste criada: `2026_05_10_120000_adjust_guardianships_structure`
+  - [x] Adicionado `can_authorize_login`
+  - [x] Adicionado `can_receive_canteen_debts`
+  - [x] Adicionado `notes`
+  - [x] Atualizado enum de `relationship_type` para incluir grandfather, grandmother, uncle, aunt, brother, sister, tutor
+  - [x] Atualizado enum de `status` para incluir ended
+  - [x] Compatibilidade com SQLite e MySQL
+- [x] Migration de ajuste executada com sucesso
+- [x] Model GuardianShip ajustado com novos campos e métodos
+  - [x] Fillable atualizado: can_authorize_login, can_receive_canteen_debts, notes
+  - [x] Métodos adicionados: canAuthorizeLogin(), canApproveChanges(), canViewFinancial(), canReceiveCanteenDebts()
+- [x] Model Person ajustado (relacionamento families atualizado)
+- [x] GuardianshipController criado com todos os métodos
+  - [x] index, create, store, show, edit, update, destroy
+  - [x] Lógica para verificar vínculo familiar entre menor e responsável
+  - [x] Soft delete com status 'ended'
+- [x] Requests criados
+  - [x] StoreGuardianshipRequest com validações customizadas
+  - [x] UpdateGuardianshipRequest com validações customizadas
+- [x] Páginas Vue criadas
+  - [x] Guardianships/Index.vue - listagem de responsabilidades
+  - [x] Guardianships/Create.vue - formulário de criação
+  - [x] Guardianships/Edit.vue - formulário de edição
+  - [x] Guardianships/Show.vue - visualização com avisos por idade
+- [x] Menu de navegação atualizado com link Responsáveis
+- [x] Rotas configuradas em routes/web.php
+- [x] DOCUMENTO_RESPONSAVEIS.md criado com documentação completa
+- [x] CHECKLIST_RESPONSAVEIS.md criado com checklist de implementação
+- [x] DOCUMENTO_BANCO_DADOS_INICIAL.md atualizado com tabela guardianships
+- [x] CHECKLIST_INICIAL.md atualizado com ajustes do model GuardianShip
 
 ### ✅ Comentários no Código
 - [x] Todas as migrations têm comentários explicativos

@@ -22,9 +22,12 @@ class GuardianShip extends Model
         'is_financial_responsible',
         'can_approve_changes',
         'can_view_financial',
+        'can_authorize_login',
+        'can_receive_canteen_debts',
         'starts_at',
         'ends_at',
         'status',
+        'notes',
     ];
 
     // Cast de tipos de dados
@@ -33,6 +36,8 @@ class GuardianShip extends Model
         'is_financial_responsible' => 'boolean',
         'can_approve_changes' => 'boolean',
         'can_view_financial' => 'boolean',
+        'can_authorize_login' => 'boolean',
+        'can_receive_canteen_debts' => 'boolean',
         'starts_at' => 'date',
         'ends_at' => 'date',
     ];
@@ -77,5 +82,39 @@ class GuardianShip extends Model
     public function isFinancialResponsible(): bool
     {
         return $this->is_financial_responsible;
+    }
+
+    /**
+     * Verifica se o responsável pode autorizar login do menor
+     * Importante para Júniores (11-13 anos)
+     */
+    public function canAuthorizeLogin(): bool
+    {
+        return $this->can_authorize_login;
+    }
+
+    /**
+     * Verifica se o responsável pode aprovar alterações no cadastro
+     */
+    public function canApproveChanges(): bool
+    {
+        return $this->can_approve_changes;
+    }
+
+    /**
+     * Verifica se o responsável pode ver dados financeiros do menor
+     */
+    public function canViewFinancial(): bool
+    {
+        return $this->can_view_financial;
+    }
+
+    /**
+     * Verifica se o responsável recebe dívidas futuras da cantina
+     * Importante para menores de 11 anos
+     */
+    public function canReceiveCanteenDebts(): bool
+    {
+        return $this->can_receive_canteen_debts;
     }
 }

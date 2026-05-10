@@ -51,6 +51,12 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Famílias
                                 </NavLink>
+                                <NavLink
+                                    :href="route('guardianships.index')"
+                                    :active="route().current('guardianships.index')"
+                                >
+                                    Responsáveis
+                                </NavLink>
                             </div>
                         </div>
 
@@ -169,6 +175,12 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('families.index')"
                         >
                             Famílias
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('guardianships.index')"
+                            :active="route().current('guardianships.index')"
+                        >
+                            Responsáveis
                         </ResponsiveNavLink>
                     </div>
 

@@ -224,20 +224,23 @@ Tabela de vínculo entre pessoas e famílias (pivot table, ajustada na Etapa 2).
 - `is_responsible` indica responsável familiar, NÃO substitui guardianships (responsável legal)
 
 ### 8. guardianships
-Tabela para responsáveis por menores de idade.
+Tabela para responsáveis por menores de idade (ajustada na Etapa 3).
 
 **Campos principais:**
 - `id`: Identificador único
 - `minor_person_id`: Pessoa menor de idade (foreign key para people)
 - `guardian_person_id`: Responsável (foreign key para people)
-- `relationship_type`: Tipo de relacionamento (father, mother, legal_guardian, other)
-- `is_legal_guardian`: Responsável legal
-- `is_financial_responsible`: Responsável financeiro (para cantina, etc.)
-- `can_approve_changes`: Pode aprovar alterações no cadastro
-- `can_view_financial`: Pode ver dados financeiros
-- `starts_at`: Início da responsabilidade
-- `ends_at`: Fim da responsabilidade (nullable, para histórico)
-- `status`: Status da responsabilidade (active, inactive)
+- `relationship_type`: Tipo de relacionamento (father, mother, grandfather, grandmother, uncle, aunt, brother, sister, legal_guardian, tutor, other)
+- `is_legal_guardian`: Responsável legal (boolean)
+- `is_financial_responsible`: Responsável financeiro (para cantina, etc.) (boolean)
+- `can_approve_changes`: Pode aprovar alterações no cadastro (boolean)
+- `can_view_financial`: Pode ver dados financeiros (boolean)
+- `can_authorize_login`: Pode autorizar login do menor (boolean) - adicionado na Etapa 3
+- `can_receive_canteen_debts`: Recebe dívidas futuras da cantina (boolean) - adicionado na Etapa 3
+- `starts_at`: Data de início do vínculo
+- `ends_at`: Data de fim do vínculo (nullable, para histórico)
+- `status`: Status da responsabilidade (active, inactive, ended)
+- `notes`: Observações sobre o vínculo (nullable) - adicionado na Etapa 3
 - `created_at`, `updated_at`: Timestamps
 
 **Relacionamentos:**
@@ -246,9 +249,17 @@ Tabela para responsáveis por menores de idade.
 
 **Índices:**
 - `minor_person_id`: Para buscar responsáveis de um menor
-- `guardian_person_id`: Para buscar menores sob responsabilidade
-- `status`: Para filtrar responsabilidades ativas
-- Unique: `[minor_person_id, guardian_person_id, ends_at]` para evitar duplicidade
+- `guardian_person_id`: Para buscar menores de um responsável
+- `status`: Para filtrar por status
+- Unique: `[minor_person_id, guardian_person_id, relationship_type, ends_at]` para evitar duplicidade de vínculo ativo
+
+**Observações da Etapa 3:**
+- Campo `can_authorize_login` adicionado para autorizar criação de usuário para Júnior
+- Campo `can_receive_canteen_debts` adicionado para definir quem recebe cobranças de compras futuras
+- Campo `notes` adicionado para observações sobre o vínculo
+- Enum de `relationship_type` atualizado para incluir grandfather, grandmother, uncle, aunt, brother, sister, tutor
+- Enum de `status` atualizado para incluir ended
+- Diferença importante: guardianships ≠ family_members (ver DOCUMENTO_RESPONSAVEIS.md)
 
 ### 9. departments
 Tabela de departamentos da igreja.

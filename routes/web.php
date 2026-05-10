@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\FamilyController;
+use App\Http\Controllers\GuardianshipController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -82,6 +83,31 @@ Route::middleware('auth')->group(function () {
         
         // Desvincular pessoa da família (soft detach)
         Route::delete('/{family}/members/{member}', [FamilyController::class, 'detachPerson'])->name('detachPerson');
+    });
+    
+    // Rotas para CRUD de Responsáveis e Supervisores - Módulo Secretaria - Etapa 3
+    // Todas as rotas exigem autenticação para segurança
+    Route::prefix('guardianships')->name('guardianships.')->group(function () {
+        // Listar todas as responsabilidades
+        Route::get('/', [GuardianshipController::class, 'index'])->name('index');
+        
+        // Mostrar formulário para criar nova responsabilidade
+        Route::get('/create', [GuardianshipController::class, 'create'])->name('create');
+        
+        // Salvar nova responsabilidade
+        Route::post('/', [GuardianshipController::class, 'store'])->name('store');
+        
+        // Mostrar detalhes de uma responsabilidade específica
+        Route::get('/{guardianship}', [GuardianshipController::class, 'show'])->name('show');
+        
+        // Mostrar formulário para editar responsabilidade existente
+        Route::get('/{guardianship}/edit', [GuardianshipController::class, 'edit'])->name('edit');
+        
+        // Atualizar responsabilidade existente
+        Route::put('/{guardianship}', [GuardianshipController::class, 'update'])->name('update');
+        
+        // Encerrar responsabilidade (soft delete com status 'ended')
+        Route::delete('/{guardianship}', [GuardianshipController::class, 'destroy'])->name('destroy');
     });
 });
 

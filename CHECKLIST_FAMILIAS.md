@@ -184,12 +184,33 @@ Este checklist documenta o processo de implementação do módulo de famílias.
 
 - [x] `DOCUMENTO_FAMILIAS.md` - Documentação completa do módulo de famílias
 - [x] `CHECKLIST_FAMILIAS.md` - Checklist de implementação
+- [x] `DOCUMENTO_BANCO_DADOS_INICIAL.md` - Adicionar tabelas families e family_members
+- [x] `CHECKLIST_INICIAL.md` - Adicionar referência à Etapa 2
 
-### Documentação a Atualizar (Pendente)
+### ✅ Diferença Com Guardianships
 
-- [ ] `DOCUMENTO_BANCO_DADOS_INICIAL.md` - Adicionar tabelas families e family_members
-- [ ] `DOCUMENTO_ARQUITETURA_INICIAL.md` - Adicionar módulo de famílias
-- [ ] `CHECKLIST_INICIAL.md` - Adicionar referência à Etapa 2
+- [x] Documentação atualizada explicando diferença entre family_members e guardianships
+- [x] Referência adicionada ao `DOCUMENTO_RESPONSAVEIS.md` para detalhes
+- [x] `is_responsible` em family_members ≠ responsável legal (guardianships)
+- [x] Uma pessoa pode ser mãe no family_members, mas só será responsável legal se definido em guardianships
+
+---
+
+## Observações
+
+### Não Implementar Nesta Etapa
+
+- ❌ Guardianships completo (responsável legal, financeiro, autorizações, etc.)
+- ❌ Cadastro online familiar
+- ❌ Criação automática de usuário
+- ❌ Criação automática de membro
+- ❌ Morada na família (morada pertence à pessoa)
+
+### Diferenças Importantes
+
+- `is_responsible` em `family_members` ≠ responsável legal (guardianships)
+- Vínculo familiar ≠ responsabilidade legal
+- Responsável principal da família ≠ responsável familiar dentro da família
 
 ---
 

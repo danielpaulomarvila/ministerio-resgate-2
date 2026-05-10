@@ -218,6 +218,29 @@ O link de **Pessoas** foi mantido no menu.
 
 ---
 
+## Diferenças Importantes
+
+### Family Members vs Guardianships
+
+**family_members (Vínculo Familiar):**
+- Representa o vínculo familiar dentro de uma família
+- Papéis: pai, mãe, filho, filha, cônjuge, familiar, outro
+- `is_responsible` indica responsável familiar dentro da família
+- NÃO substitui guardianships (responsável legal)
+
+**guardianships (Responsabilidade Legal e Supervisão):**
+- Representa responsabilidade, supervisão e autorização sobre menor
+- Responsável legal, financeiro, supervisor
+- Permissões: autoriza login, aprova alterações, ver financeiro, recebe dívidas
+- Implementado na Etapa 3
+
+**Importante:**
+- Uma pessoa pode ser mãe no family_members, mas só será responsável legal se definido em guardianships
+- Os dois módulos são independentes mas complementares
+- Para mais detalhes, ver DOCUMENTO_RESPONSAVEIS.md
+
+---
+
 ## Observações Importantes
 
 ### Não Implementar Nesta Etapa

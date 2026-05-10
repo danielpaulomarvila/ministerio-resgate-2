@@ -99,11 +99,12 @@ class Person extends Model
     /**
      * Relacionamento: Uma pessoa pode pertencer a famílias
      * Usa a tabela pivot family_members
+     * Atualizado na Etapa 2 com novos nomes de campos
      */
     public function families(): BelongsToMany
     {
         return $this->belongsToMany(Family::class, 'family_members')
-            ->withPivot('relationship_type', 'is_main_responsible', 'starts_at', 'ends_at')
+            ->withPivot('role', 'is_responsible', 'joined_at', 'left_at', 'notes')
             ->withTimestamps();
     }
 
