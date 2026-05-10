@@ -25,10 +25,6 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// Rotas para busca de autocomplete (acesso público para funcionar nos formulários)
-Route::get('/people/search', [PersonController::class, 'search'])->name('people.search');
-Route::get('/users/search', [UserController::class, 'search'])->name('users.search');
-
 Route::get('/secretaria', [SecretaryDashboardController::class, 'index'])
     ->middleware(['auth'])
     ->name('secretaria.dashboard');
@@ -104,6 +100,9 @@ Route::middleware('auth')->group(function () {
     // Rotas para CRUD de Pessoas - Módulo Secretaria - Fase 2.1
     // Todas as rotas exigem autenticação para segurança
     Route::prefix('people')->name('people.')->group(function () {
+        // Buscar pessoas por nome para autocomplete (deve vir antes das rotas dinâmicas)
+        Route::get('/search', [PersonController::class, 'search'])->name('search');
+        
         // Listar todas as pessoas
         Route::get('/', [PersonController::class, 'index'])->name('index');
         
@@ -124,6 +123,12 @@ Route::middleware('auth')->group(function () {
         
         // Remover pessoa (soft delete)
         Route::delete('/{person}', [PersonController::class, 'destroy'])->name('destroy');
+    });
+    
+    // Rotas para busca de usuários - Autocomplete (protegidas por autenticação)
+    Route::prefix('users')->name('users.')->group(function () {
+        // Buscar usuários por nome para autocomplete
+        Route::get('/search', [UserController::class, 'search'])->name('search');
     });
     
     // Rotas para CRUD de Famílias - Módulo Secretaria - Etapa 2
