@@ -28,12 +28,91 @@ class SecretaryAlertService
      */
     public function regenerateAlerts(): void
     {
+        // Limpa alertas pending duplicados antes de regenerar
+        $this->removeDuplicatePendingAlerts();
+
         $this->generateChildTurning11Alerts();
         $this->generateMinorWithoutGuardianAlerts();
         $this->generatePersonWithoutFamilyAlerts();
         $this->generateIncompleteRegistrationAlerts();
         $this->generateGuardianshipEndingSoonAlerts();
         $this->generateGuardianshipExpiredAlerts();
+    }
+
+    /**
+     * Remove alertas pending duplicados mantendo apenas o mais recente
+     */
+    protected function removeDuplicatePendingAlerts(): void
+    {
+        // Para alertas de pessoa
+        $duplicatePersonAlerts = DB::table('system_alerts')
+            ->select('type', 'related_person_id', DB::raw('MAX(id) as keep_id'))
+            ->where('status', 'pending')
+            ->whereNotNull('related_person_id')
+            ->groupBy('type', 'related_person_id')
+            ->havingRaw('COUNT(*) > 1')
+            ->get();
+
+        foreach ($duplicatePersonAlerts as $duplicate) {
+            DB::table('system_alerts')
+                ->where('type', $duplicate->type)
+                ->where('related_person_id', $duplicate->related_person_id)
+                ->where('status', 'pending')
+                ->where('id', '!=', $duplicate->keep_id)
+                ->delete();
+        }
+
+        // Para alertas de família
+        $duplicateFamilyAlerts = DB::table('system_alerts')
+            ->select('type', 'related_family_id', DB::raw('MAX(id) as keep_id'))
+            ->where('status', 'pending')
+            ->whereNotNull('related_family_id')
+            ->groupBy('type', 'related_family_id')
+            ->havingRaw('COUNT(*) > 1')
+            ->get();
+
+        foreach ($duplicateFamilyAlerts as $duplicate) {
+            DB::table('system_alerts')
+                ->where('type', $duplicate->type)
+                ->where('related_family_id', $duplicate->related_family_id)
+                ->where('status', 'pending')
+                ->where('id', '!=', $duplicate->keep_id)
+                ->delete();
+        }
+    }
+
+    /**
+     * Cria ou atualiza alerta pending sem duplicar
+     * Chave lógica: type + related_person_id + status pending
+     * ou type + related_family_id + status pending
+     */
+    protected function createOrUpdatePendingAlert(array $data): SystemAlert
+    {
+        $query = SystemAlert::query()
+            ->where('type', $data['type'])
+            ->where('status', 'pending');
+
+        if (!empty($data['related_person_id'])) {
+            $query->where('related_person_id', $data['related_person_id']);
+        }
+
+        if (!empty($data['related_family_id'])) {
+            $query->where('related_family_id', $data['related_family_id']);
+        }
+
+        $alert = $query->first();
+
+        if ($alert) {
+            $alert->update([
+                'title' => $data['title'],
+                'message' => $data['message'],
+                'severity' => $data['severity'],
+            ]);
+
+            return $alert;
+        }
+
+        return SystemAlert::create($data);
     }
 
     /**
@@ -54,30 +133,14 @@ class SecretaryAlertService
             $age = Carbon::parse($child->birth_date)->age;
             $turns11At = Carbon::parse($child->birth_date)->addYears(11)->format('d/m/Y');
 
-            // Verificar se já existe alerta aberto para esta criança
-            $existingAlert = SystemAlert::where('type', 'child_turning_11')
-                ->where('related_person_id', $child->id)
-                ->where('status', 'pending')
-                ->first();
-
-            if ($existingAlert) {
-                // Atualizar alerta existente
-                $existingAlert->update([
-                    'title' => "Criança completará 11 anos em breve",
-                    'message' => "{$child->full_name} ({$age} anos) completará 11 anos em {$turns11At}. Revise o cadastro para possível transição para Júnior.",
-                    'severity' => 'low',
-                ]);
-            } else {
-                // Criar novo alerta
-                SystemAlert::create([
-                    'type' => 'child_turning_11',
-                    'title' => "Criança completará 11 anos em breve",
-                    'message' => "{$child->full_name} ({$age} anos) completará 11 anos em {$turns11At}. Revise o cadastro para possível transição para Júnior.",
-                    'severity' => 'low',
-                    'status' => 'pending',
-                    'related_person_id' => $child->id,
-                ]);
-            }
+            $this->createOrUpdatePendingAlert([
+                'type' => 'child_turning_11',
+                'title' => "Criança completará 11 anos em breve",
+                'message' => "{$child->full_name} ({$age} anos) completará 11 anos em {$turns11At}. Revise o cadastro para possível transição para Júnior.",
+                'severity' => 'low',
+                'status' => 'pending',
+                'related_person_id' => $child->id,
+            ]);
         }
     }
 
@@ -101,30 +164,14 @@ class SecretaryAlertService
         foreach ($minorsWithoutGuardian as $minor) {
             $age = Carbon::parse($minor->birth_date)->age;
 
-            // Verificar se já existe alerta aberto para esta pessoa
-            $existingAlert = SystemAlert::where('type', 'minor_without_guardian')
-                ->where('related_person_id', $minor->id)
-                ->where('status', 'pending')
-                ->first();
-
-            if ($existingAlert) {
-                // Atualizar alerta existente
-                $existingAlert->update([
-                    'title' => "Menor sem responsável ativo",
-                    'message' => "{$minor->full_name} ({$age} anos) não possui responsável legal ativo. É necessário vincular um responsável.",
-                    'severity' => 'critical',
-                ]);
-            } else {
-                // Criar novo alerta
-                SystemAlert::create([
-                    'type' => 'minor_without_guardian',
-                    'title' => "Menor sem responsável ativo",
-                    'message' => "{$minor->full_name} ({$age} anos) não possui responsável legal ativo. É necessário vincular um responsável.",
-                    'severity' => 'critical',
-                    'status' => 'pending',
-                    'related_person_id' => $minor->id,
-                ]);
-            }
+            $this->createOrUpdatePendingAlert([
+                'type' => 'minor_without_guardian',
+                'title' => "Menor sem responsável ativo",
+                'message' => "{$minor->full_name} ({$age} anos) não possui responsável legal ativo. É necessário vincular um responsável.",
+                'severity' => 'critical',
+                'status' => 'pending',
+                'related_person_id' => $minor->id,
+            ]);
         }
     }
 
@@ -144,30 +191,14 @@ class SecretaryAlertService
             ->get();
 
         foreach ($peopleWithoutFamily as $person) {
-            // Verificar se já existe alerta aberto para esta pessoa
-            $existingAlert = SystemAlert::where('type', 'person_without_family')
-                ->where('related_person_id', $person->id)
-                ->where('status', 'pending')
-                ->first();
-
-            if ($existingAlert) {
-                // Atualizar alerta existente
-                $existingAlert->update([
-                    'title' => "Pessoa sem família",
-                    'message' => "{$person->full_name} não está vinculado a nenhuma família. Considere vincular a uma família existente.",
-                    'severity' => 'medium',
-                ]);
-            } else {
-                // Criar novo alerta
-                SystemAlert::create([
-                    'type' => 'person_without_family',
-                    'title' => "Pessoa sem família",
-                    'message' => "{$person->full_name} não está vinculado a nenhuma família. Considere vincular a uma família existente.",
-                    'severity' => 'medium',
-                    'status' => 'pending',
-                    'related_person_id' => $person->id,
-                ]);
-            }
+            $this->createOrUpdatePendingAlert([
+                'type' => 'person_without_family',
+                'title' => "Pessoa sem família",
+                'message' => "{$person->full_name} não está vinculado a nenhuma família. Considere vincular a uma família existente.",
+                'severity' => 'medium',
+                'status' => 'pending',
+                'related_person_id' => $person->id,
+            ]);
         }
     }
 
@@ -179,104 +210,58 @@ class SecretaryAlertService
      */
     protected function generateIncompleteRegistrationAlerts(): void
     {
-        // Buscar pessoas sem data de nascimento
-        $peopleWithoutBirthDate = Person::whereNull('birth_date')
-            ->whereNull('deleted_at')
+        // Buscar pessoas com cadastro incompleto
+        $people = Person::whereNull('deleted_at')
+            ->where(function ($query) {
+                $query->whereNull('birth_date')
+                    ->orWhereNull('primary_phone')
+                    ->orWhere(function ($q) {
+                        $q->whereNull('email')
+                            ->whereNull('primary_phone');
+                    });
+            })
             ->get();
 
-        foreach ($peopleWithoutBirthDate as $person) {
-            // Verificar se já existe alerta aberto para esta pessoa
-            $existingAlert = SystemAlert::where('type', 'incomplete_registration')
-                ->where('related_person_id', $person->id)
-                ->where('status', 'pending')
-                ->where('message', 'like', '%sem data de nascimento%')
-                ->first();
+        foreach ($people as $person) {
+            $missingFields = [];
+            $missingLabels = [];
 
-            if ($existingAlert) {
-                // Atualizar alerta existente
-                $existingAlert->update([
-                    'title' => "Cadastro incompleto",
-                    'message' => "{$person->full_name} não possui data de nascimento. Este campo é importante para cálculo de idade e faixas etárias.",
-                    'severity' => 'medium',
-                ]);
-            } else {
-                // Criar novo alerta
-                SystemAlert::create([
-                    'type' => 'incomplete_registration',
-                    'title' => "Cadastro incompleto",
-                    'message' => "{$person->full_name} não possui data de nascimento. Este campo é importante para cálculo de idade e faixas etárias.",
-                    'severity' => 'medium',
-                    'status' => 'pending',
-                    'related_person_id' => $person->id,
-                ]);
+            if (is_null($person->birth_date)) {
+                $missingFields[] = 'birth_date';
+                $missingLabels[] = 'data de nascimento';
             }
-        }
 
-        // Buscar pessoas sem telefone principal
-        $peopleWithoutPhone = Person::whereNull('primary_phone')
-            ->whereNull('deleted_at')
-            ->get();
-
-        foreach ($peopleWithoutPhone as $person) {
-            // Verificar se já existe alerta aberto para esta pessoa
-            $existingAlert = SystemAlert::where('type', 'incomplete_registration')
-                ->where('related_person_id', $person->id)
-                ->where('status', 'pending')
-                ->where('message', 'like', '%sem telefone%')
-                ->first();
-
-            if ($existingAlert) {
-                // Atualizar alerta existente
-                $existingAlert->update([
-                    'title' => "Cadastro incompleto",
-                    'message' => "{$person->full_name} não possui telefone principal. Adicione um telefone para contato.",
-                    'severity' => 'medium',
-                ]);
-            } else {
-                // Criar novo alerta
-                SystemAlert::create([
-                    'type' => 'incomplete_registration',
-                    'title' => "Cadastro incompleto",
-                    'message' => "{$person->full_name} não possui telefone principal. Adicione um telefone para contato.",
-                    'severity' => 'medium',
-                    'status' => 'pending',
-                    'related_person_id' => $person->id,
-                ]);
+            if (is_null($person->primary_phone)) {
+                $missingFields[] = 'primary_phone';
+                $missingLabels[] = 'telefone principal';
             }
-        }
 
-        // Buscar pessoas sem email e sem telefone
-        $peopleWithoutEmailOrPhone = Person::whereNull('email')
-            ->whereNull('primary_phone')
-            ->whereNull('deleted_at')
-            ->get();
-
-        foreach ($peopleWithoutEmailOrPhone as $person) {
-            // Verificar se já existe alerta aberto para esta pessoa
-            $existingAlert = SystemAlert::where('type', 'incomplete_registration')
-                ->where('related_person_id', $person->id)
-                ->where('status', 'pending')
-                ->where('message', 'like', '%sem email e sem telefone%')
-                ->first();
-
-            if ($existingAlert) {
-                // Atualizar alerta existente
-                $existingAlert->update([
-                    'title' => "Cadastro incompleto",
-                    'message' => "{$person->full_name} não possui email nem telefone. Adicione pelo menos uma forma de contato.",
-                    'severity' => 'medium',
-                ]);
-            } else {
-                // Criar novo alerta
-                SystemAlert::create([
-                    'type' => 'incomplete_registration',
-                    'title' => "Cadastro incompleto",
-                    'message' => "{$person->full_name} não possui email nem telefone. Adicione pelo menos uma forma de contato.",
-                    'severity' => 'medium',
-                    'status' => 'pending',
-                    'related_person_id' => $person->id,
-                ]);
+            if (is_null($person->email) && is_null($person->primary_phone)) {
+                // Se não tem email nem telefone, já está coberto pelo primary_phone
+                // Não adiciona email duplicado na lista
             }
+
+            if (empty($missingFields)) {
+                continue;
+            }
+
+            // Criar mensagem agrupada
+            if (count($missingLabels) === 1) {
+                $message = "{$person->full_name} não possui {$missingLabels[0]}. Este campo é importante para o cadastro.";
+            } else {
+                $lastLabel = array_pop($missingLabels);
+                $fieldsText = implode(', ', $missingLabels) . ' e ' . $lastLabel;
+                $message = "{$person->full_name} não possui {$fieldsText}. Revise o cadastro.";
+            }
+
+            $this->createOrUpdatePendingAlert([
+                'type' => 'incomplete_registration',
+                'title' => "Cadastro incompleto",
+                'message' => $message,
+                'severity' => 'medium',
+                'status' => 'pending',
+                'related_person_id' => $person->id,
+            ]);
         }
     }
 
@@ -304,30 +289,14 @@ class SecretaryAlertService
                 continue;
             }
 
-            // Verificar se já existe alerta aberto para esta responsabilidade
-            $existingAlert = SystemAlert::where('type', 'guardianship_ending_soon')
-                ->where('related_person_id', $minor->id)
-                ->where('status', 'pending')
-                ->first();
-
-            if ($existingAlert) {
-                // Atualizar alerta existente
-                $existingAlert->update([
-                    'title' => "Responsabilidade com data de fim próxima",
-                    'message' => "A responsabilidade de {$guardian->full_name} sobre {$minor->full_name} termina em {$endsAt}. Revise se deve ser estendida.",
-                    'severity' => 'medium',
-                ]);
-            } else {
-                // Criar novo alerta
-                SystemAlert::create([
-                    'type' => 'guardianship_ending_soon',
-                    'title' => "Responsabilidade com data de fim próxima",
-                    'message' => "A responsabilidade de {$guardian->full_name} sobre {$minor->full_name} termina em {$endsAt}. Revise se deve ser estendida.",
-                    'severity' => 'medium',
-                    'status' => 'pending',
-                    'related_person_id' => $minor->id,
-                ]);
-            }
+            $this->createOrUpdatePendingAlert([
+                'type' => 'guardianship_ending_soon',
+                'title' => "Responsabilidade com data de fim próxima",
+                'message' => "A responsabilidade de {$guardian->full_name} sobre {$minor->full_name} termina em {$endsAt}. Revise se deve ser estendida.",
+                'severity' => 'medium',
+                'status' => 'pending',
+                'related_person_id' => $minor->id,
+            ]);
         }
     }
 
@@ -354,30 +323,14 @@ class SecretaryAlertService
                 continue;
             }
 
-            // Verificar se já existe alerta aberto para esta responsabilidade
-            $existingAlert = SystemAlert::where('type', 'guardianship_expired')
-                ->where('related_person_id', $minor->id)
-                ->where('status', 'pending')
-                ->first();
-
-            if ($existingAlert) {
-                // Atualizar alerta existente
-                $existingAlert->update([
-                    'title' => "Responsabilidade vencida",
-                    'message' => "A responsabilidade de {$guardian->full_name} sobre {$minor->full_name} venceu em {$endsAt}. Revise se deve ser estendida ou encerrada.",
-                    'severity' => 'critical',
-                ]);
-            } else {
-                // Criar novo alerta
-                SystemAlert::create([
-                    'type' => 'guardianship_expired',
-                    'title' => "Responsabilidade vencida",
-                    'message' => "A responsabilidade de {$guardian->full_name} sobre {$minor->full_name} venceu em {$endsAt}. Revise se deve ser estendida ou encerrada.",
-                    'severity' => 'critical',
-                    'status' => 'pending',
-                    'related_person_id' => $minor->id,
-                ]);
-            }
+            $this->createOrUpdatePendingAlert([
+                'type' => 'guardianship_expired',
+                'title' => "Responsabilidade vencida",
+                'message' => "A responsabilidade de {$guardian->full_name} sobre {$minor->full_name} venceu em {$endsAt}. Revise se deve ser estendida ou encerrada.",
+                'severity' => 'critical',
+                'status' => 'pending',
+                'related_person_id' => $minor->id,
+            ]);
         }
     }
 }
