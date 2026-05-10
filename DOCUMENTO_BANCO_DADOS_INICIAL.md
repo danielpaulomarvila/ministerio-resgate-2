@@ -537,10 +537,87 @@ Quando uma criança menor de 11 anos estiver próxima de completar 11 anos, o si
 
 ## Próximos Passos
 
-1. Implementar módulo de Secretaria para gerenciar cadastros e aprovações
+1. ✅ Implementar módulo de Secretaria para gerenciar cadastros e aprovações (Etapa 4 - Painel inicial da Secretaria)
 2. Implementar módulo Financeiro com suporte a responsáveis financeiros
 3. Implementar módulo Cantina com cobrança em responsáveis de menores
 4. Implementar sistema de alertas automáticos para crianças completando 11 anos
 5. Implementar sistema de permissões por papel/função (Spatie Laravel Permission)
 6. Implementar área do membro para acesso via usuário
 7. Preparar arquitetura para futuro app iOS/Android (API Sanctum, PWA, Capacitor)
+
+---
+
+## Etapa 4 - Painel Inicial da Secretaria
+
+### Controller
+
+- **SecretaryDashboardController** - Controller responsável pelo painel inicial da Secretaria
+  - Método `index()` - Busca dados reais do banco usando models existentes
+  - Calcula indicadores sobre pessoas, famílias, responsáveis e faixa etária
+  - Identifica atenções (pessoas sem família, menores sem responsável, cadastros incompletos)
+  - Mostra listas recentes (pessoas, famílias, responsabilidades)
+  - Acesso seguro para dados vazios
+
+### Rota
+
+- **GET /secretaria** - Rota protegida por autenticação
+  - Nome da rota: `secretaria.dashboard`
+  - Middleware: `auth`
+
+### Página Vue
+
+- **resources/js/Pages/Secretaria/Dashboard.vue** - Página do painel da Secretaria
+  - Visual limpo e responsivo
+  - Cards principais (Pessoas, Famílias, Responsáveis Ativos, Menores sem Responsável)
+  - Cards por faixa etária (Crianças <11, Júniores 11-13, Jovens 14-17, Adultos 18+)
+  - Atenções da Secretaria (Pessoas sem família, Sem data de nascimento, Sem telefone)
+  - Crianças próximas dos 11 anos (lista com nome, idade e data de aniversário)
+  - Listas recentes (Pessoas, Famílias, Responsabilidades)
+  - Atalhos rápidos para cadastro e visualização
+
+### Indicadores Calculados
+
+1. Total de pessoas
+2. Total de famílias
+3. Total de responsáveis ativos
+4. Crianças menores de 11 anos
+5. Júniores (11-13 anos)
+6. Jovens (14-17 anos)
+7. Adultos (18+ anos)
+8. Pessoas sem família
+9. Menores sem responsável ativo
+10. Crianças próximas dos 11 anos (próximos 60 dias)
+11. Pessoas sem data de nascimento
+12. Pessoas sem telefone
+13. Pessoas sem email e sem telefone
+14. Pessoas recentemente cadastradas (últimas 5)
+15. Famílias recentemente criadas (últimas 5)
+16. Responsabilidades recentes (últimas 5)
+
+### Regra dos 11 Anos
+
+O painel respeita e reforça a regra implementada na Etapa 3:
+- Responsabilidade legal NÃO acaba automaticamente aos 11 anos
+- Crianças menores de 11 anos não podem ter usuário próprio
+- Ao completar 11 anos, a Secretaria deve revisar o cadastro
+- O painel mostra aviso para crianças próximas de completar 11 anos
+
+### Campo Quem Indicou / Convidou
+
+O campo `invited_by_person_id` está preservado no banco para uso futuro:
+- Não criou pontuação nesta etapa
+- Não criou ranking nesta etapa
+- Futuramente poderá alimentar frutos de evangelismo, acompanhamento de visitantes, reconhecimento, pontuação, Membro Destaque
+
+### Não Implementado Nesta Etapa
+
+- Sistema completo de alertas
+- Aprovação de cadastro
+- Notificações reais
+- Gráficos complexos
+- Relatórios exportáveis
+- Usuário automático aos 11 anos
+- Membro automático
+- Departamento Resgatados automático
+- Pontuação/gamificação de evangelismo
+- Ranking de quem indicou pessoas

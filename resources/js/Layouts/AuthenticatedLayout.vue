@@ -40,6 +40,12 @@ const showingNavigationDropdown = ref(false);
                                     Dashboard
                                 </NavLink>
                                 <NavLink
+                                    :href="route('secretaria.dashboard')"
+                                    :active="route().current('secretaria.dashboard')"
+                                >
+                                    Secretaria
+                                </NavLink>
+                                <NavLink
                                     :href="route('people.index')"
                                     :active="route().current('people.index')"
                                 >
@@ -163,6 +169,12 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('dashboard')"
                         >
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('secretaria.dashboard')"
+                            :active="route().current('secretaria.dashboard')"
+                        >
+                            Secretaria
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('people.index')"

@@ -422,6 +422,57 @@ ministerio-resgate/
 - Retention policy
 - Teste de restore
 
+## Etapa 4 - Painel Inicial da Secretaria
+
+### Arquitetura do Painel
+
+O painel da Secretaria foi implementado seguindo a arquitetura existente:
+
+**Backend:**
+- `SecretaryDashboardController` - Controller dedicado ao painel
+- Busca dados usando Eloquent ORM (Person, Family, GuardianShip, FamilyMember)
+- Queries otimizadas com eager loading onde necessário
+- Acesso seguro com nullsafe operators e valores padrão
+- Não usa dados fake ou seeders
+
+**Frontend:**
+- `resources/js/Pages/Secretaria/Dashboard.vue` - Página Vue dedicada
+- Usa Inertia.js para comunicação server-driven
+- Props com valores padrão para evitar erros
+- Acesso seguro no Vue (verificações de null/undefined)
+- Visual responsivo com Tailwind CSS
+
+**Rota:**
+- `GET /secretaria` - Rota protegida por middleware `auth`
+- Nome da rota: `secretaria.dashboard`
+- Integração com o menu autenticado
+
+**Indicadores Calculados:**
+O painel calcula 16 indicadores usando queries SQL diretas nos models:
+- Totais (pessoas, famílias, responsáveis ativos)
+- Faixa etária (crianças <11, júniores 11-13, jovens 14-17, adultos 18+)
+- Atenções (pessoas sem família, menores sem responsável, cadastros incompletos)
+- Listas recentes (últimas 5 pessoas, famílias, responsabilidades)
+
+**Regra dos 11 Anos:**
+O painel respeita a regra implementada na Etapa 3:
+- Responsabilidade legal NÃO acaba automaticamente aos 11 anos
+- Mostra aviso para crianças próximas de completar 11 anos
+- Recomenda revisão de cadastro ao completar 11 anos
+
+**Campo Quem Indicou / Convidou:**
+O campo `invited_by_person_id` está preservado para uso futuro:
+- Não implementou pontuação nesta etapa
+- Não implementou ranking nesta etapa
+- Futuramente poderá alimentar frutos de evangelismo e Membro Destaque
+
+**Não Implementado Nesta Etapa:**
+- Sistema completo de alertas
+- Aprovação de cadastro
+- Notificações reais
+- Gráficos complexos
+- Relatórios exportáveis
+
 ## Conclusão
 
 Esta arquitetura foi projetada para ser:
