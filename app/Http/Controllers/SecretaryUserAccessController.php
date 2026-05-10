@@ -181,7 +181,7 @@ class SecretaryUserAccessController extends Controller
                 'primary_phone' => $user->person->primary_phone,
                 'age' => $user->person->age ?? null,
                 'is_baptized' => (bool) $user->person->is_baptized,
-                'can_be_member' => (bool) $user->person->can_be_member,
+                'can_be_member' => $user->person->canBeMember(),
             ] : null,
         ];
 
