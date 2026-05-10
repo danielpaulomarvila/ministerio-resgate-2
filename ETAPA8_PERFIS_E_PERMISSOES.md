@@ -125,8 +125,8 @@ Concede acesso de Super Administrador a um usuário pelo email.
 - `DELETE /secretaria/perfis-acesso/{accessProfile}` - `secretaria.access-profiles.destroy`
 
 ### Perfis de Usuário
-- `GET /secretaria/acessos/{user}/perfis` - `secretaria.acessos.perfis.edit`
-- `PUT /secretaria/acessos/{user}/perfis` - `secretaria.acessos.perfis.update`
+- `GET /secretaria/acessos/{user}/perfis` - `secretaria.access.perfis.edit`
+- `PUT /secretaria/acessos/{user}/perfis` - `secretaria.access.perfis.update`
 
 ## Vue Pages
 

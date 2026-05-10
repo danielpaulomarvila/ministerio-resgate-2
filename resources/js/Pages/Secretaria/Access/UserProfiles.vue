@@ -24,7 +24,7 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.put(route('secretaria.acessos.perfis.update', props.user.id), {
+    form.put(route('secretaria.access.perfis.update', props.user.id), {
         onSuccess: () => {
             form.reset('notes');
         },
@@ -167,7 +167,7 @@ const toggleProfile = (profileId) => {
                         <!-- Botões -->
                         <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
                             <Link
-                                :href="route('secretaria.acessos.show', user.id)"
+                                :href="route('secretaria.access.show', user.id)"
                                 class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
                             >
                                 Cancelar
