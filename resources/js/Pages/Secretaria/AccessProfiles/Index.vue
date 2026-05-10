@@ -98,33 +98,33 @@ const props = defineProps({
 
                 <!-- Tabela de Perfis -->
                 <div class="bg-white shadow-sm rounded-2xl overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-slate-200">
+                    <div class="overflow-x-auto lg:overflow-visible">
+                        <table class="w-full table-fixed divide-y divide-slate-200">
                         <thead class="bg-slate-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider" style="width: 42%">
                                     Nome
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider" style="width: 22%">
                                     Identificador
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider" style="width: 9%">
                                     Status
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider" style="width: 9%">
                                     Permissões
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider" style="width: 8%">
                                     Usuários
                                 </th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                <th class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider" style="width: 10%">
                                     Ações
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-slate-200">
                             <tr v-for="profile in profiles" :key="profile.id">
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-6 py-4">
                                     <div class="text-sm font-medium text-slate-900">{{ profile.name }}</div>
                                     <div class="text-sm text-slate-500">{{ profile.description || '-' }}</div>
                                 </td>
