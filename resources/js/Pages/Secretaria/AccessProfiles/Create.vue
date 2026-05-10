@@ -86,8 +86,12 @@ const generateSlug = () => {
                                 id="slug"
                                 v-model="form.slug"
                                 type="text"
-                                class="mt-1 block w-full rounded-lg border border-slate-300 px-4 py-3 text-sm font-mono focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                class="notranslate mt-1 block w-full rounded-lg border border-slate-300 px-4 py-3 text-sm font-mono focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                                 placeholder="Ex: secretaria"
+                                translate="no"
+                                spellcheck="false"
+                                autocomplete="off"
+                                autocapitalize="off"
                                 required
                             />
                             <p v-if="form.errors.slug" class="mt-2 text-sm text-red-600">

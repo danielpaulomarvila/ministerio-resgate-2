@@ -85,6 +85,9 @@ class AccessProfileController extends Controller
             'permissions.*' => 'exists:permissions,id',
         ]);
 
+        // Normalizar slug para perfis personalizados
+        $validated['slug'] = Str::slug($validated['slug']);
+
         $profile = AccessProfile::create([
             'uuid' => Str::uuid(),
             'name' => $validated['name'],
@@ -192,6 +195,14 @@ class AccessProfileController extends Controller
             'permissions' => 'array',
             'permissions.*' => 'exists:permissions,id',
         ]);
+
+        // Proteger slug de perfis do sistema
+        if ($accessProfile->is_system) {
+            $validated['slug'] = $accessProfile->slug;
+        } else {
+            // Normalizar slug para perfis personalizados
+            $validated['slug'] = Str::slug($validated['slug']);
+        }
 
         $accessProfile->update([
             'name' => $validated['name'],
