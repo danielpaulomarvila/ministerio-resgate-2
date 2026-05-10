@@ -21,6 +21,9 @@ const selectedPerson = ref(null);
 
 watch(peopleSearch, (value) => {
     if (value.length >= 2) {
+        selectedPerson.value = null;
+        form.person_id = '';
+        eligibility.value = null;
         axios.get(`/people/search?q=${value}`)
             .then(response => {
                 peopleResults.value = response.data;
@@ -126,7 +129,7 @@ const canSubmit = computed(() => {
                                 </button>
                             </div>
                             <div
-                                v-if="showPeopleDropdown && peopleResults.length > 0"
+                                v-if="showPeopleDropdown && peopleResults.length > 0 && !selectedPerson"
                                 class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-white shadow-lg"
                             >
                                 <div
