@@ -21,30 +21,48 @@ const selectedPerson = ref(null);
 const isSearchingPeople = ref(false);
 
 const handlePersonInput = async () => {
+    console.log('handlePersonInput called, personSearch:', personSearch.value);
     selectedPerson.value = null;
     form.person_id = null;
     eligibility.value = null;
 
-    if (personSearch.value.trim().length < 2) {
+    const search = personSearch.value.trim();
+
+    if (search.length < 2) {
         peopleResults.value = [];
         showPeopleDropdown.value = false;
         return;
     }
 
-    await searchPeople();
+    await searchPeople(search);
 };
 
-const searchPeople = async () => {
+const searchPeople = async (search) => {
+    console.log('searchPeople called with:', search);
     isSearchingPeople.value = true;
 
     try {
         const response = await axios.get('/people/search', {
-            params: { q: personSearch.value },
+            params: { q: search },
         });
 
-        peopleResults.value = response.data ?? [];
+        console.log('search response:', response.data);
+        const rawResults = response.data;
+
+        if (Array.isArray(rawResults)) {
+            peopleResults.value = rawResults;
+        } else if (Array.isArray(rawResults.data)) {
+            peopleResults.value = rawResults.data;
+        } else if (Array.isArray(rawResults.people)) {
+            peopleResults.value = rawResults.people;
+        } else {
+            peopleResults.value = [];
+        }
+
         showPeopleDropdown.value = peopleResults.value.length > 0;
+        console.log('peopleResults:', peopleResults.value);
     } catch (error) {
+        console.error('search error:', error);
         peopleResults.value = [];
         showPeopleDropdown.value = false;
     } finally {
