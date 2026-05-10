@@ -31,7 +31,7 @@ const reactivateForm = useForm({
 });
 
 const suspend = () => {
-    suspendForm.post(route('secretaria.access.suspend', props.userAccess.id), {
+    suspendForm.patch(route('secretaria.access.suspend', props.userAccess.id), {
         onSuccess: () => {
             showSuspendModal.value = false;
             suspendForm.reset();
