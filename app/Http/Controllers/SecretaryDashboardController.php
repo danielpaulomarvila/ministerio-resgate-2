@@ -7,6 +7,7 @@ use App\Models\Family;
 use App\Models\GuardianShip;
 use App\Models\FamilyMember;
 use App\Models\SystemAlert;
+use App\Models\SecretaryRequest;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -159,6 +160,11 @@ class SecretaryDashboardController extends Controller
             ->whereIn('severity', ['high', 'critical'])
             ->count();
 
+        // 16. Solicitações da Secretaria (Etapa 6)
+        $pendingRequests = SecretaryRequest::where('status', 'pending')->count();
+        $urgentRequests = SecretaryRequest::where('priority', 'urgent')->count();
+        $inReviewRequests = SecretaryRequest::where('status', 'in_review')->count();
+
         return Inertia::render('Secretaria/Dashboard', [
             // Totais
             'total_people' => $totalPeople,
@@ -187,6 +193,11 @@ class SecretaryDashboardController extends Controller
             // Alertas (Etapa 5)
             'open_alerts' => $openAlerts,
             'urgent_alerts' => $urgentAlerts,
+            
+            // Solicitações (Etapa 6)
+            'pending_requests' => $pendingRequests,
+            'urgent_requests' => $urgentRequests,
+            'in_review_requests' => $inReviewRequests,
         ]);
     }
 }

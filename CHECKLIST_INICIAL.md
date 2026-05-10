@@ -559,54 +559,99 @@ php artisan db:seed --class=DepartmentSeeder
 - [x] Documentado como próximo passo futuro
 
 ### ✅ Documentação Criada
-- [x] DOCUMENTO_SECRETARIA.md criado
-- [x] CHECKLIST_SECRETARIA.md criado
-- [x] DOCUMENTO_BANCO_DADOS_INICIAL.md atualizado com Etapa 4
-- [x] DOCUMENTO_ARQUITETURA_INICIAL.md atualizado com Etapa 4
-- [x] CHECKLIST_INICIAL.md atualizado com Etapa 4
+- [x] DOCUMENTO_SECRETARIA.md atualizado com Etapa 5
+- [x] CHECKLIST_SECRETARIA.md atualizado com Etapa 5
+- [x] DOCUMENTO_BANCO_DADOS_INICIAL.md atualizado com Etapa 5
+- [x] DOCUMENTO_ARQUITETURA_INICIAL.md atualizado com Etapa 5
+- [x] CHECKLIST_INICIAL.md atualizado com Etapa 5
+- [x] DOCUMENTO_ALERTAS_SECRETARIA.md criado
+- [x] CHECKLIST_ALERTAS_SECRETARIA.md criado
 
 ### ✅ Não Implementado Nesta Etapa
-- [x] Sistema completo de alertas
-- [x] Aprovação de cadastro
-- [x] Notificações reais
-- [x] Gráficos complexos
-- [x] Relatórios exportáveis
-- [x] Usuário automático aos 11 anos
-- [x] Membro automático
-- [x] Departamento Resgatados automático
-- [x] Pontuação/gamificação de evangelismo
-- [x] Ranking de quem indicou pessoas
+- [x] Sistema completo de notificações externas
+- [x] Alertas automáticos em tempo real
+- [x] Tarefas recorrentes avançadas
+- [x] IA para análise de alertas
 
 ---
 
-## Etapa 5 - Alertas Internos da Secretaria
+## Etapa 6 - Solicitações e Revisões da Secretaria
 
 ### ✅ Banco de Dados
-- [x] Migration para adicionar resolution_notes criada e executada
-- [x] Tabela system_alerts verificada e ajustada
+- [x] Migration para secretary_requests criada
+- [x] Campos principais adicionados (type, status, priority, title, description, requester_person_id, related_alert_id, assigned_to_user_id, current_snapshot, requested_changes, internal_notes, decision_notes, submitted_at, reviewed_at, approved_at, rejected_at, completed_at, due_at, metadata)
+- [x] Índices adicionados (type, status, priority, due_at, requester_person_id, related_alert_id, assigned_to_user_id)
+- [x] Foreign keys adicionados com nullOnDelete
 
 ### ✅ Model
-- [x] SystemAlert ajustado com métodos isOpen(), isIgnored(), markAsResolved(), markAsIgnored()
-- [x] resolution_notes adicionado ao fillable
-
-### ✅ Service
-- [x] SecretaryAlertService criado com geração de 6 tipos de alertas
-- [x] Regra de unicidade implementada (type + related_person_id + status pending)
-- [x] Dados reais usados (sem seeders fake)
+- [x] SecretaryRequest criado com relacionamentos
+- [x] Métodos de estado implementados (isPending, isInReview, isApproved, isRejected, isCompleted, isCancelled, canBeEdited, isOverdue)
+- [x] Métodos de ação implementados (markInReview, approve, reject, complete, cancel)
+- [x] Casts adicionados para JSON e datetime
 
 ### ✅ Controller
-- [x] SecretaryAlertController criado com index, show, resolve, ignore, regenerate
-- [x] Filtros por status, tipo e severidade implementados
+- [x] SecretaryRequestController criado com index, create, store, show, edit, update, markInReview, approve, reject, complete, cancel
+- [x] Filtros por status, tipo e prioridade implementados
+- [x] Validações implementadas com decision_notes obrigatório
+
+### ✅ Requests
+- [x] StoreSecretaryRequestRequest criado
+- [x] UpdateSecretaryRequestRequest criado
+- [x] Mensagens em português adicionadas
 
 ### ✅ Rotas
-- [x] Rotas criadas para alertas (index, show, resolve, ignore, regenerate)
+- [x] Rotas criadas para solicitações (index, create, store, show, edit, update, mark-in-review, approve, reject, complete, cancel)
 - [x] Middleware auth aplicado
 
 ### ✅ Menu
-- [x] Link "Alertas" adicionado ao menu desktop
-- [x] Link "Alertas" adicionado ao menu responsivo
+- [x] Link "Solicitações" adicionado ao menu desktop
+- [x] Link "Solicitações" adicionado ao menu responsivo
 
 ### ✅ Páginas Vue
+- [x] Requests/Index.vue criada com resumo, filtros e lista
+- [x] Requests/Create.vue criada com formulário e suporte para alert_id
+- [x] Requests/Show.vue criada com detalhes e ações de fluxo
+- [x] Requests/Edit.vue criada com formulário de edição
+
+### ✅ Integração com Painel
+- [x] Dashboard.vue atualizado com cards de solicitações
+- [x] SecretaryDashboardController atualizado com dados de solicitações
+
+### ✅ Integração com Alertas
+- [x] Botão "Criar solicitação de revisão" adicionado em Resolve.vue
+- [x] Create.vue preenche dados automaticamente quando vem de alerta
+
+### ✅ Documentação Criada
+- [x] DOCUMENTO_SECRETARIA.md atualizado com Etapa 6
+- [x] CHECKLIST_SECRETARIA.md atualizado com Etapa 6
+- [x] DOCUMENTO_BANCO_DADOS_INICIAL.md atualizado com Etapa 6
+- [x] DOCUMENTO_ARQUITETURA_INICIAL.md atualizado com Etapa 6
+- [x] CHECKLIST_INICIAL.md atualizado com Etapa 6
+- [x] DOCUMENTO_ALERTAS_SECRETARIA.md atualizado com integração com solicitações
+- [x] CHECKLIST_ALERTAS_SECRETARIA.md atualizado com integração com solicitações
+- [x] DOCUMENTO_SOLICITACOES_SECRETARIA.md criado
+- [x] CHECKLIST_SOLICITACOES_SECRETARIA.md criado
+
+### ✅ Regras de Segurança
+- [x] Não altera dados oficiais automaticamente
+- [x] Solicitação não é o dado oficial
+- [x] Secretaria deve aplicar alteração manualmente
+
+---
+
+## Validações e Comandos
+
+### Comandos a Executar
+- [ ] php artisan optimize:clear
+- [ ] php artisan route:list --path=secretaria/solicitacoes
+- [ ] php artisan route:list --path=secretaria/alertas
+- [ ] php artisan route:list --path=secretaria
+- [ ] php artisan test
+- [ ] npm run build
+- [ ] git status
+
+### Verificação de Duplicidade
+- [ ] find app resources database routes -iname "*Novo*" -o -iname "*Final*" -o -iname "*Corrigido*" -o -iname "*V2*" -o -iname "*Backup*" -o -iname "*Copy*"
 - [x] Alerts/Index.vue criada com resumo, filtros e lista
 - [x] Alerts/Show.vue criada com detalhes e ações
 

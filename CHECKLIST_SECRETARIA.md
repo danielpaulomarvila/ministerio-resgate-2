@@ -305,6 +305,63 @@ Este checklist acompanha a implementação do painel inicial da Secretaria.
 
 ---
 
+## Etapa 6 - Solicitações e Revisões da Secretaria
+
+### Banco de Dados
+- [x] Migration para secretary_requests criada
+- [x] Campos principais adicionados (type, status, priority, title, description, requester_person_id, related_alert_id, assigned_to_user_id, current_snapshot, requested_changes, internal_notes, decision_notes, submitted_at, reviewed_at, approved_at, rejected_at, completed_at, due_at, metadata)
+- [x] Índices adicionados (type, status, priority, due_at, requester_person_id, related_alert_id, assigned_to_user_id)
+- [x] Foreign keys adicionados com nullOnDelete
+
+### Model
+- [x] SecretaryRequest criado com relacionamentos
+- [x] Métodos de estado implementados (isPending, isInReview, isApproved, isRejected, isCompleted, isCancelled, canBeEdited, isOverdue)
+- [x] Métodos de ação implementados (markInReview, approve, reject, complete, cancel)
+- [x] Casts adicionados para JSON e datetime
+
+### Controller
+- [x] SecretaryRequestController criado com index, create, store, show, edit, update, markInReview, approve, reject, complete, cancel
+- [x] Filtros por status, tipo e prioridade implementados
+- [x] Validações implementadas com decision_notes obrigatório
+
+### Requests
+- [x] StoreSecretaryRequestRequest criado
+- [x] UpdateSecretaryRequestRequest criado
+- [x] Mensagens em português adicionadas
+
+### Rotas
+- [x] Rotas criadas para solicitações (index, create, store, show, edit, update, mark-in-review, approve, reject, complete, cancel)
+- [x] Middleware auth aplicado
+
+### Menu
+- [x] Link "Solicitações" adicionado ao menu desktop
+- [x] Link "Solicitações" adicionado ao menu responsivo
+
+### Páginas Vue
+- [x] Requests/Index.vue criada com resumo, filtros e lista
+- [x] Requests/Create.vue criada com formulário e suporte para alert_id
+- [x] Requests/Show.vue criada com detalhes e ações de fluxo
+- [x] Requests/Edit.vue criada com formulário de edição
+
+### Integração com Painel
+- [x] Dashboard.vue atualizado com cards de solicitações
+- [x] SecretaryDashboardController atualizado com dados de solicitações
+
+### Integração com Alertas
+- [x] Botão "Criar solicitação de revisão" adicionado em Resolve.vue
+- [x] Create.vue preenche dados automaticamente quando vem de alerta
+
+### Documentação
+- [x] DOCUMENTO_SOLICITACOES_SECRETARIA.md criado
+- [x] CHECKLIST_SOLICITACOES_SECRETARIA.md criado
+
+### Regras de Segurança
+- [x] Não altera dados oficiais automaticamente
+- [x] Solicitação não é o dado oficial
+- [x] Secretaria deve aplicar alteração manualmente
+
+---
+
 ## Commit
 
 ### ⏳ Commit (pendente)

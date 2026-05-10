@@ -555,6 +555,110 @@ O campo `invited_by_person_id` está preservado para uso futuro:
    - Responsabilidades vencidas
    - Urgente para revisão
 
+---
+
+## Etapa 6 - Solicitações e Revisões da Secretaria
+
+### Controller: SecretaryRequestController
+
+**Local:** `app/Http/Controllers/SecretaryRequestController.php`
+
+**Métodos:**
+- `index()`: Lista todas as solicitações com filtros por status, tipo e prioridade
+- `create()`: Mostra formulário de criação com suporte para alert_id na query string
+- `store()`: Salva nova solicitação com validação
+- `show()`: Mostra detalhes de uma solicitação com todos os relacionamentos
+- `edit()`: Mostra formulário de edição com verificação de canBeEdited()
+- `update()`: Atualiza solicitação com verificação de canBeEdited()
+- `markInReview()`: Marca solicitação como em análise
+- `approve()`: Aprova solicitação com decision_notes obrigatório
+- `reject()`: Rejeita solicitação com decision_notes obrigatório
+- `complete()`: Conclui solicitação com decision_notes obrigatório
+- `cancel()`: Cancela solicitação com decision_notes obrigatório
+
+### Model: SecretaryRequest
+
+**Local:** `app/Models/SecretaryRequest.php`
+
+**Relacionamentos:**
+- `requesterUser`: BelongsTo User
+- `requesterPerson`: BelongsTo Person
+- `assignedToUser`: BelongsTo User
+- `reviewedByUser`: BelongsTo User
+- `approvedByUser`: BelongsTo User
+- `rejectedByUser`: BelongsTo User
+- `completedByUser`: BelongsTo User
+- `relatedAlert`: BelongsTo SystemAlert
+
+**Métodos de estado:**
+- `isPending()`: Verifica se está pendente
+- `isInReview()`: Verifica se está em análise
+- `isApproved()`: Verifica se foi aprovada
+- `isRejected()`: Verifica se foi rejeitada
+- `isCompleted()`: Verifica se foi concluída
+- `isCancelled()`: Verifica se foi cancelada
+- `canBeEdited()`: Verifica se pode ser editada
+- `isOverdue()`: Verifica se está atrasada
+
+**Métodos de ação:**
+- `markInReview(int $userId, ?string $notes = null)`: Marca como em análise
+- `approve(int $userId, string $notes)`: Aprova solicitação
+- `reject(int $userId, string $notes)`: Rejeita solicitação
+- `complete(int $userId, string $notes)`: Conclui solicitação
+- `cancel(int $userId, string $notes)`: Cancela solicitação
+
+### Requests de Validação
+
+**StoreSecretaryRequestRequest:**
+- Valida type, priority, title, description, requester_person_id, related_alert_id, assigned_to_user_id, due_at, internal_notes
+- Mensagens em português
+
+**UpdateSecretaryRequestRequest:**
+- Valida title, description, priority, requester_person_id, related_alert_id, assigned_to_user_id, due_at, internal_notes
+- Mensagens em português
+
+### Páginas Vue
+
+**Requests/Index.vue:**
+- Lista de solicitações com filtros por status, tipo e prioridade
+- Cards com contagens: Pendentes, Em análise, Aprovadas, Concluídas, Urgentes
+- Tabela responsiva sem corte de texto
+
+**Requests/Create.vue:**
+- Formulário para criar solicitação
+- Suporte para alert_id na query string
+- Preenche dados automaticamente quando vem de alerta
+
+**Requests/Show.vue:**
+- Detalhes da solicitação
+- Ações de fluxo: marcar em análise, aprovar, rejeitar, concluir, cancelar
+- Cada ação exige decision_notes
+
+**Requests/Edit.vue:**
+- Formulário para edição
+- Verifica canBeEdited() antes de mostrar
+
+### Integração com Painel
+
+**SecretaryDashboardController:**
+- Adicionou contagens: pending_requests, urgent_requests, in_review_requests
+
+**Dashboard.vue:**
+- Cards de solicitações: Pendentes, Em análise, Urgentes
+- Links para página de solicitações
+
+### Integração com Alertas
+
+**Resolve.vue:**
+- Botão "Criar solicitação de revisão"
+- Navega para secretaria.requests.create com alert_id
+
+**Create.vue:**
+- Preenche dados automaticamente quando vem de alerta
+- Tipo: alert_resolution_review
+- Título e descrição a partir do alerta
+- related_alert_id vinculado
+
 ### Não Implementado Nesta Etapa
 
 - Sistema completo de notificações externas (e-mail, WhatsApp, push)

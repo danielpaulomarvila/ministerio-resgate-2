@@ -6,6 +6,7 @@ use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SecretaryAlertController;
 use App\Http\Controllers\SecretaryDashboardController;
+use App\Http\Controllers\SecretaryRequestController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -50,6 +51,44 @@ Route::prefix('secretaria/alertas')->name('secretaria.alerts.')->group(function 
     
     // Regenerar alertas com base nas regras atuais
     Route::post('/regenerar', [SecretaryAlertController::class, 'regenerate'])->name('regenerate');
+});
+
+// Rotas para Solicitações da Secretaria - Etapa 6
+// Todas as rotas exigem autenticação para segurança
+Route::prefix('secretaria/solicitacoes')->name('secretaria.requests.')->group(function () {
+    // Listar todas as solicitações
+    Route::get('/', [SecretaryRequestController::class, 'index'])->name('index');
+    
+    // Mostrar formulário de criação
+    Route::get('/criar', [SecretaryRequestController::class, 'create'])->name('create');
+    
+    // Salvar nova solicitação
+    Route::post('/', [SecretaryRequestController::class, 'store'])->name('store');
+    
+    // Mostrar detalhes de uma solicitação
+    Route::get('/{secretaryRequest}', [SecretaryRequestController::class, 'show'])->name('show');
+    
+    // Mostrar formulário de edição
+    Route::get('/{secretaryRequest}/editar', [SecretaryRequestController::class, 'edit'])->name('edit');
+    
+    // Atualizar solicitação
+    Route::put('/{secretaryRequest}', [SecretaryRequestController::class, 'update'])->name('update');
+    Route::patch('/{secretaryRequest}', [SecretaryRequestController::class, 'update'])->name('update');
+    
+    // Marcar solicitação como em análise
+    Route::patch('/{secretaryRequest}/em-analise', [SecretaryRequestController::class, 'markInReview'])->name('mark-in-review');
+    
+    // Aprovar solicitação
+    Route::patch('/{secretaryRequest}/aprovar', [SecretaryRequestController::class, 'approve'])->name('approve');
+    
+    // Rejeitar solicitação
+    Route::patch('/{secretaryRequest}/rejeitar', [SecretaryRequestController::class, 'reject'])->name('reject');
+    
+    // Concluir solicitação
+    Route::patch('/{secretaryRequest}/concluir', [SecretaryRequestController::class, 'complete'])->name('complete');
+    
+    // Cancelar solicitação
+    Route::patch('/{secretaryRequest}/cancelar', [SecretaryRequestController::class, 'cancel'])->name('cancel');
 });
 
 Route::middleware('auth')->group(function () {

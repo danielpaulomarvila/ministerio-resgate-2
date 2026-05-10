@@ -709,6 +709,108 @@ A tabela `system_alerts` já existia no projeto. Foi ajustada para suportar o si
 - `generateGuardianshipEndingSoonAlerts()`: Gera alertas para responsabilidades terminando
 - `generateGuardianshipExpiredAlerts()`: Gera alertas para responsabilidades vencidas
 
+---
+
+## Etapa 6 - Solicitações e Revisões da Secretaria
+
+### Tabela: secretary_requests
+
+**Campos principais:**
+- `id`: Chave primária
+- `uuid`: UUID único (nullable, unique)
+- `type`: Tipo da solicitação
+- `status`: Status da solicitação (default: pending)
+- `priority`: Prioridade (default: normal)
+- `title`: Título da solicitação
+- `description`: Descrição detalhada (nullable)
+- `requester_user_id`: ID do usuário solicitante (nullable, foreign key para users)
+- `requester_person_id`: ID da pessoa solicitante (nullable, foreign key para people)
+- `target_type`: Tipo do alvo polimórfico (nullable)
+- `target_id`: ID do alvo polimórfico (nullable)
+- `related_alert_id`: ID do alerta relacionado (nullable, foreign key para system_alerts)
+- `assigned_to_user_id`: ID do usuário responsável pela análise (nullable, foreign key para users)
+- `current_snapshot`: Estado atual conhecido (JSON, nullable)
+- `requested_changes`: Mudanças solicitadas (JSON, nullable)
+- `internal_notes`: Observações internas (text, nullable)
+- `decision_notes`: Decisão/observação final (text, nullable)
+- `submitted_at`: Data de envio (timestamp, nullable)
+- `reviewed_at`: Data de revisão (timestamp, nullable)
+- `reviewed_by_user_id`: ID do usuário que revisou (nullable, foreign key para users)
+- `approved_at`: Data de aprovação (timestamp, nullable)
+- `approved_by_user_id`: ID do usuário que aprovou (nullable, foreign key para users)
+- `rejected_at`: Data de rejeição (timestamp, nullable)
+- `rejected_by_user_id`: ID do usuário que rejeitou (nullable, foreign key para users)
+- `completed_at`: Data de conclusão (timestamp, nullable)
+- `completed_by_user_id`: ID do usuário que concluiu (nullable, foreign key para users)
+- `due_at`: Prazo (timestamp, nullable)
+- `metadata`: Metadados adicionais (JSON, nullable)
+- `created_at`: Data de criação
+- `updated_at`: Data de atualização
+
+**Índices:**
+- `type`
+- `status`
+- `priority`
+- `due_at`
+- `requester_person_id`
+- `related_alert_id`
+- `assigned_to_user_id`
+
+### Tipos de Solicitação
+
+- `registration_review`: Revisão de cadastro
+- `personal_data_change`: Alteração de dados pessoais
+- `family_link_review`: Revisão de vínculo familiar
+- `guardianship_review`: Revisão de responsável
+- `child_transition_review`: Revisão de transição dos 11 anos
+- `alert_resolution_review`: Revisão de alerta
+- `manual_secretary_request`: Solicitação manual da Secretaria
+
+### Status de Solicitação
+
+- `pending`: Pendente
+- `in_review`: Em análise
+- `approved`: Aprovada
+- `rejected`: Rejeitada
+- `completed`: Concluída
+- `cancelled`: Cancelada
+
+### Prioridade
+
+- `low`: Baixa
+- `normal`: Normal
+- `high`: Alta
+- `urgent`: Urgente
+
+### Model SecretaryRequest
+
+**Relacionamentos:**
+- `requesterUser`: BelongsTo User
+- `requesterPerson`: BelongsTo Person
+- `assignedToUser`: BelongsTo User
+- `reviewedByUser`: BelongsTo User
+- `approvedByUser`: BelongsTo User
+- `rejectedByUser`: BelongsTo User
+- `completedByUser`: BelongsTo User
+- `relatedAlert`: BelongsTo SystemAlert
+
+**Métodos de estado:**
+- `isPending()`: Verifica se está pendente
+- `isInReview()`: Verifica se está em análise
+- `isApproved()`: Verifica se foi aprovada
+- `isRejected()`: Verifica se foi rejeitada
+- `isCompleted()`: Verifica se foi concluída
+- `isCancelled()`: Verifica se foi cancelada
+- `canBeEdited()`: Verifica se pode ser editada
+- `isOverdue()`: Verifica se está atrasada
+
+**Métodos de ação:**
+- `markInReview(int $userId, ?string $notes = null)`: Marca como em análise
+- `approve(int $userId, string $notes)`: Aprova solicitação
+- `reject(int $userId, string $notes)`: Rejeita solicitação
+- `complete(int $userId, string $notes)`: Conclui solicitação
+- `cancel(int $userId, string $notes)`: Cancela solicitação
+
 ### Não Implementado Nesta Etapa
 
 - Sistema completo de notificações externas (e-mail, WhatsApp, push)

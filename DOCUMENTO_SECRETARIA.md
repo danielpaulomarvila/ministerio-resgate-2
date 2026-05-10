@@ -314,6 +314,87 @@ Criar uma central simples de alertas internos da Secretaria para transformar as 
 
 ---
 
+## Etapa 6 - Solicitações e Revisões da Secretaria
+
+### Objetivo
+
+Criar um módulo interno para a Secretaria registrar, acompanhar e tratar solicitações/revisões antes de alterar dados oficiais.
+
+### Conceito Chave
+
+**A solicitação não é o dado oficial.** A Secretaria analisa e aprova/rejeita antes de aplicar alterações.
+
+### Tabela: secretary_requests
+
+- Campos principais: type, status, priority, title, description, requester_person_id, related_alert_id, assigned_to_user_id, current_snapshot, requested_changes, internal_notes, decision_notes, submitted_at, reviewed_at, approved_at, rejected_at, completed_at, due_at, metadata
+- Status: pending, in_review, approved, rejected, completed, cancelled
+- Prioridade: low, normal, high, urgent
+- Tipos: registration_review, personal_data_change, family_link_review, guardianship_review, child_transition_review, alert_resolution_review, manual_secretary_request
+
+### Model: SecretaryRequest
+
+- Caminho: `app/Models/SecretaryRequest.php`
+- Relacionamentos: requesterUser, requesterPerson, assignedToUser, reviewedByUser, approvedByUser, rejectedByUser, completedByUser, relatedAlert
+- Métodos de estado: isPending(), isInReview(), isApproved(), isRejected(), isCompleted(), isCancelled(), canBeEdited(), isOverdue()
+- Métodos de ação: markInReview(), approve(), reject(), complete(), cancel()
+
+### Controller: SecretaryRequestController
+
+- Caminho: `app/Http/Controllers/SecretaryRequestController.php`
+- Métodos: index(), create(), store(), show(), edit(), update(), markInReview(), approve(), reject(), complete(), cancel()
+- Validações: decision_notes obrigatório ao aprovar, rejeitar, concluir ou cancelar
+- Filtros: status, tipo, prioridade
+
+### Rotas
+
+- `GET /secretaria/solicitacoes` - Lista de solicitações
+- `GET /secretaria/solicitacoes/criar` - Criar solicitação
+- `POST /secretaria/solicitacoes` - Salvar solicitação
+- `GET /secretaria/solicitacoes/{secretaryRequest}` - Detalhes da solicitação
+- `GET /secretaria/solicitacoes/{secretaryRequest}/editar` - Editar solicitação
+- `PUT/PATCH /secretaria/solicitacoes/{secretaryRequest}` - Atualizar solicitação
+- `PATCH /secretaria/solicitacoes/{secretaryRequest}/em-analise` - Marcar em análise
+- `PATCH /secretaria/solicitacoes/{secretaryRequest}/aprovar` - Aprovar
+- `PATCH /secretaria/solicitacoes/{secretaryRequest}/rejeitar` - Rejeitar
+- `PATCH /secretaria/solicitacoes/{secretaryRequest}/concluir` - Concluir
+- `PATCH /secretaria/solicitacoes/{secretaryRequest}/cancelar` - Cancelar
+
+### Páginas Vue
+
+- `resources/js/Pages/Secretaria/Requests/Index.vue` - Lista de solicitações com filtros e cards
+- `resources/js/Pages/Secretaria/Requests/Create.vue` - Formulário de criação com suporte para alert_id
+- `resources/js/Pages/Secretaria/Requests/Show.vue` - Detalhes da solicitação com ações de fluxo
+- `resources/js/Pages/Secretaria/Requests/Edit.vue` - Formulário de edição
+
+### Menu
+
+- Link "Solicitações" adicionado ao menu principal e responsivo
+
+### Integração com Dashboard
+
+- Cards de solicitações: Pendentes, Em análise, Urgentes
+- Contagens atualizadas em SecretaryDashboardController e Dashboard.vue
+
+### Integração com Alertas
+
+- Botão "Criar solicitação de revisão" na tela de resolução do alerta (Resolve.vue)
+- Create.vue preenche dados automaticamente quando vem de alerta
+
+### Regras de Segurança
+
+- ✅ Não altera dados oficiais automaticamente
+- ✅ Solicitação não é o dado oficial
+- ✅ Secretaria deve aplicar alteração manualmente
+- ✅ Fluxo de status controlado
+- ✅ decision_notes obrigatório em ações de estado
+
+### Documentação Adicional
+
+- ✅ `DOCUMENTO_SOLICITACOES_SECRETARIA.md` - Documentação detalhada das solicitações
+- ✅ `CHECKLIST_SOLICITACOES_SECRETARIA.md` - Checklist de implementação
+
+---
+
 ## Próximos Passos Futuros
 
 1. **Sistema de Alertas**

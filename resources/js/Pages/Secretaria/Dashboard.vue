@@ -103,6 +103,20 @@ const props = defineProps({
         type: Number,
         default: 0
     },
+    
+    // Solicitações (Etapa 6)
+    pending_requests: {
+        type: Number,
+        default: 0
+    },
+    urgent_requests: {
+        type: Number,
+        default: 0
+    },
+    in_review_requests: {
+        type: Number,
+        default: 0
+    },
 });
 </script>
 
@@ -188,6 +202,43 @@ const props = defineProps({
                             </div>
                             <Link :href="route('secretaria.alerts.index')" class="mt-3 text-sm text-blue-600 hover:text-blue-800">
                                 Ver alertas →
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Solicitações (Etapa 6) -->
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-3 mb-8">
+                    <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+                        <div class="p-6">
+                            <div class="text-sm font-medium text-gray-500">Solicitações Pendentes</div>
+                            <div class="mt-2 text-3xl font-bold" :class="pending_requests > 0 ? 'text-green-600' : 'text-gray-900'">
+                                {{ pending_requests }}
+                            </div>
+                            <Link :href="route('secretaria.requests.index')" class="mt-3 text-sm text-blue-600 hover:text-blue-800">
+                                Ver solicitações →
+                            </Link>
+                        </div>
+                    </div>
+                    <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+                        <div class="p-6">
+                            <div class="text-sm font-medium text-gray-500">Solicitações em Análise</div>
+                            <div class="mt-2 text-3xl font-bold" :class="in_review_requests > 0 ? 'text-yellow-600' : 'text-gray-900'">
+                                {{ in_review_requests }}
+                            </div>
+                            <Link :href="route('secretaria.requests.index')" class="mt-3 text-sm text-blue-600 hover:text-blue-800">
+                                Ver solicitações →
+                            </Link>
+                        </div>
+                    </div>
+                    <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+                        <div class="p-6">
+                            <div class="text-sm font-medium text-gray-500">Solicitações Urgentes</div>
+                            <div class="mt-2 text-3xl font-bold" :class="urgent_requests > 0 ? 'text-red-600' : 'text-gray-900'">
+                                {{ urgent_requests }}
+                            </div>
+                            <Link :href="route('secretaria.requests.index')" class="mt-3 text-sm text-blue-600 hover:text-blue-800">
+                                Ver solicitações →
                             </Link>
                         </div>
                     </div>

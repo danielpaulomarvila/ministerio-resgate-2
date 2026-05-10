@@ -328,6 +328,41 @@ O painel da Secretaria foi atualizado para mostrar:
 
 ---
 
+## Integração com Solicitações (Etapa 6)
+
+### Botão "Criar solicitação de revisão"
+
+Na tela de resolução do alerta (Resolve.vue), foi adicionado um botão "Criar solicitação de revisão" que permite criar uma solicitação a partir de um alerta.
+
+### Comportamento
+
+- Botão posicionado no header do alerta
+- Navega para `secretaria.requests.create` com `alert_id` como query parameter
+- Create.vue preenche dados automaticamente:
+  - Tipo: alert_resolution_review
+  - Título e descrição a partir do alerta
+  - related_alert_id vinculado
+  - requester_person_id preenchido se houver pessoa relacionada
+
+### Diferença entre Alerta e Solicitação
+
+**Alerta:**
+- Gerado automaticamente pelo sistema
+- Baseado em regras e verificações
+- Indica problema que precisa atenção
+- Exige ação corretiva
+- Tem verificação automática de resolução
+
+**Solicitação:**
+- Criado manualmente ou via formulário
+- Baseado em pedido ou necessidade
+- Indica pedido de alteração ou revisão
+- Exige análise e decisão
+- Não altera dados automaticamente
+- Pode vir de membros no futuro
+
+---
+
 ## Não Implementado Nesta Etapa
 
 - ❌ Sistema completo de notificações externas (e-mail, WhatsApp, push)

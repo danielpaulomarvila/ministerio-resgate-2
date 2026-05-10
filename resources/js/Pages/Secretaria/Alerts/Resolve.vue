@@ -226,6 +226,12 @@ const getActionButtons = () => {
                                 >
                                     {{ getSeverityLabel(alert.severity) }}
                                 </span>
+                                <Link
+                                    :href="route('secretaria.requests.create', { alert_id: alert.id })"
+                                    class="mt-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                                >
+                                    Criar solicitação de revisão
+                                </Link>
                             </div>
                         </div>
                     </div>

@@ -307,8 +307,22 @@
 ### Painel da Secretaria
 - [ ] Acessar http://127.0.0.1:8000/secretaria
 - [ ] Verificar se painel ainda abre
-- [ ] Verificar se card de alertas aparece
+- [ ] Verificar se cards de alertas aparecem
 - [ ] Verificar se link para alertas funciona
+
+---
+
+## Integração com Solicitações (Etapa 6)
+
+### Botão "Criar solicitação de revisão"
+- [ ] Botão adicionado em Resolve.vue
+- [ ] Botão posicionado no header do alerta
+- [ ] Navega para secretaria.requests.create com alert_id
+- [ ] Create.vue preenche dados automaticamente quando vem de alerta
+
+### Documentação Adicional
+- [ ] DOCUMENTO_SOLICITACOES_SECRETARIA.md criado
+- [ ] CHECKLIST_SOLICITACOES_SECRETARIA.md criado
 
 ---
 
