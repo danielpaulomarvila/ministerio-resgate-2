@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SecretaryAlertController;
 use App\Http\Controllers\SecretaryDashboardController;
 use App\Http\Controllers\SecretaryRequestController;
+use App\Http\Controllers\SecretaryUserAccessController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -90,6 +91,37 @@ Route::prefix('secretaria/solicitacoes')->name('secretaria.requests.')->group(fu
     
     // Cancelar solicitação
     Route::patch('/{secretaryRequest}/cancelar', [SecretaryRequestController::class, 'cancel'])->name('cancel');
+});
+
+// Rotas para Acessos do Sistema - Etapa 7
+// Todas as rotas exigem autenticação para segurança
+Route::prefix('secretaria/acessos')->name('secretaria.access.')->group(function () {
+    // Verificar elegibilidade de pessoa (deve vir antes da rota dinâmica)
+    Route::get('/elegibilidade/{person}', [SecretaryUserAccessController::class, 'eligibility'])->name('eligibility');
+    
+    // Listar todos os acessos
+    Route::get('/', [SecretaryUserAccessController::class, 'index'])->name('index');
+    
+    // Mostrar formulário para criar novo acesso
+    Route::get('/criar', [SecretaryUserAccessController::class, 'create'])->name('create');
+    
+    // Salvar novo acesso
+    Route::post('/', [SecretaryUserAccessController::class, 'store'])->name('store');
+    
+    // Mostrar detalhes de um acesso
+    Route::get('/{user}', [SecretaryUserAccessController::class, 'show'])->name('show');
+    
+    // Mostrar formulário para editar acesso
+    Route::get('/{user}/editar', [SecretaryUserAccessController::class, 'edit'])->name('edit');
+    
+    // Atualizar acesso
+    Route::put('/{user}', [SecretaryUserAccessController::class, 'update'])->name('update');
+    
+    // Suspender acesso
+    Route::patch('/{user}/suspender', [SecretaryUserAccessController::class, 'suspend'])->name('suspend');
+    
+    // Reativar acesso
+    Route::patch('/{user}/reativar', [SecretaryUserAccessController::class, 'reactivate'])->name('reactivate');
 });
 
 Route::middleware('auth')->group(function () {

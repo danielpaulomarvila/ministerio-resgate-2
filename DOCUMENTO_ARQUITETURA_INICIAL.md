@@ -422,6 +422,66 @@ ministerio-resgate/
 - Retention policy
 - Teste de restore
 
+## Etapa 7 - Módulo de Acessos ao Sistema
+
+### Arquitetura do Módulo de Acessos
+
+O módulo de Acessos foi implementado seguindo a arquitetura existente:
+
+**Backend:**
+- `SecretaryUserAccessController` - Controller dedicado ao módulo de acessos
+- `UserAccessEligibilityService` - Service para validar elegibilidade de pessoa para ter acesso
+- Validação de regras de idade (menores de 11 anos bloqueados, Júniores precisam de responsável)
+- Validação de responsáveis autorizados para Júniores
+- Geração de senha temporária automática
+- Controle de suspensão e reativação de acessos
+- Não cria usuário automaticamente ao cadastrar pessoa
+- Não cria membro automaticamente ao criar usuário
+
+**Frontend:**
+- `resources/js/Pages/Secretaria/Access/Index.vue` - Lista de usuários com estatísticas
+- `resources/js/Pages/Secretaria/Access/Create.vue` - Formulário para criar usuário
+- `resources/js/Pages/Secretaria/Access/Show.vue` - Detalhes do usuário
+- `resources/js/Pages/Secretaria/Access/Edit.vue` - Edição de usuário
+- Autocomplete de pessoa com verificação de elegibilidade em tempo real
+- Painel de elegibilidade mostra status e motivo
+- Modais para suspensão (com motivo obrigatório) e reativação
+- Alerta de violação de regra se menor de 11 anos
+
+**Banco de Dados:**
+- Migration `alter_users_table_add_access_fields` adiciona campos de controle
+- Campos: `must_change_password`, `access_granted_at`, `access_revoked_at`, `access_revoked_reason`, `access_notes`
+- Índices para otimizar consultas
+
+**Model User:**
+- Fillable atualizado com novos campos
+- Casts para timestamps e boolean
+- Métodos: `isSuspended()`, `requiresPasswordChange()`, `hasPerson()`
+
+**Model Person:**
+- Métodos: `requiresGuardianForUser()`, `hasActiveGuardianAuthorizedForLogin()`
+- Métodos auxiliares: `age()`, `ageGroup()`
+
+**Rotas:**
+- Grupo `/secretaria/acessos` protegido por middleware `auth`
+- Rota de elegibilidade antes da rota dinâmica para evitar conflitos
+- Métodos: index, create, store, show, edit, update, suspend, reactivate, eligibility
+
+**Menu:**
+- Link "Acessos" adicionado ao menu principal e responsivo
+
+**Dashboard:**
+- Cards de estatísticas de acesso adicionados
+- Contagens atualizadas em SecretaryDashboardController
+
+**Segurança:**
+- Todas as rotas protegidas por auth
+- Validação de elegibilidade no backend e frontend
+- Senha temporária gerada automaticamente e mostrada apenas no momento de criação
+- Validação de regras de idade estrita
+
+---
+
 ## Etapa 4 - Painel Inicial da Secretaria
 
 ### Arquitetura do Painel

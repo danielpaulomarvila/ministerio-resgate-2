@@ -711,6 +711,23 @@ php artisan db:seed --class=DepartmentSeeder
    - Sistema de categorias (Júnior/Jovem)
    - Relatórios de membresia
 
+4. **Fase 4: Sistema de Solicitações da Secretaria**
+   - CRUD de Secretary Requests
+   - Tipos de solicitação
+   - Fluxo de status
+   - Integração com alertas
+   - Dashboard atualizado
+
+5. **Fase 5: Módulo de Acessos ao Sistema (Etapa 7)**
+   - Migration para campos de acesso na tabela users
+   - Service de validação de elegibilidade
+   - Controller de acessos da Secretaria
+   - Páginas Vue para gestão de acessos
+   - Validação de regras de idade
+   - Controle de suspensão e reativação
+   - Dashboard atualizado com estatísticas de acesso
+   - Documentação completa
+
 ## Observações
 
 - **Nenhum erro ocorreu** durante a implementação

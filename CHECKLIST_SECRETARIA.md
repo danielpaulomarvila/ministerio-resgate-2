@@ -185,11 +185,98 @@ Este checklist acompanha a implementação do painel inicial da Secretaria.
 - [x] Campo quem indicou/convidou documentado
 - [x] O que não foi implementado nesta etapa documentado
 
-### ✅ Documentação Atualizada (pendente)
+### ✅ Documentação Atualizada
 
 - [ ] `DOCUMENTO_BANCO_DADOS_INICIAL.md`
 - [ ] `DOCUMENTO_ARQUITETURA_INICIAL.md`
 - [ ] `CHECKLIST_INICIAL.md`
+
+---
+
+## Módulo de Acessos ao Sistema
+**Etapa 7 do Projeto Ministério Resgate / Família Resgate**
+
+### ✅ Banco de Dados
+
+- [x] Migration `alter_users_table_add_access_fields` criada
+- [x] Campos adicionados: must_change_password, access_granted_at, access_revoked_at, access_revoked_reason, access_notes
+- [x] Índices adicionados
+- [x] Migration down() remove índices e colunas corretamente
+
+### ✅ Model User
+
+- [x] Fillable atualizado com novos campos
+- [x] Casts atualizados para novos campos
+- [x] Métodos: isSuspended(), requiresPasswordChange(), hasPerson()
+- [x] Relacionamento person() existe
+
+### ✅ Model Person
+
+- [x] Métodos: requiresGuardianForUser(), hasActiveGuardianAuthorizedForLogin()
+- [x] Métodos auxiliares: age(), ageGroup()
+- [x] Relacionamento user() existe
+
+### ✅ Service: UserAccessEligibilityService
+
+- [x] Arquivo criado em app/Services/Secretaria/
+- [x] Método check() implementado com todas as validações
+- [x] Método hasActiveUser() implementado
+
+### ✅ Controller: SecretaryUserAccessController
+
+- [x] Arquivo criado em app/Http/Controllers/
+- [x] Todos os métodos implementados: index, create, store, show, edit, update, suspend, reactivate, eligibility
+- [x] Validações de elegibilidade implementadas
+- [x] Geração de senha temporária implementada
+
+### ✅ Requests de Validação
+
+- [x] StoreSecretaryUserAccessRequest criado
+- [x] UpdateSecretaryUserAccessRequest criado
+- [x] Regras de validação definidas
+- [x] Mensagens de erro personalizadas
+
+### ✅ Rotas
+
+- [x] Grupo de rotas /secretaria/acessos criado
+- [x] Todas as rotas definidas
+- [x] Rota elegibilidade antes da rota dinâmica
+- [x] Protegidas por auth middleware
+
+### ✅ Menu
+
+- [x] Link "Acessos" adicionado ao menu principal
+- [x] Link "Acessos" adicionado ao menu responsivo
+
+### ✅ Páginas Vue
+
+- [x] Index.vue criado
+- [x] Create.vue criado
+- [x] Show.vue criado
+- [x] Edit.vue criado
+- [x] Autocomplete de pessoa funcionando
+- [x] Painel de elegibilidade funcionando
+- [x] Modais de suspensão/reativação funcionando
+
+### ✅ Dashboard
+
+- [x] Estatísticas de acesso adicionadas ao controller
+- [x] Cards de acesso adicionados ao Dashboard.vue
+- [x] Links funcionando
+
+### ✅ Segurança
+
+- [x] Rotas protegidas por auth
+- [x] Validação de elegibilidade no backend
+- [x] Validação de elegibilidade no frontend
+- [x] Senha temporária gerada automaticamente
+- [x] Senha não exibida na tela de detalhes
+
+### ✅ Documentação
+
+- [x] DOCUMENTO_ACESSOS_SECRETARIA.md criado
+- [x] CHECKLIST_ACESSOS_SECRETARIA.md criado
+- [x] DOCUMENTO_SECRETARIA.md atualizado
 
 ---
 

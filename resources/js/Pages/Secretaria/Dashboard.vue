@@ -117,6 +117,24 @@ const props = defineProps({
         type: Number,
         default: 0
     },
+    
+    // Acessos ao Sistema (Etapa 7)
+    active_users: {
+        type: Number,
+        default: 0
+    },
+    suspended_users: {
+        type: Number,
+        default: 0
+    },
+    people_without_user: {
+        type: Number,
+        default: 0
+    },
+    juniors_with_access: {
+        type: Number,
+        default: 0
+    },
 });
 </script>
 
@@ -239,6 +257,59 @@ const props = defineProps({
                             </div>
                             <Link :href="route('secretaria.requests.index')" class="mt-3 text-sm text-blue-600 hover:text-blue-800">
                                 Ver solicitações →
+                            </Link>
+                        </div>
+                    </div>
+                    <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+                        <div class="p-6">
+                            <div class="text-sm font-medium text-gray-500">Em Análise</div>
+                            <div class="mt-2 text-3xl font-bold" :class="in_review_requests > 0 ? 'text-yellow-600' : 'text-gray-900'">
+                                {{ in_review_requests }}
+                            </div>
+                            <Link :href="route('secretaria.requests.index')" class="mt-3 text-sm text-blue-600 hover:text-blue-800">
+                                Ver solicitações →
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Acessos ao Sistema (Etapa 7) -->
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-4 mb-8">
+                    <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+                        <div class="p-6">
+                            <div class="text-sm font-medium text-gray-500">Usuários Ativos</div>
+                            <div class="mt-2 text-3xl font-bold text-green-600">{{ active_users }}</div>
+                            <Link :href="route('secretaria.access.index')" class="mt-3 text-sm text-blue-600 hover:text-blue-800">
+                                Ver acessos →
+                            </Link>
+                        </div>
+                    </div>
+                    <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+                        <div class="p-6">
+                            <div class="text-sm font-medium text-gray-500">Usuários Suspensos</div>
+                            <div class="mt-2 text-3xl font-bold" :class="suspended_users > 0 ? 'text-red-600' : 'text-gray-900'">
+                                {{ suspended_users }}
+                            </div>
+                            <Link :href="route('secretaria.access.index')" class="mt-3 text-sm text-blue-600 hover:text-blue-800">
+                                Ver acessos →
+                            </Link>
+                        </div>
+                    </div>
+                    <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+                        <div class="p-6">
+                            <div class="text-sm font-medium text-gray-500">Pessoas sem Usuário</div>
+                            <div class="mt-2 text-3xl font-bold text-gray-900">{{ people_without_user }}</div>
+                            <Link :href="route('secretaria.access.create')" class="mt-3 text-sm text-blue-600 hover:text-blue-800">
+                                Criar acesso →
+                            </Link>
+                        </div>
+                    </div>
+                    <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+                        <div class="p-6">
+                            <div class="text-sm font-medium text-gray-500">Júniores com Acesso</div>
+                            <div class="mt-2 text-3xl font-bold text-blue-600">{{ juniors_with_access }}</div>
+                            <Link :href="route('secretaria.access.index')" class="mt-3 text-sm text-blue-600 hover:text-blue-800">
+                                Ver acessos →
                             </Link>
                         </div>
                     </div>

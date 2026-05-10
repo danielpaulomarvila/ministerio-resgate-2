@@ -58,6 +58,12 @@ const showingNavigationDropdown = ref(false);
                                     Solicitações
                                 </NavLink>
                                 <NavLink
+                                    :href="route('secretaria.access.index')"
+                                    :active="route().current('secretaria.access.*')"
+                                >
+                                    Acessos
+                                </NavLink>
+                                <NavLink
                                     :href="route('people.index')"
                                     :active="route().current('people.index')"
                                 >
@@ -199,6 +205,12 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('secretaria.requests.*')"
                         >
                             Solicitações
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('secretaria.access.index')"
+                            :active="route().current('secretaria.access.*')"
+                        >
+                            Acessos
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('people.index')"

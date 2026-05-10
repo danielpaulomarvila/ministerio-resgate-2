@@ -395,6 +395,84 @@ Criar um módulo interno para a Secretaria registrar, acompanhar e tratar solici
 
 ---
 
+## Módulo de Acessos ao Sistema
+**Etapa 7 do Projeto Ministério Resgate / Família Resgate**
+
+Este módulo permite que a Secretaria gerencie quem pode ter acesso ao sistema, diferenciando claramente entre pessoa, usuário e membro.
+
+### Rota e Acesso
+
+**Rota base:** `/secretaria/acessos`
+
+**Controller:** `SecretaryUserAccessController`
+
+**Páginas Vue:** `resources/js/Pages/Secretaria/Access/`
+
+**Middleware:** `auth` (autenticação obrigatória)
+
+**Menu:** Link "Acessos" adicionado ao menu autenticado
+
+### Diferenças Fundamentais
+
+- **Pessoa**: registro cadastral
+- **Usuário**: login no sistema (sempre vinculado a uma pessoa)
+- **Membro**: pessoa batizada (não criado automaticamente ao criar usuário)
+
+### Regras por Idade
+
+- **Menor de 11 anos**: Não pode ter usuário próprio
+- **Júnior (11-13 anos)**: Pode ter usuário supervisionado, precisa de responsável ativo autorizado
+- **Jovem (14-17 anos)**: Pode ter usuário
+- **Adulto (18+ anos)**: Pode ter usuário
+
+### Funcionalidades
+
+- Listar todos os usuários do sistema
+- Criar novo usuário vinculado a uma pessoa
+- Verificar elegibilidade de pessoa para ter acesso
+- Editar dados do usuário (nome, email, observações)
+- Suspender acesso (com motivo obrigatório)
+- Reativar acesso (revalida elegibilidade)
+- Mostrar alerta de violação de regra (se menor de 11 anos)
+
+### Campos Adicionados à Tabela users
+
+- `must_change_password` (boolean)
+- `access_granted_at` (timestamp)
+- `access_revoked_at` (timestamp)
+- `access_revoked_reason` (string)
+- `access_notes` (text)
+
+### Service: UserAccessEligibilityService
+
+Verifica elegibilidade de pessoa para ter acesso:
+- Valida data de nascimento
+- Valida regras de idade
+- Valida responsáveis autorizados (para Júniores)
+- Retorna array com status e motivo
+
+### Integração com Dashboard
+
+- Cards de acesso: Usuários ativos, Usuários suspensos, Pessoas sem usuário, Júniores com acesso
+- Contagens atualizadas em SecretaryDashboardController e Dashboard.vue
+
+### Regras de Segurança
+
+- ✅ Não cria usuário automaticamente ao cadastrar pessoa
+- ✅ Não cria membro automaticamente ao criar usuário
+- ✅ Valida elegibilidade antes de criar acesso
+- ✅ Menor de 11 anos não pode ter usuário
+- ✅ Júnior precisa de responsável autorizado
+- ✅ Senha temporária gerada automaticamente
+- ✅ Senha mostrada apenas no momento de criação
+
+### Documentação Adicional
+
+- ✅ `DOCUMENTO_ACESSOS_SECRETARIA.md` - Documentação detalhada dos acessos
+- ✅ `CHECKLIST_ACESSOS_SECRETARIA.md` - Checklist de implementação
+
+---
+
 ## Próximos Passos Futuros
 
 1. **Sistema de Alertas**

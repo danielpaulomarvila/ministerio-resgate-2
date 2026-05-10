@@ -629,7 +629,32 @@ find app resources database routes -iname "*Novo*" -o -iname "*Final*" -o -iname
 - ✅ Botão "Criar solicitação de revisão" adicionado em Resolve.vue
 - ✅ Create.vue preenche dados automaticamente quando vem de alerta
 
-### Documentação
+### Integração com Módulo de Acessos
+**Etapa 7 do Projeto Ministério Resgate / Família Resgate**
+
+### Integração Futura
+
+Ideias futuras para integração entre Solicitações e Acessos:
+
+- Solicitação de criação de acesso ao sistema
+- Solicitação de reativação de acesso
+- Solicitação de alteração de dados de usuário
+
+Nesta etapa (Etapa 7):
+- ✅ Não cria fluxo automático de solicitação de acesso
+- ✅ Acesso criado manualmente pela Secretaria
+- ✅ Documentação de integração futura
+
+### Regras Importantes
+
+- ✅ Não cria usuário automaticamente ao aprovar solicitação
+- ✅ Secretaria deve criar acesso manualmente se necessário
+- ✅ Solicitação não substitui módulo de acessos
+- ✅ Manter separação de responsabilidades
+
+---
+
+## Documentação
 
 - ✅ DOCUMENTO_SOLICITACOES_SECRETARIA.md criado
 

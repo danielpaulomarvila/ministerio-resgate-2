@@ -296,6 +296,8 @@ Este checklist guia a implementação do módulo de Solicitações e Revisões d
 - [x] Documentar regras de segurança
 - [x] Documentar integração futura
 - [x] Documentar diferença entre alerta e solicitação
+- [x] Documentar integração com módulo de Acessos (Etapa 7)
+- [x] Documentar regras importantes (não cria usuário automaticamente)
 
 ### CHECKLIST_SOLICITACOES_SECRETARIA.md
 

@@ -8,6 +8,7 @@ use App\Models\GuardianShip;
 use App\Models\FamilyMember;
 use App\Models\SystemAlert;
 use App\Models\SecretaryRequest;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -165,6 +166,17 @@ class SecretaryDashboardController extends Controller
         $urgentRequests = SecretaryRequest::where('priority', 'urgent')->count();
         $inReviewRequests = SecretaryRequest::where('status', 'in_review')->count();
 
+        // 17. Estatísticas de Acesso ao Sistema (Etapa 7)
+        $activeUsers = User::where('status', 'active')->count();
+        $suspendedUsers = User::where('status', 'suspended')->count();
+        $peopleWithoutUser = Person::whereDoesntHave('user')->count();
+        $juniorsWithAccess = User::where('status', 'active')
+            ->whereHas('person', function ($query) {
+                $query->where('birth_date', '>=', now()->subYears(13)->toDateString())
+                    ->where('birth_date', '<=', now()->subYears(11)->toDateString());
+            })
+            ->count();
+
         return Inertia::render('Secretaria/Dashboard', [
             // Totais
             'total_people' => $totalPeople,
@@ -198,6 +210,12 @@ class SecretaryDashboardController extends Controller
             'pending_requests' => $pendingRequests,
             'urgent_requests' => $urgentRequests,
             'in_review_requests' => $inReviewRequests,
+            
+            // Acessos ao Sistema (Etapa 7)
+            'active_users' => $activeUsers,
+            'suspended_users' => $suspendedUsers,
+            'people_without_user' => $peopleWithoutUser,
+            'juniors_with_access' => $juniorsWithAccess,
         ]);
     }
 }

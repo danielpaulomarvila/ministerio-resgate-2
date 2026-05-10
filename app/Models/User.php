@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'person_id', 'status'])]
+#[Fillable(['name', 'email', 'password', 'person_id', 'status', 'must_change_password', 'access_granted_at', 'access_revoked_at', 'access_revoked_reason', 'access_notes'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -30,6 +30,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'last_login_at' => 'datetime',
+            'must_change_password' => 'boolean',
+            'access_granted_at' => 'datetime',
+            'access_revoked_at' => 'datetime',
         ];
     }
 
@@ -75,5 +78,29 @@ class User extends Authenticatable
     public function isActive(): bool
     {
         return $this->status === 'active';
+    }
+
+    /**
+     * Verifica se o usuário está suspenso
+     */
+    public function isSuspended(): bool
+    {
+        return $this->status === 'suspended';
+    }
+
+    /**
+     * Verifica se o usuário precisa trocar a senha
+     */
+    public function requiresPasswordChange(): bool
+    {
+        return $this->must_change_password;
+    }
+
+    /**
+     * Verifica se o usuário está vinculado a uma pessoa
+     */
+    public function hasPerson(): bool
+    {
+        return $this->person_id !== null;
     }
 }

@@ -274,4 +274,58 @@ class Person extends Model
     {
         return $this->is_baptized;
     }
+
+    /**
+     * Verifica se a pessoa precisa de responsável/supervisão para ter usuário
+     * Regra: Júniores (11-13 anos) precisam de responsável ativo autorizado
+     * 
+     * @return bool True se precisa de responsável
+     */
+    public function requiresGuardianForUser(): bool
+    {
+        return $this->isJunior();
+    }
+
+    /**
+     * Verifica se a pessoa tem responsável ativo autorizado para login
+     * Usado para validar elegibilidade de Júniores
+     * 
+     * @return bool True se tem responsável ativo com can_authorize_login = true
+     */
+    public function hasActiveGuardianAuthorizedForLogin(): bool
+    {
+        if (!$this->requiresGuardianForUser()) {
+            return true; // Não precisa de responsável
+        }
+
+        return $this->guardianshipsAsMinor()
+            ->where('status', 'active')
+            ->where('can_authorize_login', true)
+            ->whereHas('guardian', function ($query) {
+                $query->whereNull('deleted_at');
+            })
+            ->exists();
+    }
+
+    /**
+     * Retorna a idade da pessoa
+     * Método auxiliar para compatibilidade
+     * 
+     * @return int|null
+     */
+    public function age(): ?int
+    {
+        return $this->getAgeAttribute();
+    }
+
+    /**
+     * Retorna o grupo de idade da pessoa
+     * Método auxiliar para compatibilidade
+     * 
+     * @return string|null
+     */
+    public function ageGroup(): ?string
+    {
+        return $this->ageGroupLabel();
+    }
 }

@@ -81,6 +81,11 @@ Tabela de usuários que acessam o sistema.
 - `password`: Senha hash
 - `status`: Status do usuário (active, inactive, suspended)
 - `last_login_at`: Último login
+- `must_change_password`: Indica se usuário precisa trocar senha no primeiro acesso (boolean, default false) - Etapa 7
+- `access_granted_at`: Timestamp de quando o acesso foi concedido (nullable) - Etapa 7
+- `access_revoked_at`: Timestamp de quando o acesso foi revogado (nullable) - Etapa 7
+- `access_revoked_reason`: Motivo da revogação do acesso (nullable string) - Etapa 7
+- `access_notes`: Observações sobre o acesso (nullable text) - Etapa 7
 - `created_at`, `updated_at`: Timestamps
 
 **Relacionamentos:**
@@ -90,6 +95,15 @@ Tabela de usuários que acessam o sistema.
 - `person_id`: Para vincular à pessoa
 - `status`: Para filtrar usuários ativos
 - `last_login_at`: Para rastrear acessos
+- `must_change_password`: Para usuários que precisam trocar senha (Etapa 7)
+- `access_granted_at`: Para rastrear quando acesso foi concedido (Etapa 7)
+- `access_revoked_at`: Para rastrear quando acesso foi revogado (Etapa 7)
+
+**Observações (Etapa 7):**
+- Campos adicionados para controle de acesso ao sistema
+- Permite gerenciar suspensão e reativação de acessos
+- Permite rastrear histórico de concessão e revogação de acessos
+- `must_change_password` usado para forçar troca de senha no primeiro acesso
 
 ### 3. person_documents
 Tabela para documentos de identificação de pessoas (adaptada para Portugal).
