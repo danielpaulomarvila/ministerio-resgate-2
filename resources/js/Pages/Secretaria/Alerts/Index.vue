@@ -33,11 +33,7 @@ const form = useForm({
 });
 
 const resolveAlert = (alert) => {
-    form.patch(route('secretaria.alerts.resolve', alert.id), {
-        onSuccess: () => {
-            form.reset();
-        },
-    });
+    window.location.href = route('secretaria.alerts.resolve.show', alert.id);
 };
 
 const ignoreAlert = (alert) => {
@@ -89,6 +85,8 @@ const getStatusColor = (status) => {
     switch (status) {
         case 'pending':
             return 'bg-green-100 text-green-800';
+        case 'in_progress':
+            return 'bg-yellow-100 text-yellow-800';
         case 'resolved':
             return 'bg-blue-100 text-blue-800';
         case 'dismissed':
@@ -102,6 +100,8 @@ const getStatusLabel = (status) => {
     switch (status) {
         case 'pending':
             return 'Aberto';
+        case 'in_progress':
+            return 'Em andamento';
         case 'resolved':
             return 'Resolvido';
         case 'dismissed':
@@ -298,34 +298,34 @@ const getTypeLabel = (type) => {
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 min-w-[200px]">
                                         Título
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 min-w-[180px]">
                                         Tipo
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 min-w-[100px]">
                                         Severidade
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 min-w-[120px]">
                                         Status
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                    <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 min-w-[140px]">
                                         Data
                                     </th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+                                    <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 min-w-[150px]">
                                         Ações
                                     </th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white">
                                 <tr v-if="alerts.length === 0">
-                                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                                    <td colspan="6" class="px-4 py-4 text-center text-sm text-gray-500">
                                         Nenhum alerta encontrado.
                                     </td>
                                 </tr>
                                 <tr v-for="alert in alerts" :key="alert.id">
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-4">
                                         <div class="text-sm font-medium text-gray-900">
                                             {{ alert.title }}
                                         </div>
@@ -336,12 +336,12 @@ const getTypeLabel = (type) => {
                                             Pessoa: {{ alert.related_person.full_name }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-4">
                                         <span class="text-sm text-gray-900">
                                             {{ getTypeLabel(alert.type) }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-4">
                                         <span
                                             class="inline-flex rounded-full px-2 py-1 text-xs font-semibold"
                                             :class="getSeverityColor(alert.severity)"
@@ -349,7 +349,7 @@ const getTypeLabel = (type) => {
                                             {{ getSeverityLabel(alert.severity) }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-4">
                                         <span
                                             class="inline-flex rounded-full px-2 py-1 text-xs font-semibold"
                                             :class="getStatusColor(alert.status)"
@@ -357,25 +357,25 @@ const getTypeLabel = (type) => {
                                             {{ getStatusLabel(alert.status) }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td class="px-4 py-4 text-sm text-gray-500">
                                         {{ alert.detected_at }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <td class="px-4 py-4 text-right text-sm font-medium">
                                         <Link
                                             :href="route('secretaria.alerts.show', alert.id)"
                                             class="mr-3 text-indigo-600 hover:text-indigo-900"
                                         >
                                             Ver
                                         </Link>
-                                        <button
-                                            v-if="alert.status === 'pending'"
-                                            @click="resolveAlert(alert)"
+                                        <Link
+                                            v-if="alert.status === 'pending' || alert.status === 'in_progress'"
+                                            :href="route('secretaria.alerts.resolve.show', alert.id)"
                                             class="mr-3 text-green-600 hover:text-green-900"
                                         >
-                                            Resolver
-                                        </button>
+                                            Tratar
+                                        </Link>
                                         <button
-                                            v-if="alert.status === 'pending'"
+                                            v-if="alert.status === 'pending' || alert.status === 'in_progress'"
                                             @click="ignoreAlert(alert)"
                                             class="text-gray-600 hover:text-gray-900"
                                         >

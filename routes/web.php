@@ -36,8 +36,14 @@ Route::prefix('secretaria/alertas')->name('secretaria.alerts.')->group(function 
     // Mostrar detalhes de um alerta específico
     Route::get('/{systemAlert}', [SecretaryAlertController::class, 'show'])->name('show');
     
-    // Marcar alerta como resolvido
-    Route::patch('/{systemAlert}/resolver', [SecretaryAlertController::class, 'resolve'])->name('resolve');
+    // Mostrar tela de resolução/tratamento do alerta
+    Route::get('/{systemAlert}/resolver', [SecretaryAlertController::class, 'resolveShow'])->name('resolve.show');
+    
+    // Marcar alerta como em andamento
+    Route::patch('/{systemAlert}/em-andamento', [SecretaryAlertController::class, 'markInProgress'])->name('mark-in-progress');
+    
+    // Verificar se o alerta foi realmente resolvido
+    Route::post('/{systemAlert}/verificar-resolucao', [SecretaryAlertController::class, 'verifyResolution'])->name('verify-resolution');
     
     // Marcar alerta como ignorado
     Route::patch('/{systemAlert}/ignorar', [SecretaryAlertController::class, 'ignore'])->name('ignore');

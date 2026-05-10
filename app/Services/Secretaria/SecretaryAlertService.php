@@ -333,4 +333,244 @@ class SecretaryAlertService
             ]);
         }
     }
+
+    /**
+     * Verifica se um alerta foi realmente resolvido
+     * 
+     * @param SystemAlert $alert
+     * @return array ['resolved' => bool, 'message' => string]
+     */
+    public function isAlertActuallyResolved(SystemAlert $alert): array
+    {
+        switch ($alert->type) {
+            case 'incomplete_registration':
+                return $this->verifyIncompleteRegistrationResolved($alert);
+            
+            case 'person_without_family':
+                return $this->verifyPersonWithoutFamilyResolved($alert);
+            
+            case 'minor_without_guardian':
+                return $this->verifyMinorWithoutGuardianResolved($alert);
+            
+            case 'child_turning_11':
+                // Este alerta é de revisão manual
+                // Se o usuário clicou em verificar resolução, consideramos como confirmado
+                return [
+                    'resolved' => true,
+                    'message' => 'Revisão confirmada pela Secretaria.',
+                ];
+            
+            case 'guardianship_ending_soon':
+                return $this->verifyGuardianshipEndingSoonResolved($alert);
+            
+            case 'guardianship_expired':
+                return $this->verifyGuardianshipExpiredResolved($alert);
+            
+            default:
+                return [
+                    'resolved' => false,
+                    'message' => 'Tipo de alerta desconhecido.',
+                ];
+        }
+    }
+
+    /**
+     * Verifica se cadastro incompleto foi corrigido
+     */
+    protected function verifyIncompleteRegistrationResolved(SystemAlert $alert): array
+    {
+        if (!$alert->relatedPerson) {
+            return [
+                'resolved' => false,
+                'message' => 'Pessoa relacionada não encontrada.',
+            ];
+        }
+
+        $person = $alert->relatedPerson;
+        $missingFields = [];
+
+        // Verificar campos faltantes baseados na mensagem do alerta
+        if (str_contains($alert->message, 'data de nascimento') && is_null($person->birth_date)) {
+            $missingFields[] = 'data de nascimento';
+        }
+
+        if (str_contains($alert->message, 'telefone') && is_null($person->primary_phone)) {
+            $missingFields[] = 'telefone principal';
+        }
+
+        if (str_contains($alert->message, 'email') && is_null($person->email)) {
+            // Se não tem email mas tem telefone, pode ser aceito
+            if (is_null($person->primary_phone)) {
+                $missingFields[] = 'email ou telefone';
+            }
+        }
+
+        if (!empty($missingFields)) {
+            $fieldsText = implode(', ', $missingFields);
+            return [
+                'resolved' => false,
+                'message' => "Este cadastro ainda possui pendências: {$fieldsText}.",
+            ];
+        }
+
+        return [
+            'resolved' => true,
+            'message' => 'Cadastro completo verificado.',
+        ];
+    }
+
+    /**
+     * Verifica se pessoa sem família foi vinculada
+     */
+    protected function verifyPersonWithoutFamilyResolved(SystemAlert $alert): array
+    {
+        if (!$alert->relatedPerson) {
+            return [
+                'resolved' => false,
+                'message' => 'Pessoa relacionada não encontrada.',
+            ];
+        }
+
+        $person = $alert->relatedPerson;
+
+        // Verificar se tem vínculo familiar ativo
+        $hasActiveFamily = $person->families()
+            ->whereNull('family_members.left_at')
+            ->exists();
+
+        if (!$hasActiveFamily) {
+            return [
+                'resolved' => false,
+                'message' => 'Esta pessoa ainda não está vinculada a uma família.',
+            ];
+        }
+
+        return [
+            'resolved' => true,
+            'message' => 'Pessoa vinculada a uma família.',
+        ];
+    }
+
+    /**
+     * Verifica se menor tem responsável ativo
+     */
+    protected function verifyMinorWithoutGuardianResolved(SystemAlert $alert): array
+    {
+        if (!$alert->relatedPerson) {
+            return [
+                'resolved' => false,
+                'message' => 'Pessoa relacionada não encontrada.',
+            ];
+        }
+
+        $minor = $alert->relatedPerson;
+
+        // Verificar se tem guardianship ativo
+        $hasActiveGuardianship = $minor->guardianshipsAsMinor()
+            ->where('status', 'active')
+            ->exists();
+
+        if (!$hasActiveGuardianship) {
+            return [
+                'resolved' => false,
+                'message' => 'Este menor ainda não possui responsável ativo.',
+            ];
+        }
+
+        return [
+            'resolved' => true,
+            'message' => 'Menor possui responsável ativo.',
+        ];
+    }
+
+    /**
+     * Verifica se responsabilidade próxima do fim foi tratada
+     */
+    protected function verifyGuardianshipEndingSoonResolved(SystemAlert $alert): array
+    {
+        if (!$alert->relatedPerson) {
+            return [
+                'resolved' => false,
+                'message' => 'Pessoa relacionada não encontrada.',
+            ];
+        }
+
+        $minor = $alert->relatedPerson;
+
+        // Buscar guardianship ativo do menor
+        $guardianship = $minor->guardianshipsAsMinor()
+            ->where('status', 'active')
+            ->first();
+
+        if (!$guardianship) {
+            return [
+                'resolved' => true,
+                'message' => 'Responsabilidade não existe mais ou foi encerrada.',
+            ];
+        }
+
+        // Se ainda está ativo e ends_at está nos próximos 30 dias
+        if ($guardianship->ends_at) {
+            $endsAt = Carbon::parse($guardianship->ends_at);
+            $now = Carbon::now();
+            $in30Days = $now->copy()->addDays(30);
+
+            if ($endsAt->between($now, $in30Days)) {
+                return [
+                    'resolved' => false,
+                    'message' => 'A responsabilidade ainda termina nos próximos 30 dias. Prorrogue ou encerre formalmente.',
+                ];
+            }
+        }
+
+        return [
+            'resolved' => true,
+            'message' => 'Responsabilidade foi prorrogada ou encerrada.',
+        ];
+    }
+
+    /**
+     * Verifica se responsabilidade vencida foi tratada
+     */
+    protected function verifyGuardianshipExpiredResolved(SystemAlert $alert): array
+    {
+        if (!$alert->relatedPerson) {
+            return [
+                'resolved' => false,
+                'message' => 'Pessoa relacionada não encontrada.',
+            ];
+        }
+
+        $minor = $alert->relatedPerson;
+
+        // Buscar guardianship ativo do menor
+        $guardianship = $minor->guardianshipsAsMinor()
+            ->where('status', 'active')
+            ->first();
+
+        if (!$guardianship) {
+            return [
+                'resolved' => true,
+                'message' => 'Responsabilidade não existe mais ou foi encerrada.',
+            ];
+        }
+
+        // Se ainda está ativo e ends_at está vencido
+        if ($guardianship->ends_at) {
+            $endsAt = Carbon::parse($guardianship->ends_at);
+            $now = Carbon::now();
+
+            if ($endsAt->lt($now)) {
+                return [
+                    'resolved' => false,
+                    'message' => 'A responsabilidade ainda está vencida. Atualize a data ou encerre formalmente.',
+                ];
+            }
+        }
+
+        return [
+            'resolved' => true,
+            'message' => 'Responsabilidade foi atualizada ou encerrada.',
+        ];
+    }
 }

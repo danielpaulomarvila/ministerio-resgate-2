@@ -101,17 +101,24 @@ O sistema de alertas internos da Secretaria é uma ferramenta para transformar a
 ### Pending (Aberto)
 - **Mapeado da tabela existente:** `pending`
 - **Descrição:** Alerta aberto, aguardando ação da Secretaria
-- **Ações possíveis:** Resolver, Ignorar
+- **Ações possíveis:** Tratar (abre tela de resolução), Ignorar
+
+### In Progress (Em andamento)
+- **Mapeado da tabela existente:** `in_progress`
+- **Descrição:** Alerta em tratamento pela Secretaria
+- **Ações possíveis:** Continuar tratamento, Verificar resolução, Ignorar
 
 ### Resolved (Resolvido)
 - **Mapeado da tabela existente:** `resolved`
-- **Descrição:** Alerta resolvido pela Secretaria
+- **Descrição:** Alerta resolvido pela Secretaria após validação real
 - **Campos preenchidos:** `resolved_at`, `resolved_by_user_id`, `resolution_notes`
+- **Nota:** Só pode ser marcado como resolvido após o problema real ser corrigido e validado pelo sistema
 
 ### Dismissed (Ignorado)
 - **Mapeado da tabela existente:** `dismissed`
 - **Descrição:** Alerta ignorado pela Secretaria
 - **Campos preenchidos:** `resolved_at`, `resolved_by_user_id`, `resolution_notes`
+- **Nota:** Ignorar exige motivo obrigatório (resolution_notes)
 
 ---
 
@@ -164,7 +171,8 @@ A tabela `system_alerts` já existia no projeto. Foi ajustada para adicionar o c
 ## Model SystemAlert
 
 ### Métodos principais:
-- `isOpen()`: Verifica se o alerta está aberto (status pending)
+- `isPending()`: Verifica se o alerta está aberto (status pending)
+- `isInProgress()`: Verifica se o alerta está em andamento
 - `isResolved()`: Verifica se o alerta foi resolvido
 - `isIgnored()`: Verifica se o alerta foi ignorado (status dismissed)
 - `markAsResolved(int $userId, ?string $notes = null)`: Marca o alerta como resolvido
@@ -183,6 +191,9 @@ O service `SecretaryAlertService` é responsável por gerar alertas automaticame
 
 ### Métodos:
 - `regenerateAlerts()`: Regera todos os alertas com base nas regras atuais
+- `removeDuplicatePendingAlerts()`: Remove alertas pending duplicados mantendo o mais recente
+- `createOrUpdatePendingAlert(array $data)`: Cria ou atualiza alerta pending sem duplicar
+- `isAlertActuallyResolved(SystemAlert $alert): array`: Verifica se um alerta foi realmente resolvido
 - `generateChildTurning11Alerts()`: Gera alertas para crianças próximas dos 11 anos
 - `generateMinorWithoutGuardianAlerts()`: Gera alertas para menores sem responsável
 - `generatePersonWithoutFamilyAlerts()`: Gera alertas para pessoas sem família
@@ -195,44 +206,93 @@ O service `SecretaryAlertService` é responsável por gerar alertas automaticame
 - Atualiza alertas existentes se necessário
 - Usa dados reais do banco (sem seeders fake)
 - Trata dados nulos de forma segura
+- Agrupa campos faltantes em um único alerta por pessoa para cadastro incompleto
 
 ---
 
-## Controller SecretaryAlertController
+## Fluxo de Resolução de Alertas
 
-### Métodos:
-- `index()`: Lista todos os alertas com filtros opcionais
-- `show(SystemAlert $systemAlert)`: Mostra detalhes de um alerta específico
-- `resolve(Request $request, SystemAlert $systemAlert)`: Marca alerta como resolvido
-- `ignore(Request $request, SystemAlert $systemAlert)`: Marca alerta como ignorado
-- `regenerate()`: Regenera alertas com base nas regras atuais
+O sistema de alertas exige que o problema real seja corrigido antes de marcar o alerta como resolvido.
 
-### Filtros:
-- Status: all, pending, resolved, dismissed
-- Tipo: all, child_turning_11, minor_without_guardian, person_without_family, incomplete_registration, guardianship_ending_soon, guardianship_expired
-- Severidade: all, low, medium, high, critical
+### Fluxo Correto
+
+1. **Usuário clica em "Tratar"** na lista de alertas
+2. **Sistema abre tela de resolução** do alerta
+3. **Usuário corrige o problema real** no cadastro correspondente usando as ações contextuais
+4. **Usuário volta à tela de resolução** e clica em "Verificar resolução"
+5. **Sistema valida se o problema foi corrigido** através de verificação real no banco
+6. **Se corrigido:** Marca como resolved com resolution_notes obrigatório
+7. **Se não corrigido:** Mantém em pending/in_progress com mensagem explicativa
+
+### Status de Resolução
+
+- **Pending (Aberto):** Alerta ainda não foi tratado
+- **In Progress (Em andamento):** Alerta está sendo tratado
+- **Resolved (Resolvido):** Problema foi corrigido e validado pelo sistema
+- **Dismissed (Ignorado):** Secretaria decidiu conscientemente não tratar (exige motivo)
+
+### Regras de Verificação por Tipo
+
+#### incomplete_registration
+- Só resolve se os campos faltantes foram preenchidos
+- Se faltava telefone: primary_phone deve estar preenchido
+- Se faltava email: email deve estar preenchido OU primary_phone deve estar preenchido
+- Se faltava data de nascimento: birth_date deve estar preenchido
+
+#### person_without_family
+- Só resolve se a pessoa tiver vínculo familiar ativo
+- Verifica: family_members.left_at = null
+
+#### minor_without_guardian
+- Só resolve se o menor tiver guardianship ativo
+- Verifica: guardianships.status = 'active' para o menor
+
+#### child_turning_11
+- Este alerta é de revisão manual
+- Ao clicar em verificar resolução, considera como confirmado
+- Não cria usuário automaticamente
+- Não cria membro automaticamente
+- Não move para Resgatados automaticamente
+
+#### guardianship_ending_soon
+- Só resolve se:
+  - A responsabilidade foi prorrogada para data > 30 dias
+  - OU a responsabilidade foi encerrada (status não é mais active)
+  - OU ends_at foi atualizado para data futura válida
+- Se ainda está ativo e ends_at nos próximos 30 dias: não resolve
+
+#### guardianship_expired
+- Só resolve se:
+  - status não é mais active
+  - OU ends_at foi atualizado para data futura válida
+  - OU responsabilidade foi encerrada formalmente
+- Se status active e ends_at continua vencido: não resolve
 
 ---
 
 ## Páginas Vue
 
-### Index.vue
-- **Caminho:** `resources/js/Pages/Secretaria/Alerts/Index.vue`
-- **Funcionalidades:**
-  - Resumo por status (abertos, resolvidos, ignorados)
-  - Resumo por severidade (informativos, atenção, urgentes)
-  - Filtros por status, tipo e severidade
-  - Lista de alertas com botões de ação
-  - Botão para regenerar alertas
+### Alerts/Index.vue
+- Lista todos os alertas com filtros por status, tipo e severidade
+- Mostra resumo por status (abertos, resolvidos, ignorados)
+- Mostra resumo por severidade (informativos, atenção, urgentes)
+- Botão "Tratar" abre tela de resolução (não resolve diretamente)
+- Botão "Ignorar" exige motivo
+- Tabela responsiva sem corte de texto
 
-### Show.vue
-- **Caminho:** `resources/js/Pages/Secretaria/Alerts/Show.vue`
-- **Funcionalidades:**
-  - Detalhes completos do alerta
-  - Registro relacionado (pessoa ou família)
-  - Botões para resolver ou ignorar
-  - Campo para observações de resolução
-  - Acesso seguro para dados nulos
+### Alerts/Show.vue
+- Mostra detalhes do alerta
+- Exibe pessoa e família relacionadas
+- Mostra informações de resolução (se resolvido)
+
+### Alerts/Resolve.vue
+- Tela de resolução/tratamento do alerta
+- Mostra instruções claras sobre o fluxo
+- Exibe ações contextuais baseadas no tipo de alerta
+- Botão "Marcar em andamento" (opcional)
+- Botão "Verificar resolução" (obrigatório para resolver)
+- Botão "Ignorar" (exige motivo obrigatório)
+- Campo resolution_notes obrigatório para verificar resolução e ignorar
 
 ---
 

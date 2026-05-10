@@ -146,13 +146,53 @@ class SecretaryAlertController extends Controller
     }
 
     /**
-     * Marca um alerta como resolvido
+     * Mostra a tela de resolução/tratamento do alerta
+     * 
+     * @param SystemAlert $systemAlert
+     * @return \Inertia\Response
+     */
+    public function resolveShow(SystemAlert $systemAlert)
+    {
+        $systemAlert->load(['relatedPerson', 'relatedFamily', 'resolvedBy']);
+
+        return Inertia::render('Secretaria/Alerts/Resolve', [
+            'alert' => [
+                'id' => $systemAlert->id,
+                'type' => $systemAlert->type,
+                'title' => $systemAlert->title,
+                'message' => $systemAlert->message,
+                'severity' => $systemAlert->severity,
+                'status' => $systemAlert->status,
+                'detected_at' => $systemAlert->created_at->format('d/m/Y H:i'),
+                'resolved_at' => $systemAlert->resolved_at ? $systemAlert->resolved_at->format('d/m/Y H:i') : null,
+                'resolution_notes' => $systemAlert->resolution_notes,
+                'related_person' => $systemAlert->relatedPerson ? [
+                    'id' => $systemAlert->relatedPerson->id,
+                    'full_name' => $systemAlert->relatedPerson->full_name,
+                    'birth_date' => $systemAlert->relatedPerson->birth_date ? $systemAlert->relatedPerson->birth_date->format('d/m/Y') : null,
+                    'primary_phone' => $systemAlert->relatedPerson->primary_phone,
+                    'email' => $systemAlert->relatedPerson->email,
+                ] : null,
+                'related_family' => $systemAlert->relatedFamily ? [
+                    'id' => $systemAlert->relatedFamily->id,
+                    'name' => $systemAlert->relatedFamily->name,
+                ] : null,
+                'resolved_by' => $systemAlert->resolvedBy ? [
+                    'id' => $systemAlert->resolvedBy->id,
+                    'name' => $systemAlert->resolvedBy->name,
+                ] : null,
+            ],
+        ]);
+    }
+
+    /**
+     * Marca um alerta como em andamento
      * 
      * @param Request $request
      * @param SystemAlert $systemAlert
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function resolve(Request $request, SystemAlert $systemAlert)
+    public function markInProgress(Request $request, SystemAlert $systemAlert)
     {
         $request->validate([
             'resolution_notes' => 'nullable|string|max:1000',
@@ -161,10 +201,52 @@ class SecretaryAlertController extends Controller
         $userId = auth()->id();
         $notes = $request->get('resolution_notes');
 
-        $systemAlert->markAsResolved($userId, $notes);
+        $systemAlert->update([
+            'status' => 'in_progress',
+            'resolution_notes' => $notes,
+        ]);
 
-        return redirect()->route('secretaria.alerts.index')
-            ->with('success', 'Alerta marcado como resolvido com sucesso.');
+        return redirect()->route('secretaria.alerts.resolve.show', $systemAlert->id)
+            ->with('success', 'Alerta marcado como em andamento.');
+    }
+
+    /**
+     * Verifica se o alerta foi realmente resolvido
+     * 
+     * @param Request $request
+     * @param SystemAlert $systemAlert
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function verifyResolution(Request $request, SystemAlert $systemAlert)
+    {
+        $request->validate([
+            'resolution_notes' => 'required|string|max:1000',
+        ]);
+
+        $userId = auth()->id();
+        $notes = $request->get('resolution_notes');
+
+        // Verificar se o problema foi realmente resolvido
+        $verification = $this->alertService->isAlertActuallyResolved($systemAlert);
+
+        if ($verification['resolved']) {
+            // Se foi resolvido, marcar como resolved
+            $systemAlert->markAsResolved($userId, $notes);
+
+            return redirect()->route('secretaria.alerts.index')
+                ->with('success', 'Alerta marcado como resolvido. ' . $verification['message']);
+        } else {
+            // Se não foi resolvido, manter em andamento ou pending
+            $newStatus = $systemAlert->status === 'pending' ? 'pending' : 'in_progress';
+            
+            $systemAlert->update([
+                'status' => $newStatus,
+                'resolution_notes' => $notes,
+            ]);
+
+            return redirect()->route('secretaria.alerts.resolve.show', $systemAlert->id)
+                ->with('error', 'O problema ainda não foi corrigido. ' . $verification['message']);
+        }
     }
 
     /**
@@ -177,7 +259,7 @@ class SecretaryAlertController extends Controller
     public function ignore(Request $request, SystemAlert $systemAlert)
     {
         $request->validate([
-            'resolution_notes' => 'nullable|string|max:1000',
+            'resolution_notes' => 'required|string|max:1000',
         ]);
 
         $userId = auth()->id();
