@@ -16,7 +16,7 @@ class UserAccessEligibilityService
 {
     /**
      * Verifica se uma pessoa é elegível para ter acesso ao sistema
-     * 
+     *
      * @param Person $person A pessoa a ser verificada
      * @return array Array com informações sobre elegibilidade
      */
@@ -24,7 +24,24 @@ class UserAccessEligibilityService
     {
         $age = $person->age();
         $ageGroup = $person->ageGroup();
-        
+
+        // Verificar se já possui usuário (ativo ou suspenso)
+        if ($person->user !== null) {
+            $isActive = $person->user->isActive();
+            $reason = $isActive
+                ? 'Esta pessoa já possui usuário ativo.'
+                : 'Esta pessoa já possui usuário suspenso. Reative o acesso existente em vez de criar outro.';
+
+            return [
+                'allowed' => false,
+                'reason' => $reason,
+                'age' => $age,
+                'age_group' => $ageGroup,
+                'requires_guardian' => false,
+                'has_authorized_guardian' => false,
+            ];
+        }
+
         // Verificar se tem data de nascimento
         if (!$person->birth_date) {
             return [
@@ -52,7 +69,7 @@ class UserAccessEligibilityService
         // Verificar se é Júnior (11-13 anos)
         if ($person->isJunior()) {
             $hasAuthorizedGuardian = $person->hasActiveGuardianAuthorizedForLogin();
-            
+
             if (!$hasAuthorizedGuardian) {
                 return [
                     'allowed' => false,
