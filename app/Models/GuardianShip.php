@@ -13,6 +13,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class GuardianShip extends Model
 {
+    // Nome da tabela no banco de dados
+    // Laravel padrão seria guardian_ships, mas a tabela real é guardianships
+    protected $table = 'guardianships';
+
     // Campos que podem ser preenchidos em massa
     protected $fillable = [
         'minor_person_id',
