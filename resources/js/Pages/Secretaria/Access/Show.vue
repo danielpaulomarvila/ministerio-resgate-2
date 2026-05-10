@@ -127,11 +127,11 @@ const ageGroupLabel = () => {
                         <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Nome</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ props.user.name }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ props.user?.name || '-' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Email</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ props.user.email }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ props.user?.email || '-' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Status</dt>
@@ -139,39 +139,39 @@ const ageGroupLabel = () => {
                                     <span
                                         class="inline-flex rounded-full px-2 py-1 text-xs font-semibold"
                                         :class="{
-                                            'bg-green-100 text-green-800': props.user.status === 'active',
-                                            'bg-red-100 text-red-800': props.user.status === 'suspended',
-                                            'bg-gray-100 text-gray-800': props.user.status === 'inactive',
+                                            'bg-green-100 text-green-800': props.user?.status === 'active',
+                                            'bg-red-100 text-red-800': props.user?.status === 'suspended',
+                                            'bg-gray-100 text-gray-800': props.user?.status === 'inactive',
                                         }"
                                     >
-                                        {{ props.user.status === 'active' ? 'Ativo' : props.user.status === 'suspended' ? 'Suspenso' : 'Inativo' }}
+                                        {{ props.user?.status === 'active' ? 'Ativo' : props.user?.status === 'suspended' ? 'Suspenso' : 'Inativo' }}
                                     </span>
                                 </dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Troca de Senha Pendente</dt>
                                 <dd class="mt-1 text-sm text-gray-900">
-                                    {{ props.user.must_change_password ? 'Sim' : 'Não' }}
+                                    {{ props.user?.must_change_password ? 'Sim' : 'Não' }}
                                 </dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Acesso Concedido em</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ formatDate(props.user.access_granted_at) }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ formatDate(props.user?.access_granted_at) }}</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Acesso Revogado em</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ formatDate(props.user.access_revoked_at) }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ formatDate(props.user?.access_revoked_at) }}</dd>
                             </div>
-                            <div v-if="props.user.access_revoked_reason">
+                            <div v-if="props.user?.access_revoked_reason">
                                 <dt class="text-sm font-medium text-gray-500">Motivo da Revogação</dt>
                                 <dd class="mt-1 text-sm text-gray-900">{{ props.user.access_revoked_reason }}</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Criado em</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ formatDate(props.user.created_at) }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ formatDate(props.user?.created_at) }}</dd>
                             </div>
                         </dl>
-                        <div v-if="props.user.access_notes" class="mt-4">
+                        <div v-if="props.user?.access_notes" class="mt-4">
                             <dt class="text-sm font-medium text-gray-500">Observações</dt>
                             <dd class="mt-1 text-sm text-gray-900">{{ props.user.access_notes }}</dd>
                         </div>
@@ -179,7 +179,7 @@ const ageGroupLabel = () => {
                 </div>
 
                 <!-- Dados da pessoa vinculada -->
-                <div v-if="props.user.person" class="mb-6 rounded-lg bg-white shadow">
+                <div v-if="props.user?.person" class="mb-6 rounded-lg bg-white shadow">
                     <div class="border-b border-gray-200 p-6">
                         <h3 class="text-lg font-medium text-gray-900">Pessoa Vinculada</h3>
                     </div>
@@ -187,7 +187,7 @@ const ageGroupLabel = () => {
                         <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Nome Completo</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ props.user.person.full_name }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ props.user.person.full_name || '-' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Email da Pessoa</dt>
@@ -195,7 +195,7 @@ const ageGroupLabel = () => {
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Idade</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ props.user.person.age }} anos</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ props.user.person.age ? props.user.person.age + ' anos' : '-' }}</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Grupo de Idade</dt>
@@ -234,20 +234,20 @@ const ageGroupLabel = () => {
                     <div class="p-6">
                         <div class="flex space-x-3">
                             <Link
-                                :href="route('secretaria.access.edit', props.user.id)"
+                                :href="route('secretaria.access.edit', props.user?.id)"
                                 class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
                             >
                                 Editar
                             </Link>
                             <button
-                                v-if="props.user.status === 'active'"
+                                v-if="props.user?.status === 'active'"
                                 @click="showSuspendModal = true"
                                 class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
                             >
                                 Suspender
                             </button>
                             <button
-                                v-else
+                                v-else-if="props.user?.status === 'suspended'"
                                 @click="showReactivateModal = true"
                                 class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
                             >
