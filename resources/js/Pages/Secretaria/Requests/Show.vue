@@ -157,6 +157,16 @@ const getTypeLabel = (type) => {
             return type;
     }
 };
+
+const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${date.getFullYear()} ${hours}:${minutes}`;
+};
 </script>
 
 <template>
@@ -168,12 +178,21 @@ const getTypeLabel = (type) => {
                 <h2 class="text-xl font-semibold leading-tight text-gray-800">
                     Detalhes da Solicitação
                 </h2>
-                <Link
-                    :href="route('secretaria.requests.index')"
-                    class="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
-                >
-                    Voltar
-                </Link>
+                <div class="flex space-x-2">
+                    <Link
+                        v-if="request.status === 'pending' || request.status === 'in_review'"
+                        :href="route('secretaria.requests.edit', request.id)"
+                        class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                    >
+                        Editar
+                    </Link>
+                    <Link
+                        :href="route('secretaria.requests.index')"
+                        class="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
+                    >
+                        Voltar
+                    </Link>
+                </div>
             </div>
         </template>
 
@@ -219,13 +238,13 @@ const getTypeLabel = (type) => {
                             <div>
                                 <dt class="text-sm font-medium text-gray-500">Criado em</dt>
                                 <dd class="mt-1 text-sm text-gray-900">
-                                    {{ request.created_at }}
+                                    {{ formatDate(request.created_at) }}
                                 </dd>
                             </div>
                             <div v-if="request.due_at">
                                 <dt class="text-sm font-medium text-gray-500">Prazo</dt>
                                 <dd class="mt-1 text-sm text-gray-900">
-                                    {{ request.due_at }}
+                                    {{ formatDate(request.due_at) }}
                                 </dd>
                             </div>
                             <div v-if="request.assigned_to_user">
