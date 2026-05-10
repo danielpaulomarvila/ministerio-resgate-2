@@ -19,12 +19,20 @@ class UserController extends Controller
      */
     public function search(Request $request): JsonResponse
     {
-        $query = $request->input('q', '');
-        
-        $users = User::where('name', 'like', "%{$query}%")
+        $term = trim((string) $request->query('q', ''));
+
+        if (mb_strlen($term) < 2) {
+            return response()->json([]);
+        }
+
+        $users = User::query()
+            ->where(function ($query) use ($term) {
+                $query->where('name', 'like', "%{$term}%")
+                    ->orWhere('email', 'like', "%{$term}%");
+            })
             ->orderBy('name')
-            ->limit(20)
-            ->get(['id', 'name']);
+            ->limit(10)
+            ->get(['id', 'name', 'email']);
         
         return response()->json($users);
     }

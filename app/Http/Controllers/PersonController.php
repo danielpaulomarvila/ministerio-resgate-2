@@ -277,13 +277,22 @@ class PersonController extends Controller
      */
     public function search(Request $request): JsonResponse
     {
-        $query = $request->input('q', '');
-        
-        $people = Person::where('full_name', 'like', "%{$query}%")
+        $term = trim((string) $request->query('q', ''));
+
+        if (mb_strlen($term) < 2) {
+            return response()->json([]);
+        }
+
+        $people = Person::query()
+            ->where(function ($query) use ($term) {
+                $query->where('full_name', 'like', "%{$term}%")
+                    ->orWhere('email', 'like', "%{$term}%")
+                    ->orWhere('primary_phone', 'like', "%{$term}%");
+            })
             ->whereNull('deleted_at')
             ->orderBy('full_name')
-            ->limit(20)
-            ->get(['id', 'full_name']);
+            ->limit(10)
+            ->get(['id', 'full_name', 'email', 'primary_phone']);
         
         return response()->json($people);
     }

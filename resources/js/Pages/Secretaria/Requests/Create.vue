@@ -31,12 +31,13 @@ const selectedPerson = ref(null);
 watch(personSearch, async (newValue) => {
     if (newValue.length >= 2) {
         try {
-            const response = await axios.get(route('people.search'), {
+            const response = await axios.get('/people/search', {
                 params: { q: newValue }
             });
             personResults.value = response.data;
         } catch (error) {
             console.error('Erro ao buscar pessoas:', error);
+            personResults.value = [];
         }
     } else {
         personResults.value = [];
@@ -65,12 +66,13 @@ const selectedUser = ref(null);
 watch(userSearch, async (newValue) => {
     if (newValue.length >= 2) {
         try {
-            const response = await axios.get(route('users.search'), {
+            const response = await axios.get('/users/search', {
                 params: { q: newValue }
             });
             userResults.value = response.data;
         } catch (error) {
             console.error('Erro ao buscar usuários:', error);
+            userResults.value = [];
         }
     } else {
         userResults.value = [];
@@ -267,7 +269,7 @@ const getTypeHelpText = (type) => {
                                     <!-- Dropdown de resultados -->
                                     <div
                                         v-if="personResults.length > 0"
-                                        class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white shadow-lg"
+                                        class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg"
                                     >
                                         <ul class="py-1">
                                             <li
@@ -276,7 +278,10 @@ const getTypeHelpText = (type) => {
                                                 @click="selectPerson(person)"
                                                 class="cursor-pointer px-4 py-2 hover:bg-gray-100"
                                             >
-                                                {{ person.full_name }}
+                                                <div class="font-medium">{{ person.full_name }}</div>
+                                                <div class="text-sm text-gray-500">
+                                                    {{ person.primary_phone || person.email || 'Sem contato' }}
+                                                </div>
                                             </li>
                                         </ul>
                                     </div>
@@ -310,7 +315,7 @@ const getTypeHelpText = (type) => {
                                     <!-- Dropdown de resultados -->
                                     <div
                                         v-if="userResults.length > 0"
-                                        class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white shadow-lg"
+                                        class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg"
                                     >
                                         <ul class="py-1">
                                             <li
@@ -319,7 +324,10 @@ const getTypeHelpText = (type) => {
                                                 @click="selectUser(user)"
                                                 class="cursor-pointer px-4 py-2 hover:bg-gray-100"
                                             >
-                                                {{ user.name }}
+                                                <div class="font-medium">{{ user.name }}</div>
+                                                <div class="text-sm text-gray-500">
+                                                    {{ user.email || 'Sem email' }}
+                                                </div>
                                             </li>
                                         </ul>
                                     </div>

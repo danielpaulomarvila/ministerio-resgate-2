@@ -25,6 +25,10 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// Rotas para busca de autocomplete (acesso público para funcionar nos formulários)
+Route::get('/people/search', [PersonController::class, 'search'])->name('people.search');
+Route::get('/users/search', [UserController::class, 'search'])->name('users.search');
+
 Route::get('/secretaria', [SecretaryDashboardController::class, 'index'])
     ->middleware(['auth'])
     ->name('secretaria.dashboard');
@@ -120,15 +124,6 @@ Route::middleware('auth')->group(function () {
         
         // Remover pessoa (soft delete)
         Route::delete('/{person}', [PersonController::class, 'destroy'])->name('destroy');
-        
-        // Buscar pessoas por nome para autocomplete
-        Route::get('/search', [PersonController::class, 'search'])->name('search');
-    });
-    
-    // Rotas para busca de usuários - Autocomplete
-    Route::prefix('users')->name('users.')->group(function () {
-        // Buscar usuários por nome para autocomplete
-        Route::get('/search', [UserController::class, 'search'])->name('search');
     });
     
     // Rotas para CRUD de Famílias - Módulo Secretaria - Etapa 2
