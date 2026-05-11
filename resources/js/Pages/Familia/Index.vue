@@ -56,9 +56,9 @@ const props = defineProps({
         </div>
 
         <!-- Grid de Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-5">
             <!-- Card 1 - Aniversariantes de hoje -->
-            <div class="lg:col-span-3 bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow min-h-[220px]">
+            <div class="xl:col-span-3 bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow min-h-[220px]">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center">
                         <span class="text-3xl mr-3">🎂</span>
@@ -94,7 +94,7 @@ const props = defineProps({
             </div>
 
             <!-- Card 2 - Sistemas disponíveis -->
-            <div class="lg:col-span-6 bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow min-h-[220px]">
+            <div class="xl:col-span-6 bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow min-h-[220px]">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center">
                         <span class="text-3xl mr-3">🚀</span>
@@ -163,7 +163,7 @@ const props = defineProps({
             </div>
 
             <!-- Card 3 - Avisos e pendências -->
-            <div class="lg:col-span-3 bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow min-h-[220px]">
+            <div class="xl:col-span-3 bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow min-h-[220px]">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center">
                         <span class="text-3xl mr-3">🔔</span>
@@ -185,7 +185,7 @@ const props = defineProps({
             </div>
 
             <!-- Card 4 - Central de Oração (Em breve) -->
-            <div class="lg:col-span-4 bg-white rounded-2xl p-5 shadow-md border border-gray-100 opacity-75 min-h-[170px]">
+            <div class="xl:col-span-4 bg-white rounded-2xl p-5 shadow-md border border-gray-100 opacity-75 min-h-[170px]">
                 <div class="flex items-start justify-between mb-3">
                     <div class="flex items-center">
                         <span class="text-2xl mr-2">🙏</span>
@@ -204,7 +204,7 @@ const props = defineProps({
             </div>
 
             <!-- Card 5 - Palavra do Dia (Em breve) -->
-            <div class="lg:col-span-4 bg-white rounded-2xl p-5 shadow-md border border-gray-100 opacity-75 min-h-[170px]">
+            <div class="xl:col-span-4 bg-white rounded-2xl p-5 shadow-md border border-gray-100 opacity-75 min-h-[170px]">
                 <div class="flex items-start justify-between mb-3">
                     <div class="flex items-center">
                         <span class="text-2xl mr-2">📖</span>
@@ -223,7 +223,7 @@ const props = defineProps({
             </div>
 
             <!-- Card 6 - Mais sistemas (Em breve) -->
-            <div class="lg:col-span-4 bg-white rounded-2xl p-5 shadow-md border border-gray-100 opacity-75 min-h-[170px]">
+            <div class="xl:col-span-4 bg-white rounded-2xl p-5 shadow-md border border-gray-100 opacity-75 min-h-[170px]">
                 <div class="flex items-start justify-between mb-3">
                     <div class="flex items-center">
                         <span class="text-2xl mr-2">✨</span>

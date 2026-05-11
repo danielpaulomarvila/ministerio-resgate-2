@@ -7,18 +7,18 @@ const sidebarOpen = ref(false);
 </script>
 
 <template>
-    <div class="min-h-screen bg-[#F8F4EC] lg:grid lg:grid-cols-[280px_1fr]">
+    <div class="min-h-screen bg-[#F8F4EC] md:grid md:grid-cols-[280px_1fr]">
         <!-- Mobile Sidebar Overlay -->
         <div
             v-if="sidebarOpen"
-            class="fixed inset-0 bg-black/50 z-50 lg:hidden"
+            class="fixed inset-0 bg-black/50 z-50 md:hidden"
             @click="sidebarOpen = false"
         />
 
         <!-- Mobile Sidebar Drawer -->
         <aside
             v-if="sidebarOpen"
-            class="fixed left-0 top-0 h-full w-[280px] bg-[#061B2E] shadow-xl z-50 lg:hidden overflow-y-auto"
+            class="fixed left-0 top-0 h-full w-[280px] bg-[#061B2E] shadow-xl z-50 md:hidden overflow-y-auto"
         >
             <!-- Sidebar Header -->
             <div class="p-6 border-b border-white/10">
@@ -169,7 +169,7 @@ const sidebarOpen = ref(false);
         </aside>
 
         <!-- Desktop Sidebar (Grid Column) -->
-        <aside class="hidden lg:flex min-h-screen bg-[#061B2E] text-white flex-col">
+        <aside class="hidden md:flex min-h-screen bg-[#061B2E] text-white flex-col">
             <!-- Sidebar Header -->
             <div class="p-6 border-b border-white/10">
                 <div class="flex items-center space-x-3">
@@ -327,7 +327,7 @@ const sidebarOpen = ref(false);
                         <!-- Mobile Menu Button -->
                         <button
                             @click="sidebarOpen = !sidebarOpen"
-                            class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                            class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
                         >
                             <svg class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
