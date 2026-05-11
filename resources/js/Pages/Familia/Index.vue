@@ -16,44 +16,46 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
         <!-- Hero Section -->
-        <div class="mb-8 rounded-3xl bg-gradient-to-br from-[#FFF8F0] to-[#F5EBE0] border border-amber-200/50 p-8 shadow-lg relative overflow-hidden">
+        <div class="mb-6 rounded-2xl bg-gradient-to-br from-[#FFF8F0] to-[#F5EBE0] border border-amber-200/50 p-6 shadow-md relative overflow-hidden h-64 flex items-center">
             <!-- Background decoration -->
-            <div class="absolute right-0 top-0 w-1/3 h-full opacity-10">
-                <div class="absolute right-8 top-8 text-8xl">✝️</div>
-                <div class="absolute right-16 top-32 text-6xl">👨‍👩‍👧‍👦</div>
-                <div class="absolute right-12 top-56 text-5xl">🏠</div>
+            <div class="absolute right-0 top-0 w-1/3 h-full opacity-10 flex items-center justify-center">
+                <div class="text-9xl">✝️</div>
             </div>
 
-            <div class="relative z-10">
-                <p class="text-sm font-semibold text-amber-600 uppercase tracking-wider mb-2">
-                    CENTRO FAMÍLIA RESGATE
-                </p>
-                <h1 class="text-3xl font-bold text-gray-800 mb-4">
-                    Bem-vindo ao centro da Família Resgate! 👋
-                </h1>
-                <p class="text-lg text-gray-700 mb-2">
-                    Olá, {{ greetingName }}. Que bom ter você aqui.
-                </p>
-                <p class="text-lg text-amber-600 font-medium">
-                    🧡 Sua casa dentro do ecossistema Resgate.
-                </p>
+            <div class="relative z-10 w-full">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <p class="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-2">
+                            CENTRO FAMÍLIA RESGATE
+                        </p>
+                        <h1 class="text-2xl font-bold text-gray-800 mb-2">
+                            Bem-vindo ao centro da Família Resgate! 👋
+                        </h1>
+                        <p class="text-base text-gray-700 mb-1">
+                            Olá, {{ greetingName }}. Que bom ter você aqui.
+                        </p>
+                        <p class="text-base text-amber-600 font-medium">
+                            🧡 Sua casa dentro do ecossistema Resgate.
+                        </p>
+                    </div>
 
-                <!-- Verse on the right -->
-                <div class="mt-6 p-4 bg-white/60 rounded-2xl border border-amber-200/50 inline-block">
-                    <p class="text-gray-700 italic font-medium">
-                        "Eu e a minha casa serviremos ao Senhor."
-                    </p>
-                    <p class="text-sm text-gray-500 mt-1">— Josué 24:15</p>
+                    <!-- Verse on the right -->
+                    <div class="hidden md:block bg-white/70 rounded-xl border border-amber-200/50 p-4 ml-6">
+                        <p class="text-gray-700 italic font-medium text-sm">
+                            "Eu e a minha casa serviremos ao Senhor."
+                        </p>
+                        <p class="text-xs text-gray-500 mt-1">— Josué 24:15</p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Grid de Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
             <!-- Card 1 - Aniversariantes de hoje -->
-            <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+            <div class="lg:col-span-3 bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center">
                         <span class="text-3xl mr-3">🎂</span>
@@ -89,7 +91,7 @@ const props = defineProps({
             </div>
 
             <!-- Card 2 - Sistemas disponíveis -->
-            <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition-shadow lg:col-span-2">
+            <div class="lg:col-span-6 bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center">
                         <span class="text-3xl mr-3">🚀</span>
@@ -100,69 +102,53 @@ const props = defineProps({
                     </div>
                 </div>
 
-                <div v-if="shortcuts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div v-if="shortcuts.length > 0" class="grid grid-cols-2 gap-3">
                     <!-- Secretaria -->
                     <Link
                         v-if="shortcuts.some(s => s.title === 'Secretaria')"
                         :href="shortcuts.find(s => s.title === 'Secretaria')?.route || '#'"
-                        class="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 hover:shadow-md transition-all"
+                        class="p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 hover:shadow-md transition-all flex flex-col items-center text-center"
                     >
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <div class="text-3xl mb-2">👨‍💻</div>
-                                <h3 class="font-bold text-gray-800">Secretaria</h3>
-                                <p class="text-sm text-gray-600 mt-1">Cadastros, famílias, solicitações e mais</p>
-                            </div>
-                            <span class="text-blue-600 font-semibold text-sm">→ Acessar</span>
-                        </div>
+                        <div class="text-2xl mb-1">👨‍💻</div>
+                        <h3 class="font-bold text-gray-800 text-sm">Secretaria</h3>
+                        <p class="text-xs text-gray-600 mt-1">Cadastros e solicitações</p>
+                        <span class="text-blue-600 font-semibold text-xs mt-2">→ Acessar</span>
                     </Link>
 
                     <!-- Departamentos -->
                     <Link
                         v-if="shortcuts.some(s => s.title === 'Departamentos')"
                         :href="shortcuts.find(s => s.title === 'Departamentos')?.route || '#'"
-                        class="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 hover:shadow-md transition-all"
+                        class="p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 hover:shadow-md transition-all flex flex-col items-center text-center"
                     >
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <div class="text-3xl mb-2">🏛️</div>
-                                <h3 class="font-bold text-gray-800">Departamentos</h3>
-                                <p class="text-sm text-gray-600 mt-1">Ministérios, equipes e vínculos</p>
-                            </div>
-                            <span class="text-purple-600 font-semibold text-sm">→ Acessar</span>
-                        </div>
+                        <div class="text-2xl mb-1">🏛️</div>
+                        <h3 class="font-bold text-gray-800 text-sm">Departamentos</h3>
+                        <p class="text-xs text-gray-600 mt-1">Ministérios e equipes</p>
+                        <span class="text-purple-600 font-semibold text-xs mt-2">→ Acessar</span>
                     </Link>
 
                     <!-- Acessos -->
                     <Link
                         v-if="shortcuts.some(s => s.title === 'Acessos')"
                         :href="shortcuts.find(s => s.title === 'Acessos')?.route || '#'"
-                        class="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 hover:shadow-md transition-all"
+                        class="p-3 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 hover:shadow-md transition-all flex flex-col items-center text-center"
                     >
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <div class="text-3xl mb-2">🛡️</div>
-                                <h3 class="font-bold text-gray-800">Acessos</h3>
-                                <p class="text-sm text-gray-600 mt-1">Gestão de usuários e permissões</p>
-                            </div>
-                            <span class="text-green-600 font-semibold text-sm">→ Acessar</span>
-                        </div>
+                        <div class="text-2xl mb-1">🛡️</div>
+                        <h3 class="font-bold text-gray-800 text-sm">Acessos</h3>
+                        <p class="text-xs text-gray-600 mt-1">Usuários e permissões</p>
+                        <span class="text-green-600 font-semibold text-xs mt-2">→ Acessar</span>
                     </Link>
 
                     <!-- Perfis de Acesso -->
                     <Link
                         v-if="shortcuts.some(s => s.title === 'Perfis de Acesso')"
                         :href="shortcuts.find(s => s.title === 'Perfis de Acesso')?.route || '#'"
-                        class="p-4 bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl border border-amber-200 hover:shadow-md transition-all"
+                        class="p-3 bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl border border-amber-200 hover:shadow-md transition-all flex flex-col items-center text-center"
                     >
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <div class="text-3xl mb-2">🪪</div>
-                                <h3 class="font-bold text-gray-800">Perfis de Acesso</h3>
-                                <p class="text-sm text-gray-600 mt-1">Perfis e permissões do sistema</p>
-                            </div>
-                            <span class="text-amber-600 font-semibold text-sm">→ Acessar</span>
-                        </div>
+                        <div class="text-2xl mb-1">🪪</div>
+                        <h3 class="font-bold text-gray-800 text-sm">Perfis</h3>
+                        <p class="text-xs text-gray-600 mt-1">Perfis do sistema</p>
+                        <span class="text-amber-600 font-semibold text-xs mt-2">→ Acessar</span>
                     </Link>
                 </div>
                 <div v-else class="text-center py-6">
@@ -174,7 +160,7 @@ const props = defineProps({
             </div>
 
             <!-- Card 3 - Avisos e pendências -->
-            <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+            <div class="lg:col-span-3 bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center">
                         <span class="text-3xl mr-3">🔔</span>
@@ -196,57 +182,57 @@ const props = defineProps({
             </div>
 
             <!-- Card 4 - Central de Oração (Em breve) -->
-            <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 relative opacity-75">
-                <div class="absolute top-4 right-4">
-                    <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold border border-amber-300">
+            <div class="lg:col-span-4 bg-white rounded-2xl p-5 shadow-md border border-gray-100 opacity-75">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-2">🙏</span>
+                        <h2 class="text-lg font-bold text-gray-800">Central de Oração</h2>
+                    </div>
+                    <span class="px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold border border-amber-300">
                         Em breve
                     </span>
                 </div>
-                <div class="flex items-center mb-4">
-                    <span class="text-3xl mr-3">🙏</span>
-                    <h2 class="text-xl font-bold text-gray-800">Central de Oração</h2>
-                </div>
-                <div class="text-center py-6">
-                    <div class="text-5xl mb-3">🕊️</div>
-                    <p class="text-gray-600">
+                <div class="text-center py-4">
+                    <div class="text-4xl mb-2">🕊️</div>
+                    <p class="text-sm text-gray-600">
                         Em breve, você poderá pedir oração e acompanhar pedidos pela Central de Oração.
                     </p>
                 </div>
             </div>
 
             <!-- Card 5 - Palavra do Dia (Em breve) -->
-            <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 relative opacity-75">
-                <div class="absolute top-4 right-4">
-                    <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold border border-amber-300">
+            <div class="lg:col-span-4 bg-white rounded-2xl p-5 shadow-md border border-gray-100 opacity-75">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-2">📖</span>
+                        <h2 class="text-lg font-bold text-gray-800">Palavra do Dia</h2>
+                    </div>
+                    <span class="px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold border border-amber-300">
                         Em breve
                     </span>
                 </div>
-                <div class="flex items-center mb-4">
-                    <span class="text-3xl mr-3">📖</span>
-                    <h2 class="text-xl font-bold text-gray-800">Palavra do Dia</h2>
-                </div>
-                <div class="text-center py-6">
-                    <div class="text-5xl mb-3">📜</div>
-                    <p class="text-gray-600">
+                <div class="text-center py-4">
+                    <div class="text-4xl mb-2">📜</div>
+                    <p class="text-sm text-gray-600">
                         Em breve, uma palavra de fé e encorajamento aparecerá aqui todos os dias para você.
                     </p>
                 </div>
             </div>
 
             <!-- Card 6 - Mais sistemas (Em breve) -->
-            <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 relative opacity-75">
-                <div class="absolute top-4 right-4">
-                    <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold border border-amber-300">
+            <div class="lg:col-span-4 bg-white rounded-2xl p-5 shadow-md border border-gray-100 opacity-75">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-2">✨</span>
+                        <h2 class="text-lg font-bold text-gray-800">Mais sistemas</h2>
+                    </div>
+                    <span class="px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold border border-amber-300">
                         Em breve
                     </span>
                 </div>
-                <div class="flex items-center mb-4">
-                    <span class="text-3xl mr-3">✨</span>
-                    <h2 class="text-xl font-bold text-gray-800">Mais sistemas</h2>
-                </div>
-                <div class="text-center py-6">
-                    <div class="text-5xl mb-3">🎁</div>
-                    <p class="text-gray-600">
+                <div class="text-center py-4">
+                    <div class="text-4xl mb-2">🎁</div>
+                    <p class="text-sm text-gray-600">
                         Novos sistemas e funcionalidades estarão disponíveis em breve para abençoar ainda mais você.
                     </p>
                 </div>
@@ -254,13 +240,13 @@ const props = defineProps({
         </div>
 
         <!-- Footer -->
-        <div class="mt-8 text-center">
-            <div class="inline-block bg-white/80 rounded-2xl p-6 shadow-md border border-amber-200/50">
-                <p class="text-lg font-medium text-gray-700 italic mb-2">
+        <div class="mt-6 text-center">
+            <div class="inline-block bg-white/80 rounded-2xl p-4 shadow-md border border-amber-200/50">
+                <p class="text-base font-medium text-gray-700 italic mb-1">
                     "Eu e a minha casa serviremos ao Senhor."
                 </p>
-                <p class="text-sm text-gray-500 mb-4">— Josué 24:15</p>
-                <p class="text-amber-600 font-semibold">
+                <p class="text-xs text-gray-500 mb-2">— Josué 24:15</p>
+                <p class="text-amber-600 font-semibold text-sm">
                     Bem-vindo à sua casa espiritual! 🏠
                 </p>
             </div>

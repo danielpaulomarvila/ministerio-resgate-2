@@ -7,19 +7,19 @@ const sidebarOpen = ref(false);
 </script>
 
 <template>
-    <div class="min-h-screen bg-[#F8F6F3]">
+    <div class="min-h-screen bg-[#F8F4EC]">
         <!-- Mobile Sidebar Overlay -->
         <div
             v-if="sidebarOpen"
-            class="fixed inset-0 bg-black/50 z-40 xl:hidden"
+            class="fixed inset-0 bg-black/50 z-40 lg:hidden"
             @click="sidebarOpen = false"
         />
 
         <!-- Sidebar -->
         <aside
             :class="[
-                'fixed left-0 top-0 h-full w-[280px] bg-gradient-to-b from-[#1e3a5f] to-[#0f2744] shadow-xl z-50 transition-transform duration-300 xl:translate-x-0',
-                sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                'fixed left-0 top-0 h-full w-[280px] bg-[#061B2E] shadow-xl z-50 transition-transform duration-300 lg:translate-x-0 -translate-x-full lg:block',
+                sidebarOpen ? 'translate-x-0' : ''
             ]"
         >
             <!-- Sidebar Header -->
@@ -171,7 +171,7 @@ const sidebarOpen = ref(false);
         </aside>
 
         <!-- Main Content Area -->
-        <div class="xl:pl-[280px]">
+        <div class="lg:ml-[280px]">
             <!-- Header -->
             <header class="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-30">
                 <div class="px-4 sm:px-6 lg:px-8">
@@ -179,7 +179,7 @@ const sidebarOpen = ref(false);
                         <!-- Mobile Menu Button -->
                         <button
                             @click="sidebarOpen = !sidebarOpen"
-                            class="xl:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                            class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
                         >
                             <svg class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
