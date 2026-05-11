@@ -233,6 +233,124 @@ Cadastros vindos do formulário online devem entrar como solicitações pendente
 
 A Secretaria deve aprovar antes que os dados virem definitivos.
 
+## Cadastro pela Secretaria e Cadastro Online
+
+### Referência conceitual do sistema antigo
+
+O sistema antigo foi analisado como referência conceitual para entender o fluxo de cadastro.
+
+**Boas partes do sistema antigo (conceitual):**
+
+1. **Fluxo de cadastro online com aprovação**
+   - Cadastro online gera solicitação pendente
+   - Secretaria pode: aprovar, rejeitar, solicitar correção, marcar em análise
+   - Ao aprovar, cria Family, Members, Users e vínculos automaticamente
+   - Valida NIFs duplicados antes de aprovar
+   - Valida emails duplicados antes de criar usuários
+   - Envia email de decisão para a pessoa
+
+2. **Estrutura de dados do cadastro online**
+   - Payload estruturado: main, spouse, children, family, address
+   - Trata família inteira em um único cadastro
+   - Permite criar usuários para membros da família
+   - Cria vínculos de relacionamento (spouse, parent, child)
+   - Gera código de membro automaticamente
+
+3. **Cadastro pela Secretaria**
+   - Permite salvar cadastro incompleto com confirmação
+   - Sistema de pending items para cadastros incompletos
+   - Sincroniza família, cônjuge, filhos
+   - Sincroniza departamentos
+   - Sincroniza ministry groups
+   - Sistema de audit/logging
+
+**Partes que devem ser descartadas:**
+
+1. **Sistema complexo de endereço/morada**
+   - O sistema antigo usava PortugalAddressService com hierarquia complexa
+   - Travava ou ficava pesado/confuso
+   - Deve ser redesenhado e simplificado no Resgate 2.0
+
+2. **Complexidade excessiva**
+   - Muitos campos em um único payload
+   - Sistema de fallback para dados legados
+   - Normalização excessiva de dados
+
+### Regra para Resgate 2.0
+
+**Não copiar:**
+- Código do sistema antigo
+- Visual do sistema antigo
+- Tela do sistema antigo
+- Documentos do sistema antigo
+- Estrutura complexa de endereço/morada
+
+**Usar como referência conceitual:**
+- Fluxo de aprovação de cadastro online
+- Estrutura de dados (main, spouse, children, family)
+- Validação de NIFs e emails
+- Criação automática de vínculos ao aprovar
+- Sistema de pending items para cadastros incompletos
+
+### Endereço/Morada no Resgate 2.0
+
+A parte de endereço/morada deve ser redesenhada e melhorada.
+
+**Estrutura adequada para Portugal:**
+- Morada
+- Código postal
+- Distrito
+- Concelho/Município
+- Freguesia
+- Localidade
+- País
+- Complemento/referência, se necessário
+
+**Experiência desejada:**
+- Simples
+- Sem travamentos
+- Sem campos confusos
+- Sem excesso de campos na mesma tela
+- Sem formulário pesado
+- Permitir salvar como incompleto para revisão posterior
+
+**Sugestão:**
+- Morada pode ser uma etapa própria ou seção recolhível
+- Se a pessoa não souber tudo, permitir salvar como incompleto
+- Secretaria pode revisar e completar depois
+
+### Experiência visual do cadastro
+
+Evitar:
+- Formulário gigante com tudo aberto
+- Scroll longo
+- Campos espremidos
+- Textos cortados
+- Caixas sobre caixas
+- Excesso de informação
+
+Preferir:
+- Etapas guiadas
+- Abas
+- Seções compactas
+- Progresso visual
+- Validação clara
+- Campos agrupados por assunto
+- Botões bem posicionados
+- Salvamento seguro
+- Mensagens simples em português
+
+**Exemplo de etapas para cadastro pela Secretaria:**
+1. Dados pessoais
+2. Contato
+3. Família
+4. Documentos
+5. Morada
+6. Igreja/membresia
+7. Revisão final
+
+Para cadastro online, deve ser mais simples e acolhedor, com menos etapas.
+
 ## Área futura do membro/participante
 
 No futuro, cada pessoa com usuário poderá ter uma área própria.

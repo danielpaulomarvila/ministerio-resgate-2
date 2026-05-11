@@ -794,8 +794,21 @@ Não implementar agora:
 - pedido público de oração
 - chat de acompanhamento
 - distribuição de pedidos entre intercessores
+- cadastro online completo
+- sistema complexo de endereço/morada do sistema antigo
 
 Isso é visão e planejamento para orientar a próxima etapa.
+
+## Referência ao Cadastro
+
+Para detalhes sobre cadastro pela Secretaria e cadastro online, incluindo análise do sistema antigo como referência conceitual, ver a seção "Cadastro pela Secretaria e Cadastro Online" em docs/VISAO_PRODUTO_RESGATE_2.md.
+
+Essa seção documenta:
+- Boas partes do sistema antigo (conceitual)
+- Partes que devem ser descartadas
+- Regra para Resgate 2.0 (não copiar código, usar como referência)
+- Endereço/Morada redesenhado e simplificado
+- Experiência visual do cadastro por etapas
 
 ## Planejamento da Próxima Etapa
 
