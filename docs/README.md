@@ -55,3 +55,4 @@ Este diretório reúne a documentação técnica, funcional e estratégica do pr
 
 - [Visão Futura do Painel Pastoral](VISAO_FUTURA_PAINEL_PASTORAL.md)
 - [Visão Oficial do Produto — Resgate 2.0](VISAO_PRODUTO_RESGATE_2.md)
+- [Visão do Site Público e Centro Família Resgate](VISAO_SITE_PUBLICO_E_CENTRO_FAMILIA.md)
