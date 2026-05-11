@@ -35,30 +35,38 @@ Criar a base visual e funcional inicial do Centro Família Resgate.
 
 **Métodos:**
 - `index(Request $request): Response` - Carrega dados e renderiza página
-- `getAvailableShortcuts($user): array` - Monta lista de atalhos permitidos
+- `getAvailableShortcuts($user): array` - Monta lista de atalhos permitidos usando `hasPermission()`
 
 ### 3. Layout
 
 **Arquivo:** `resources/js/Layouts/FamilyHubLayout.vue`
 
 **Características:**
-- Tema escuro (bg-gray-900)
-- Header com logo e menu do usuário
+- Tema escuro premium (bg-gray-950)
+- Header com identidade Resgate (logo com "R" em gradiente laranja)
+- Nome do sistema: "Família Resgate" com subtítulo "Centro da igreja"
+- Avatar do usuário com inicial
 - Dropdown com "Meu perfil" e "Sair"
-- Layout simples e limpo
+- Layout limpo e organizado
 
 ### 4. Página Vue Principal
 
 **Arquivo:** `resources/js/Pages/Familia/Index.vue`
 
 **Seções:**
-1. Saudação principal: "Bem-vindo ao centro da Família Resgate"
-2. Saudação personalizada: "Olá, {nome}. Que bom ter você aqui."
-3. Card de aniversariantes do dia
-4. Card de sistemas disponíveis
-5. Card de avisos e pendências
-6. Card futuro de oração (visão futura)
-7. Card futuro de palavra do dia (visão futura)
+1. Hero Section: "Centro Família Resgate" com saudação personalizada
+2. Card de aniversariantes do dia (com ícone e visual premium)
+3. Card de sistemas disponíveis (com ícone e visual premium)
+4. Card de avisos e pendências (com ícone e visual premium)
+5. Card futuro de oração (com badge "Em breve" e ícone espiritual)
+6. Card futuro de palavra do dia (com badge "Em breve" e ícone espiritual)
+
+**Visual:**
+- Fundo escuro (bg-gray-950)
+- Cards com bordas sutis e hover effects
+- Ícones coloridos (laranja para aniversariantes, azul para sistemas, verde para avisos, roxo para oração, âmbar para palavra)
+- Badges "Em breve" em laranja para sistemas futuros
+- Gradiente no hero section
 
 ## Dados Reais Usados
 
@@ -148,18 +156,51 @@ Usamos permissões existentes do sistema:
 ## Riscos
 
 **Riscos mitigados:**
-- Backend protege atalhos com verificação de permissões
+- Backend protege atalhos com verificação de permissões usando `hasPermission()`
 - Página funciona mesmo se usuário não tiver `person_id`
 - Layout simples evita scroll longo
 - Componentes mantidos simples para evitar complexidade
 
+## Ajuste Visual Após Teste Manual
+
+Após teste manual inicial, foi identificado que o visual não estava no padrão oficial do Resgate 2.0. Foram feitos os seguintes ajustes:
+
+**Ajustes no Layout:**
+- Fundo alterado de `bg-gray-900` para `bg-gray-950` (mais escuro e premium)
+- Logo padrão Laravel removido
+- Adicionada identidade visual Resgate: logo com "R" em gradiente laranja
+- Nome do sistema: "Família Resgate" com subtítulo "Centro da igreja"
+- Avatar do usuário com inicial em círculo laranja
+- Header com backdrop blur para efeito premium
+
+**Ajustes na Página:**
+- Criado Hero Section com gradiente e título forte "Centro Família Resgate"
+- Saudação personalizada destacada
+- Cards melhorados com:
+  - Ícones coloridos para cada seção
+  - Bordas sutis e hover effects
+  - Fundo semitransparente (`bg-gray-900/50`)
+  - Cantos arredondados (`rounded-2xl`)
+- Badges "Em breve" em laranja para sistemas futuros
+- Ícones espirituais para Oração e Palavra do dia
+
+**Correção no Controller:**
+- Alterado de `$user->can()` para `$user->hasPermission()` para verificar permissões corretamente
+- Adicionado atalho para "Perfis de Acesso" quando usuário tem permissão `permissions.view`
+
 ## Visual
 
 **Identidade visual seguida:**
-- Tema escuro (bg-gray-900)
+- Tema escuro premium (bg-gray-950)
 - Preto/cinza como base
-- Laranja-dourado (amber-500) como destaque
+- Laranja-dourado (amber-500) como destaque principal
+- Azul para informação
+- Verde para sucesso
+- Roxo para espiritual
 - Visual premium, espiritual, moderno, elegante, limpo
+- Hero Section com gradiente
+- Ícones coloridos
+- Badges "Em breve" elegantes
 
 **Evitado:**
 - Scroll longo
@@ -171,6 +212,9 @@ Usamos permissões existentes do sistema:
 - Botões desalinhados
 - Tabelas desnecessárias
 - Informação demais na mesma tela
+- Fundo branco dominante
+- Visual padrão Laravel
+- Logo padrão Laravel
 
 ## Testes Manuais Sugeridos
 

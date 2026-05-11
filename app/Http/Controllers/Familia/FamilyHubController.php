@@ -67,7 +67,7 @@ class FamilyHubController extends Controller
         $shortcuts = [];
 
         // Secretaria
-        if ($user->can('secretaria.view') || $user->can('people.view')) {
+        if ($user->hasPermission('secretaria.view') || $user->hasPermission('people.view')) {
             $shortcuts[] = [
                 'title' => 'Secretaria',
                 'description' => 'Cadastros, famílias, solicitações e organização administrativa.',
@@ -77,7 +77,7 @@ class FamilyHubController extends Controller
         }
 
         // Departamentos
-        if ($user->can('departments.view')) {
+        if ($user->hasPermission('departments.view')) {
             $shortcuts[] = [
                 'title' => 'Departamentos',
                 'description' => 'Ministérios, equipes e vínculos.',
@@ -87,11 +87,21 @@ class FamilyHubController extends Controller
         }
 
         // Acessos
-        if ($user->can('accesses.view') || $user->can('access_profiles.view')) {
+        if ($user->hasPermission('accesses.view') || $user->hasPermission('permissions.view')) {
             $shortcuts[] = [
                 'title' => 'Acessos',
                 'description' => 'Gestão de usuários e permissões.',
                 'route' => route('secretaria.access.index'),
+                'visible' => true,
+            ];
+        }
+
+        // Perfis de Acesso
+        if ($user->hasPermission('permissions.view')) {
+            $shortcuts[] = [
+                'title' => 'Perfis de Acesso',
+                'description' => 'Gestão de perfis e permissões do sistema.',
+                'route' => route('secretaria.access-profiles.index'),
                 'visible' => true,
             ];
         }

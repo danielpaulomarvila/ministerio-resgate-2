@@ -1,23 +1,27 @@
 <script setup>
 import { ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 
 const showingNavigationDropdown = ref(false);
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-900">
+    <div class="min-h-screen bg-gray-950">
         <!-- Header -->
-        <header class="border-b border-gray-800 bg-gray-900">
+        <header class="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 justify-between items-center">
-                    <!-- Logo -->
+                    <!-- Logo/Brand -->
                     <div class="flex items-center">
-                        <Link :href="route('familia.index')">
-                            <ApplicationLogo class="h-8 w-auto text-amber-500" />
+                        <Link :href="route('familia.index')" class="flex items-center space-x-3">
+                            <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
+                                <span class="text-white font-bold text-xl">R</span>
+                            </div>
+                            <div>
+                                <h1 class="text-lg font-bold text-white">Família Resgate</h1>
+                                <p class="text-xs text-amber-500">Centro da igreja</p>
+                            </div>
                         </Link>
-                        <span class="ml-3 text-xl font-semibold text-white">Família Resgate</span>
                     </div>
 
                     <!-- User Menu -->
@@ -26,9 +30,14 @@ const showingNavigationDropdown = ref(false);
                             @click="showingNavigationDropdown = !showingNavigationDropdown"
                             class="flex items-center rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
                         >
-                            <span class="mr-2">{{ $page.props.auth.user.name }}</span>
+                            <div class="h-8 w-8 rounded-full bg-amber-500 flex items-center justify-center mr-2">
+                                <span class="text-white font-semibold text-sm">
+                                    {{ $page.props.auth.user.name.charAt(0).toUpperCase() }}
+                                </span>
+                            </div>
+                            <span>{{ $page.props.auth.user.name }}</span>
                             <svg
-                                class="h-4 w-4"
+                                class="h-4 w-4 ml-2"
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
                                 viewBox="0 0 24 24"
@@ -47,7 +56,7 @@ const showingNavigationDropdown = ref(false);
                         <div
                             v-show="showingNavigationDropdown"
                             @click.away="showingNavigationDropdown = false"
-                            class="absolute right-0 mt-2 w-48 rounded-lg bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 z-50"
+                            class="absolute right-0 mt-2 w-48 rounded-lg bg-gray-800 shadow-lg ring-1 ring-gray-700 z-50"
                         >
                             <div class="py-1">
                                 <Link
