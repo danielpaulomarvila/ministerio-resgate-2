@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\DepartmentPersonUpdated;
 use App\Models\ActivityLog;
+use App\Models\DepartmentPerson;
 use Illuminate\Support\Facades\Auth;
 
 /**

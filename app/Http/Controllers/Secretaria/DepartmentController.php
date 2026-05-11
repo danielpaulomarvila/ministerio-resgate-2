@@ -7,6 +7,7 @@ use App\Events\DepartmentLeaderChanged;
 use App\Events\DepartmentUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\Department;
+use App\Models\DepartmentPerson;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
