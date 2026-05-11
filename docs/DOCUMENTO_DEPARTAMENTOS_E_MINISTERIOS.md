@@ -24,6 +24,25 @@ Este módulo gerencia os departamentos e ministérios da igreja, incluindo sua c
 - Critério: `department_people.status = active` E `ends_at IS NULL`
 - Mensagem de erro: "Este departamento possui pessoas ativas vinculadas. Remova ou inative os vínculos antes de excluir."
 
+### Exclusão Segura com Modal Visual
+
+- **Modal Visual**: Exclusão usa modal visual bonito e centralizado, não window.confirm/alert nativo do navegador
+- **Componente Reutilizável**: Usa componente `ConfirmActionModal.vue` para confirmação de ações
+- **Departamento do Sistema**: Botão Excluir não aparece para departamentos do sistema (`is_system = true`)
+- **Backend Protege**: Backend bloqueia exclusão de departamento do sistema mesmo se o botão for forçado
+- **Pessoas Ativas**: Backend bloqueia exclusão se houver pessoas ativas vinculadas
+- **Soft Delete**: Usa soft delete (deleted_at), não exclusão física
+- **ActivityLog**: Gera ActivityLog através de evento DepartmentDeleted e listener LogDepartmentDeleted
+- **Não Apaga Dados**: Não apaga pessoas, usuários, membros ou member_profile
+
+### Modal de Confirmação
+
+- **Componente**: `resources/js/Components/ConfirmActionModal.vue`
+- **Visual**: Fundo escurecido, card centralizado, título claro, texto explicativo
+- **Botões**: Cancelar (neutro) e Confirmar (vermelho para exclusão)
+- **Transições**: Transições suaves de entrada e saída
+- **Reutilizável**: Pode ser reutilizado em outras partes do sistema
+
 ### Regras Importantes
 
 - **Departamento não cria membro automaticamente**

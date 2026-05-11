@@ -1,6 +1,8 @@
 <script setup>
 import { Head, Link, router } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ConfirmActionModal from '@/Components/ConfirmActionModal.vue';
+import { ref } from 'vue';
 
 const props = defineProps({
     departments: {
@@ -21,14 +23,27 @@ const props = defineProps({
  * - Departamento com pessoas ativas vinculadas não pode ser excluído
  * - Usa soft delete (não apaga dados do banco)
  * - Não apaga pessoas, usuários, membros ou member_profile
+ * - Usa modal visual, não window.confirm nativo
  */
-const deleteDepartment = (department) => {
-    if (!confirm(`Tem certeza que deseja excluir o departamento "${department.name}"?`)) {
-        return;
-    }
+const departmentToDelete = ref(null);
+const showDeleteModal = ref(false);
 
-    router.delete(route('secretaria.departments.destroy', department.id), {
+const openDeleteModal = (department) => {
+    departmentToDelete.value = department;
+    showDeleteModal.value = true;
+};
+
+const closeDeleteModal = () => {
+    departmentToDelete.value = null;
+    showDeleteModal.value = false;
+};
+
+const confirmDeleteDepartment = () => {
+    if (!departmentToDelete.value) return;
+
+    router.delete(route('secretaria.departments.destroy', departmentToDelete.value.id), {
         preserveScroll: true,
+        onFinish: () => closeDeleteModal(),
     });
 };
 </script>
@@ -163,7 +178,7 @@ const deleteDepartment = (department) => {
                                     <button
                                         v-if="!department.is_system"
                                         type="button"
-                                        @click="deleteDepartment(department)"
+                                        @click="openDeleteModal(department)"
                                         class="text-red-600 hover:text-red-900"
                                     >
                                         Excluir
@@ -176,4 +191,16 @@ const deleteDepartment = (department) => {
             </div>
         </div>
     </AuthenticatedLayout>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <ConfirmActionModal
+        :show="showDeleteModal"
+        title="Excluir departamento"
+        :message="`Tem certeza que deseja excluir o departamento '${departmentToDelete?.name}'? Esta ação removerá o departamento da listagem, mas não apagará pessoas, usuários, membros ou históricos vinculados.`"
+        confirm-text="Excluir Departamento"
+        cancel-text="Cancelar"
+        confirm-button-class="bg-red-600 hover:bg-red-700 text-white"
+        @confirm="confirmDeleteDepartment"
+        @cancel="closeDeleteModal"
+    />
 </template>

@@ -1,6 +1,8 @@
 <script setup>
 import { Head, Link, router } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ConfirmActionModal from '@/Components/ConfirmActionModal.vue';
+import { ref } from 'vue';
 
 const props = defineProps({
     department: {
@@ -21,13 +23,22 @@ const props = defineProps({
  * - Departamento com pessoas ativas vinculadas não pode ser excluído
  * - Usa soft delete (não apaga dados do banco)
  * - Não apaga pessoas, usuários, membros ou member_profile
+ * - Usa modal visual, não window.confirm nativo
  */
-const deleteDepartment = () => {
-    if (!confirm(`Tem certeza que deseja excluir o departamento "${props.department.name}"?`)) {
-        return;
-    }
+const showDeleteModal = ref(false);
 
-    router.delete(route('secretaria.departments.destroy', props.department.id));
+const openDeleteModal = () => {
+    showDeleteModal.value = true;
+};
+
+const closeDeleteModal = () => {
+    showDeleteModal.value = false;
+};
+
+const confirmDeleteDepartment = () => {
+    router.delete(route('secretaria.departments.destroy', props.department.id), {
+        onFinish: () => closeDeleteModal(),
+    });
 };
 </script>
 
@@ -50,7 +61,7 @@ const deleteDepartment = () => {
                     <button
                         v-if="!department.is_system"
                         type="button"
-                        @click="deleteDepartment"
+                        @click="openDeleteModal"
                         class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
                     >
                         Excluir
@@ -211,4 +222,16 @@ const deleteDepartment = () => {
             </div>
         </div>
     </AuthenticatedLayout>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <ConfirmActionModal
+        :show="showDeleteModal"
+        title="Excluir departamento"
+        :message="`Tem certeza que deseja excluir o departamento '${props.department.name}'? Esta ação removerá o departamento da listagem, mas não apagará pessoas, usuários, membros ou históricos vinculados.`"
+        confirm-text="Excluir Departamento"
+        cancel-text="Cancelar"
+        confirm-button-class="bg-red-600 hover:bg-red-700 text-white"
+        @confirm="confirmDeleteDepartment"
+        @cancel="closeDeleteModal"
+    />
 </template>
