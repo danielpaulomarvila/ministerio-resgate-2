@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\FamilyController;
+use App\Http\Controllers\Familia\FamilyHubController;
 use App\Http\Controllers\GuardianshipController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProfileController;
@@ -29,6 +30,10 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/familia', [FamilyHubController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('familia.index');
 
 Route::get('/secretaria', [SecretaryDashboardController::class, 'index'])
     ->middleware(['auth'])

@@ -57,6 +57,11 @@ Este diretório reúne a documentação técnica, funcional e estratégica do pr
 - [Visão Oficial do Produto — Resgate 2.0](VISAO_PRODUTO_RESGATE_2.md)
 - [Visão do Site Público e Centro Família Resgate](VISAO_SITE_PUBLICO_E_CENTRO_FAMILIA.md)
 
+## Centro Família Resgate
+
+- [Centro Família Resgate](DOCUMENTO_CENTRO_FAMILIA_RESGATE.md)
+- [Checklist Centro Família Resgate](CHECKLIST_CENTRO_FAMILIA_RESGATE.md)
+
 ## Regras de qualidade
 
 - [Regra de Qualidade e Arquitetura Limpa do Resgate 2.0](REGRA_QUALIDADE_ARQUITETURA_LIMPA.md)
