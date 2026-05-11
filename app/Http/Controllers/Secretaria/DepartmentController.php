@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Secretaria;
 
 use App\Events\DepartmentCreated;
+use App\Events\DepartmentDeleted;
 use App\Events\DepartmentLeaderChanged;
 use App\Events\DepartmentUpdated;
 use App\Http\Controllers\Controller;
@@ -11,6 +12,7 @@ use App\Models\DepartmentPerson;
 use App\Models\Person;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 /**
@@ -311,13 +313,16 @@ class DepartmentController extends Controller
 
         // Registrar dados antes da exclusão para log/evento
         $departmentName = $department->name;
-        $departmentId = $department->id;
+        $userId = Auth::id();
 
-        // Soft delete (não apaga dados do banco, apenas marca como deleted_at)
-        $department->delete();
+        // Usar transação para evitar ação parcial quebrada
+        DB::transaction(function () use ($department, $userId) {
+            // Soft delete (não apaga dados do banco, apenas marca como deleted_at)
+            $department->delete();
 
-        // Disparar evento para log
-        event(new DepartmentDeleted($department, Auth::id()));
+            // Disparar evento para log
+            event(new DepartmentDeleted($department, $userId));
+        });
 
         return redirect()
             ->route('secretaria.departments.index')
