@@ -7,20 +7,18 @@ const sidebarOpen = ref(false);
 </script>
 
 <template>
-    <div class="min-h-screen bg-[#F8F4EC]">
+    <div class="min-h-screen bg-[#F8F4EC] lg:grid lg:grid-cols-[280px_1fr]">
         <!-- Mobile Sidebar Overlay -->
         <div
             v-if="sidebarOpen"
-            class="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            class="fixed inset-0 bg-black/50 z-50 lg:hidden"
             @click="sidebarOpen = false"
         />
 
-        <!-- Sidebar -->
+        <!-- Mobile Sidebar Drawer -->
         <aside
-            :class="[
-                'fixed left-0 top-0 h-full w-[280px] bg-[#061B2E] shadow-xl z-50 transition-transform duration-300 lg:translate-x-0 -translate-x-full lg:block',
-                sidebarOpen ? 'translate-x-0' : ''
-            ]"
+            v-if="sidebarOpen"
+            class="fixed left-0 top-0 h-full w-[280px] bg-[#061B2E] shadow-xl z-50 lg:hidden overflow-y-auto"
         >
             <!-- Sidebar Header -->
             <div class="p-6 border-b border-white/10">
@@ -170,10 +168,160 @@ const sidebarOpen = ref(false);
             </div>
         </aside>
 
-        <!-- Main Content Area -->
-        <div class="lg:ml-[280px]">
+        <!-- Desktop Sidebar (Grid Column) -->
+        <aside class="hidden lg:flex min-h-screen bg-[#061B2E] text-white flex-col">
+            <!-- Sidebar Header -->
+            <div class="p-6 border-b border-white/10">
+                <div class="flex items-center space-x-3">
+                    <div class="h-14 w-14 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg">
+                        <span class="text-white font-bold text-2xl">R</span>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-white">Família Resgate</h1>
+                        <p class="text-xs text-amber-400">Centro da igreja</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Menu -->
+            <div class="p-4 flex-1 overflow-y-auto">
+                <!-- Main Items -->
+                <nav class="space-y-2">
+                    <Link
+                        :href="route('familia.index')"
+                        class="flex items-center space-x-3 px-4 py-3 rounded-xl text-white hover:bg-white/10 transition-colors"
+                    >
+                        <span class="text-xl">🏠</span>
+                        <span class="font-medium">Centro Família</span>
+                    </Link>
+
+                    <Link
+                        v-if="$page.props.shortcuts?.some(s => s.title === 'Secretaria')"
+                        :href="$page.props.shortcuts?.find(s => s.title === 'Secretaria')?.route || '#'"
+                        class="flex items-center space-x-3 px-4 py-3 rounded-xl text-white hover:bg-white/10 transition-colors"
+                    >
+                        <span class="text-xl">📋</span>
+                        <span class="font-medium">Secretaria</span>
+                    </Link>
+
+                    <Link
+                        v-if="$page.props.shortcuts?.some(s => s.title === 'Departamentos')"
+                        :href="$page.props.shortcuts?.find(s => s.title === 'Departamentos')?.route || '#'"
+                        class="flex items-center space-x-3 px-4 py-3 rounded-xl text-white hover:bg-white/10 transition-colors"
+                    >
+                        <span class="text-xl">🏛️</span>
+                        <span class="font-medium">Departamentos</span>
+                    </Link>
+
+                    <Link
+                        v-if="$page.props.shortcuts?.some(s => s.title === 'Acessos')"
+                        :href="$page.props.shortcuts?.find(s => s.title === 'Acessos')?.route || '#'"
+                        class="flex items-center space-x-3 px-4 py-3 rounded-xl text-white hover:bg-white/10 transition-colors"
+                    >
+                        <span class="text-xl">🛡️</span>
+                        <span class="font-medium">Acessos</span>
+                    </Link>
+
+                    <Link
+                        v-if="$page.props.shortcuts?.some(s => s.title === 'Perfis de Acesso')"
+                        :href="$page.props.shortcuts?.find(s => s.title === 'Perfis de Acesso')?.route || '#'"
+                        class="flex items-center space-x-3 px-4 py-3 rounded-xl text-white hover:bg-white/10 transition-colors"
+                    >
+                        <span class="text-xl">🪪</span>
+                        <span class="font-medium">Perfis de Acesso</span>
+                    </Link>
+                </nav>
+
+                <!-- Future Systems Section -->
+                <div class="mt-8">
+                    <h3 class="px-4 text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">
+                        Futuros sistemas
+                    </h3>
+                    <nav class="space-y-2">
+                        <button
+                            disabled
+                            class="flex items-center justify-between w-full px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 transition-colors cursor-not-allowed"
+                        >
+                            <div class="flex items-center space-x-3">
+                                <span class="text-xl">🙏</span>
+                                <span>Central de Oração</span>
+                            </div>
+                            <span class="px-2 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-medium border border-amber-500/30">
+                                Em breve
+                            </span>
+                        </button>
+
+                        <button
+                            disabled
+                            class="flex items-center justify-between w-full px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 transition-colors cursor-not-allowed"
+                        >
+                            <div class="flex items-center space-x-3">
+                                <span class="text-xl">📖</span>
+                                <span>Palavra do Dia</span>
+                            </div>
+                            <span class="px-2 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-medium border border-amber-500/30">
+                                Em breve
+                            </span>
+                        </button>
+
+                        <button
+                            disabled
+                            class="flex items-center justify-between w-full px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 transition-colors cursor-not-allowed"
+                        >
+                            <div class="flex items-center space-x-3">
+                                <span class="text-xl">💰</span>
+                                <span>Financeiro</span>
+                            </div>
+                            <span class="px-2 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-medium border border-amber-500/30">
+                                Em breve
+                            </span>
+                        </button>
+
+                        <button
+                            disabled
+                            class="flex items-center justify-between w-full px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 transition-colors cursor-not-allowed"
+                        >
+                            <div class="flex items-center space-x-3">
+                                <span class="text-xl">☕</span>
+                                <span>Cantina</span>
+                            </div>
+                            <span class="px-2 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-medium border border-amber-500/30">
+                                Em breve
+                            </span>
+                        </button>
+
+                        <button
+                            disabled
+                            class="flex items-center justify-between w-full px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 transition-colors cursor-not-allowed"
+                        >
+                            <div class="flex items-center space-x-3">
+                                <span class="text-xl">💒</span>
+                                <span>Centro Pastoral</span>
+                            </div>
+                            <span class="px-2 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-medium border border-amber-500/30">
+                                Em breve
+                            </span>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Sidebar Footer -->
+            <div class="p-4 border-t border-white/10">
+                <div class="bg-white/5 rounded-xl p-4 text-center">
+                    <div class="text-3xl mb-2">👨‍👩‍👧‍👦</div>
+                    <p class="text-sm text-white/80 leading-relaxed">
+                        Somos uma família que ama, acolhe e transforma vidas.
+                    </p>
+                    <div class="mt-2 text-2xl">❤️</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area (Grid Column) -->
+        <div class="min-w-0">
             <!-- Header -->
-            <header class="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-30">
+            <header class="bg-white border-b border-gray-200">
                 <div class="px-4 sm:px-6 lg:px-8">
                     <div class="flex h-16 justify-between items-center">
                         <!-- Mobile Menu Button -->
@@ -258,7 +406,7 @@ const sidebarOpen = ref(false);
             </header>
 
             <!-- Main Content -->
-            <main>
+            <main class="px-4 sm:px-6 lg:px-8 py-6">
                 <slot />
             </main>
         </div>

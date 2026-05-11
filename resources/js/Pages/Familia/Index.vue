@@ -16,46 +16,49 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+    <div class="mx-auto max-w-7xl">
         <!-- Hero Section -->
-        <div class="mb-6 rounded-2xl bg-gradient-to-br from-[#FFF8F0] to-[#F5EBE0] border border-amber-200/50 p-6 shadow-md relative overflow-hidden h-64 flex items-center">
-            <!-- Background decoration -->
-            <div class="absolute right-0 top-0 w-1/3 h-full opacity-10 flex items-center justify-center">
-                <div class="text-9xl">✝️</div>
-            </div>
+        <div class="mb-6 rounded-2xl bg-gradient-to-br from-[#FFF8F0] to-[#F5EBE0] border border-amber-200/50 shadow-md overflow-hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 min-h-[280px]">
+                <!-- Left Column -->
+                <div class="p-6 flex flex-col justify-center">
+                    <p class="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-2">
+                        CENTRO FAMÍLIA RESGATE
+                    </p>
+                    <h1 class="text-2xl font-bold text-gray-800 mb-2">
+                        Bem-vindo ao centro da Família Resgate! 👋
+                    </h1>
+                    <p class="text-base text-gray-700 mb-1">
+                        Olá, {{ greetingName }}. Que bom ter você aqui.
+                    </p>
+                    <p class="text-base text-amber-600 font-medium">
+                        🧡 Sua casa dentro do ecossistema Resgate.
+                    </p>
+                </div>
 
-            <div class="relative z-10 w-full">
-                <div class="flex items-start justify-between">
-                    <div class="flex-1">
-                        <p class="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-2">
-                            CENTRO FAMÍLIA RESGATE
-                        </p>
-                        <h1 class="text-2xl font-bold text-gray-800 mb-2">
-                            Bem-vindo ao centro da Família Resgate! 👋
-                        </h1>
-                        <p class="text-base text-gray-700 mb-1">
-                            Olá, {{ greetingName }}. Que bom ter você aqui.
-                        </p>
-                        <p class="text-base text-amber-600 font-medium">
-                            🧡 Sua casa dentro do ecossistema Resgate.
-                        </p>
-                    </div>
-
-                    <!-- Verse on the right -->
-                    <div class="hidden md:block bg-white/70 rounded-xl border border-amber-200/50 p-4 ml-6">
-                        <p class="text-gray-700 italic font-medium text-sm">
-                            "Eu e a minha casa serviremos ao Senhor."
-                        </p>
-                        <p class="text-xs text-gray-500 mt-1">— Josué 24:15</p>
+                <!-- Right Column - Visual -->
+                <div class="p-6 flex items-center justify-center bg-gradient-to-br from-amber-50/50 to-orange-50/50">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4 flex items-center justify-center gap-4">
+                            <span>✝️</span>
+                            <span>🏠</span>
+                            <span>👨‍👩‍👧‍👦</span>
+                        </div>
+                        <div class="bg-white/80 rounded-xl p-4 border border-amber-200/50">
+                            <p class="text-gray-700 italic font-medium text-sm">
+                                "Eu e a minha casa serviremos ao Senhor."
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">— Josué 24:15</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Grid de Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5">
             <!-- Card 1 - Aniversariantes de hoje -->
-            <div class="lg:col-span-3 bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+            <div class="lg:col-span-3 bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow min-h-[220px]">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center">
                         <span class="text-3xl mr-3">🎂</span>
@@ -91,7 +94,7 @@ const props = defineProps({
             </div>
 
             <!-- Card 2 - Sistemas disponíveis -->
-            <div class="lg:col-span-6 bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+            <div class="lg:col-span-6 bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow min-h-[220px]">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center">
                         <span class="text-3xl mr-3">🚀</span>
@@ -160,7 +163,7 @@ const props = defineProps({
             </div>
 
             <!-- Card 3 - Avisos e pendências -->
-            <div class="lg:col-span-3 bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+            <div class="lg:col-span-3 bg-white rounded-2xl p-5 shadow-md border border-gray-100 hover:shadow-lg transition-shadow min-h-[220px]">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center">
                         <span class="text-3xl mr-3">🔔</span>
@@ -182,7 +185,7 @@ const props = defineProps({
             </div>
 
             <!-- Card 4 - Central de Oração (Em breve) -->
-            <div class="lg:col-span-4 bg-white rounded-2xl p-5 shadow-md border border-gray-100 opacity-75">
+            <div class="lg:col-span-4 bg-white rounded-2xl p-5 shadow-md border border-gray-100 opacity-75 min-h-[170px]">
                 <div class="flex items-start justify-between mb-3">
                     <div class="flex items-center">
                         <span class="text-2xl mr-2">🙏</span>
@@ -201,7 +204,7 @@ const props = defineProps({
             </div>
 
             <!-- Card 5 - Palavra do Dia (Em breve) -->
-            <div class="lg:col-span-4 bg-white rounded-2xl p-5 shadow-md border border-gray-100 opacity-75">
+            <div class="lg:col-span-4 bg-white rounded-2xl p-5 shadow-md border border-gray-100 opacity-75 min-h-[170px]">
                 <div class="flex items-start justify-between mb-3">
                     <div class="flex items-center">
                         <span class="text-2xl mr-2">📖</span>
@@ -220,7 +223,7 @@ const props = defineProps({
             </div>
 
             <!-- Card 6 - Mais sistemas (Em breve) -->
-            <div class="lg:col-span-4 bg-white rounded-2xl p-5 shadow-md border border-gray-100 opacity-75">
+            <div class="lg:col-span-4 bg-white rounded-2xl p-5 shadow-md border border-gray-100 opacity-75 min-h-[170px]">
                 <div class="flex items-start justify-between mb-3">
                     <div class="flex items-center">
                         <span class="text-2xl mr-2">✨</span>
