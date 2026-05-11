@@ -18,122 +18,251 @@ const props = defineProps({
 <template>
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <!-- Hero Section -->
-        <div class="mb-8 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 p-8">
-            <h1 class="text-3xl font-bold text-white mb-2">Centro Família Resgate</h1>
-            <p class="text-lg text-amber-500 mb-4">Bem-vindo ao centro da Família Resgate</p>
-            <p class="text-gray-300">Olá, {{ greetingName }}. Que bom ter você aqui.</p>
-            <p class="text-sm text-gray-400 mt-2">Sua casa dentro do ecossistema Resgate.</p>
+        <div class="mb-8 rounded-3xl bg-gradient-to-br from-[#FFF8F0] to-[#F5EBE0] border border-amber-200/50 p-8 shadow-lg relative overflow-hidden">
+            <!-- Background decoration -->
+            <div class="absolute right-0 top-0 w-1/3 h-full opacity-10">
+                <div class="absolute right-8 top-8 text-8xl">✝️</div>
+                <div class="absolute right-16 top-32 text-6xl">👨‍👩‍👧‍👦</div>
+                <div class="absolute right-12 top-56 text-5xl">🏠</div>
+            </div>
+
+            <div class="relative z-10">
+                <p class="text-sm font-semibold text-amber-600 uppercase tracking-wider mb-2">
+                    CENTRO FAMÍLIA RESGATE
+                </p>
+                <h1 class="text-3xl font-bold text-gray-800 mb-4">
+                    Bem-vindo ao centro da Família Resgate! 👋
+                </h1>
+                <p class="text-lg text-gray-700 mb-2">
+                    Olá, {{ greetingName }}. Que bom ter você aqui.
+                </p>
+                <p class="text-lg text-amber-600 font-medium">
+                    🧡 Sua casa dentro do ecossistema Resgate.
+                </p>
+
+                <!-- Verse on the right -->
+                <div class="mt-6 p-4 bg-white/60 rounded-2xl border border-amber-200/50 inline-block">
+                    <p class="text-gray-700 italic font-medium">
+                        "Eu e a minha casa serviremos ao Senhor."
+                    </p>
+                    <p class="text-sm text-gray-500 mt-1">— Josué 24:15</p>
+                </div>
+            </div>
         </div>
 
         <!-- Grid de Cards -->
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <!-- Card de Aniversariantes -->
-            <div class="rounded-2xl bg-gray-900/50 border border-gray-800 p-6 hover:border-gray-700 transition-colors">
-                <div class="flex items-center mb-4">
-                    <div class="h-10 w-10 rounded-lg bg-amber-500/20 flex items-center justify-center mr-3">
-                        <svg class="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Card 1 - Aniversariantes de hoje -->
+            <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <span class="text-3xl mr-3">🎂</span>
+                        <h2 class="text-xl font-bold text-gray-800">Aniversariantes de hoje</h2>
                     </div>
-                    <h2 class="text-xl font-semibold text-white">Aniversariantes de hoje</h2>
+                    <div class="h-8 w-8 rounded-full bg-pink-100 flex items-center justify-center">
+                        <span class="text-pink-600 font-bold">{{ birthdayCount }}</span>
+                    </div>
                 </div>
+
                 <div v-if="birthdayPeople.length > 0" class="space-y-3">
                     <div
-                        v-for="person in birthdayPeople"
+                        v-for="person in birthdayPeople.slice(0, 5)"
                         :key="person.id"
-                        class="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-800/50 border border-gray-700"
+                        class="flex items-center space-x-3 p-3 bg-pink-50 rounded-xl"
                     >
-                        <span class="text-gray-200">{{ person.name }}</span>
-                        <span class="text-amber-500 font-medium">{{ person.birth_date }}</span>
+                        <span class="text-2xl">🎉</span>
+                        <span class="text-gray-700 font-medium">{{ person.name }}</span>
                     </div>
-                    <div v-if="birthdayCount > 5" class="mt-3 text-sm text-gray-400 text-center">
+                    <div v-if="birthdayCount > 5" class="text-sm text-gray-500 text-center mt-2">
                         E mais {{ birthdayCount - 5 }} aniversariantes
                     </div>
                 </div>
-                <div v-else class="text-gray-400 text-center py-4">
-                    Hoje não temos aniversariantes registrados.
+                <div v-else class="text-center py-6">
+                    <div class="text-5xl mb-3">🎈</div>
+                    <p class="text-gray-600 mb-2">
+                        Hoje não temos aniversariantes registrados.
+                    </p>
+                    <p class="text-sm text-gray-500">
+                        Mas não deixe de parabenizar alguém especial! 💙
+                    </p>
                 </div>
             </div>
 
-            <!-- Card de Sistemas Disponíveis -->
-            <div class="rounded-2xl bg-gray-900/50 border border-gray-800 p-6 hover:border-gray-700 transition-colors">
-                <div class="flex items-center mb-4">
-                    <div class="h-10 w-10 rounded-lg bg-blue-500/20 flex items-center justify-center mr-3">
-                        <svg class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                        </svg>
+            <!-- Card 2 - Sistemas disponíveis -->
+            <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition-shadow lg:col-span-2">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <span class="text-3xl mr-3">🚀</span>
+                        <h2 class="text-xl font-bold text-gray-800">Sistemas disponíveis</h2>
                     </div>
-                    <h2 class="text-xl font-semibold text-white">Sistemas disponíveis</h2>
+                    <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                        <span class="text-blue-600 font-bold">{{ shortcuts.length }}</span>
+                    </div>
                 </div>
-                <div v-if="shortcuts.length > 0" class="space-y-3">
+
+                <div v-if="shortcuts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Secretaria -->
                     <Link
-                        v-for="shortcut in shortcuts"
-                        :key="shortcut.title"
-                        :href="shortcut.route"
-                        class="block p-4 rounded-xl bg-gray-800/50 border border-gray-700 hover:bg-gray-800 hover:border-amber-500/50 transition-all"
+                        v-if="shortcuts.some(s => s.title === 'Secretaria')"
+                        :href="shortcuts.find(s => s.title === 'Secretaria')?.route || '#'"
+                        class="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 hover:shadow-md transition-all"
                     >
-                        <h3 class="text-lg font-medium text-white">{{ shortcut.title }}</h3>
-                        <p class="mt-1 text-sm text-gray-400">{{ shortcut.description }}</p>
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="text-3xl mb-2">👨‍💻</div>
+                                <h3 class="font-bold text-gray-800">Secretaria</h3>
+                                <p class="text-sm text-gray-600 mt-1">Cadastros, famílias, solicitações e mais</p>
+                            </div>
+                            <span class="text-blue-600 font-semibold text-sm">→ Acessar</span>
+                        </div>
+                    </Link>
+
+                    <!-- Departamentos -->
+                    <Link
+                        v-if="shortcuts.some(s => s.title === 'Departamentos')"
+                        :href="shortcuts.find(s => s.title === 'Departamentos')?.route || '#'"
+                        class="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 hover:shadow-md transition-all"
+                    >
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="text-3xl mb-2">🏛️</div>
+                                <h3 class="font-bold text-gray-800">Departamentos</h3>
+                                <p class="text-sm text-gray-600 mt-1">Ministérios, equipes e vínculos</p>
+                            </div>
+                            <span class="text-purple-600 font-semibold text-sm">→ Acessar</span>
+                        </div>
+                    </Link>
+
+                    <!-- Acessos -->
+                    <Link
+                        v-if="shortcuts.some(s => s.title === 'Acessos')"
+                        :href="shortcuts.find(s => s.title === 'Acessos')?.route || '#'"
+                        class="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 hover:shadow-md transition-all"
+                    >
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="text-3xl mb-2">🛡️</div>
+                                <h3 class="font-bold text-gray-800">Acessos</h3>
+                                <p class="text-sm text-gray-600 mt-1">Gestão de usuários e permissões</p>
+                            </div>
+                            <span class="text-green-600 font-semibold text-sm">→ Acessar</span>
+                        </div>
+                    </Link>
+
+                    <!-- Perfis de Acesso -->
+                    <Link
+                        v-if="shortcuts.some(s => s.title === 'Perfis de Acesso')"
+                        :href="shortcuts.find(s => s.title === 'Perfis de Acesso')?.route || '#'"
+                        class="p-4 bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl border border-amber-200 hover:shadow-md transition-all"
+                    >
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="text-3xl mb-2">🪪</div>
+                                <h3 class="font-bold text-gray-800">Perfis de Acesso</h3>
+                                <p class="text-sm text-gray-600 mt-1">Perfis e permissões do sistema</p>
+                            </div>
+                            <span class="text-amber-600 font-semibold text-sm">→ Acessar</span>
+                        </div>
                     </Link>
                 </div>
-                <div v-else class="text-gray-400 text-center py-4">
-                    Nenhum sistema interno liberado para este usuário.
+                <div v-else class="text-center py-6">
+                    <div class="text-5xl mb-3">🔒</div>
+                    <p class="text-gray-600">
+                        Você ainda não possui sistemas internos liberados.
+                    </p>
                 </div>
             </div>
 
-            <!-- Card de Avisos e Pendências -->
-            <div class="rounded-2xl bg-gray-900/50 border border-gray-800 p-6 hover:border-gray-700 transition-colors">
-                <div class="flex items-center mb-4">
-                    <div class="h-10 w-10 rounded-lg bg-green-500/20 flex items-center justify-center mr-3">
-                        <svg class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+            <!-- Card 3 - Avisos e pendências -->
+            <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <span class="text-3xl mr-3">🔔</span>
+                        <h2 class="text-xl font-bold text-gray-800">Avisos e pendências</h2>
                     </div>
-                    <h2 class="text-xl font-semibold text-white">Avisos e pendências</h2>
+                    <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                        <span class="text-green-600 text-xl">✓</span>
+                    </div>
                 </div>
-                <div class="text-gray-400 text-center py-4">
-                    Nenhum aviso importante no momento.
+                <div class="text-center py-6">
+                    <div class="text-5xl mb-3">✅</div>
+                    <p class="text-gray-600">
+                        Nenhum aviso importante no momento.
+                    </p>
+                    <p class="text-sm text-gray-500 mt-2">
+                        Tudo em ordem!
+                    </p>
                 </div>
             </div>
 
-            <!-- Card Futuro de Oração -->
-            <div class="rounded-2xl bg-gray-900/30 border border-gray-800 p-6 relative">
+            <!-- Card 4 - Central de Oração (Em breve) -->
+            <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 relative opacity-75">
                 <div class="absolute top-4 right-4">
-                    <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-500 text-xs font-medium border border-amber-500/30">
+                    <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold border border-amber-300">
                         Em breve
                     </span>
                 </div>
                 <div class="flex items-center mb-4">
-                    <div class="h-10 w-10 rounded-lg bg-purple-500/20 flex items-center justify-center mr-3">
-                        <svg class="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-xl font-semibold text-white">Oração</h2>
+                    <span class="text-3xl mr-3">🙏</span>
+                    <h2 class="text-xl font-bold text-gray-800">Central de Oração</h2>
                 </div>
-                <div class="text-gray-400 text-center py-4">
-                    Em breve, você poderá pedir oração e acompanhar pedidos pela Central de Oração.
+                <div class="text-center py-6">
+                    <div class="text-5xl mb-3">🕊️</div>
+                    <p class="text-gray-600">
+                        Em breve, você poderá pedir oração e acompanhar pedidos pela Central de Oração.
+                    </p>
                 </div>
             </div>
 
-            <!-- Card Futuro de Palavra do Dia -->
-            <div class="rounded-2xl bg-gray-900/30 border border-gray-800 p-6 relative">
+            <!-- Card 5 - Palavra do Dia (Em breve) -->
+            <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 relative opacity-75">
                 <div class="absolute top-4 right-4">
-                    <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-500 text-xs font-medium border border-amber-500/30">
+                    <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold border border-amber-300">
                         Em breve
                     </span>
                 </div>
                 <div class="flex items-center mb-4">
-                    <div class="h-10 w-10 rounded-lg bg-amber-500/20 flex items-center justify-center mr-3">
-                        <svg class="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                    </div>
-                    <h2 class="text-xl font-semibold text-white">Palavra do dia</h2>
+                    <span class="text-3xl mr-3">📖</span>
+                    <h2 class="text-xl font-bold text-gray-800">Palavra do Dia</h2>
                 </div>
-                <div class="text-gray-400 text-center py-4">
-                    Em breve, uma palavra de fé e encorajamento aparecerá aqui.
+                <div class="text-center py-6">
+                    <div class="text-5xl mb-3">📜</div>
+                    <p class="text-gray-600">
+                        Em breve, uma palavra de fé e encorajamento aparecerá aqui todos os dias para você.
+                    </p>
                 </div>
+            </div>
+
+            <!-- Card 6 - Mais sistemas (Em breve) -->
+            <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-100 relative opacity-75">
+                <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold border border-amber-300">
+                        Em breve
+                    </span>
+                </div>
+                <div class="flex items-center mb-4">
+                    <span class="text-3xl mr-3">✨</span>
+                    <h2 class="text-xl font-bold text-gray-800">Mais sistemas</h2>
+                </div>
+                <div class="text-center py-6">
+                    <div class="text-5xl mb-3">🎁</div>
+                    <p class="text-gray-600">
+                        Novos sistemas e funcionalidades estarão disponíveis em breve para abençoar ainda mais você.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center">
+            <div class="inline-block bg-white/80 rounded-2xl p-6 shadow-md border border-amber-200/50">
+                <p class="text-lg font-medium text-gray-700 italic mb-2">
+                    "Eu e a minha casa serviremos ao Senhor."
+                </p>
+                <p class="text-sm text-gray-500 mb-4">— Josué 24:15</p>
+                <p class="text-amber-600 font-semibold">
+                    Bem-vindo à sua casa espiritual! 🏠
+                </p>
             </div>
         </div>
     </div>

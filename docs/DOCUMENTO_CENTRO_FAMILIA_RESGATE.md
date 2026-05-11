@@ -42,31 +42,42 @@ Criar a base visual e funcional inicial do Centro Família Resgate.
 **Arquivo:** `resources/js/Layouts/FamilyHubLayout.vue`
 
 **Características:**
-- Tema escuro premium (bg-gray-950)
-- Header com identidade Resgate (logo com "R" em gradiente laranja)
-- Nome do sistema: "Família Resgate" com subtítulo "Centro da igreja"
-- Avatar do usuário com inicial
+- Tema claro premium (bg-[#F8F6F3] - bege claro)
+- Menu lateral fixo à esquerda com fundo azul escuro (gradiente de #1e3a5f para #0f2744)
+- Sidebar com logo "R" dourado, título "Família Resgate" e subtítulo "Centro da igreja"
+- Itens principais do sidebar: Centro Família, Secretaria, Departamentos, Acessos, Perfis de Acesso (aparecem conforme permissões)
+- Seção "Futuros sistemas" com: Central de Oração, Palavra do Dia, Financeiro, Cantina, Centro Pastoral (todos com badge "Em breve")
+- Footer do sidebar com ilustração de família e frase: "Somos uma família que ama, acolhe e transforma vidas."
+- Header superior claro com breadcrumb "🏠 Centro Família"
+- Ícones de notificação e mensagem (visuais apenas)
+- Avatar do usuário com inicial, nome e saudação "Bem-vindo(a)!"
 - Dropdown com "Meu perfil" e "Sair"
-- Layout limpo e organizado
+- Sidebar responsiva: recolhível em mobile com overlay, fixo em desktop
+- Layout premium, acolhedor, familiar e espiritual
 
 ### 4. Página Vue Principal
 
 **Arquivo:** `resources/js/Pages/Familia/Index.vue`
 
 **Seções:**
-1. Hero Section: "Centro Família Resgate" com saudação personalizada
-2. Card de aniversariantes do dia (com ícone e visual premium)
-3. Card de sistemas disponíveis (com ícone e visual premium)
-4. Card de avisos e pendências (com ícone e visual premium)
-5. Card futuro de oração (com badge "Em breve" e ícone espiritual)
-6. Card futuro de palavra do dia (com badge "Em breve" e ícone espiritual)
+1. Hero Section com gradiente bege claro, título "Bem-vindo ao centro da Família Resgate! 👋", saudação personalizada, frase "🧡 Sua casa dentro do ecossistema Resgate", versículo "Eu e a minha casa serviremos ao Senhor. — Josué 24:15"
+2. Card de aniversariantes do dia (com emoji 🎂, contador circular, lista de nomes com emoji 🎉)
+3. Card de sistemas disponíveis (com emoji 🚀, mini-cards coloridos para cada sistema: Secretaria 👨‍💻, Departamentos 🏛️, Acessos 🛡️, Perfis de Acesso 🪪)
+4. Card de avisos e pendências (com emoji 🔔, check verde quando sem avisos)
+5. Card futuro de Central de Oração (com emoji 🙏, badge "Em breve")
+6. Card futuro de Palavra do Dia (com emoji 📖, badge "Em breve")
+7. Card futuro de Mais sistemas (com emoji ✨, badge "Em breve")
+8. Footer com versículo e frase "Bem-vindo à sua casa espiritual! 🏠"
 
 **Visual:**
-- Fundo escuro (bg-gray-950)
-- Cards com bordas sutis e hover effects
-- Ícones coloridos (laranja para aniversariantes, azul para sistemas, verde para avisos, roxo para oração, âmbar para palavra)
-- Badges "Em breve" em laranja para sistemas futuros
-- Gradiente no hero section
+- Fundo bege claro (#F8F6F3)
+- Cards brancos com bordas cinza suaves e sombras
+- Ícones/emojis coloridos para cada seção
+- Badges "Em breve" em âmbar para sistemas futuros
+- Gradientes sutis nos cards de sistemas
+- Responsivo: grid de 3 colunas em desktop, 2 em tablet, 1 em mobile
+- Textos legíveis com bom contraste
+- Aparência premium, acolhedora, familiar e espiritual
 
 ## Dados Reais Usados
 
@@ -161,46 +172,76 @@ Usamos permissões existentes do sistema:
 - Layout simples evita scroll longo
 - Componentes mantidos simples para evitar complexidade
 
-## Ajuste Visual Após Teste Manual
+## Ajuste Visual Após Pesquisa no Sistema Antigo
 
-Após teste manual inicial, foi identificado que o visual não estava no padrão oficial do Resgate 2.0. Foram feitos os seguintes ajustes:
+Após pesquisa no sistema antigo e aprovação de nova referência visual, foi decidido mudar completamente o visual do Centro Família Resgate. Foram feitos os seguintes ajustes:
 
-**Ajustes no Layout:**
-- Fundo alterado de `bg-gray-900` para `bg-gray-950` (mais escuro e premium)
-- Logo padrão Laravel removido
-- Adicionada identidade visual Resgate: logo com "R" em gradiente laranja
-- Nome do sistema: "Família Resgate" com subtítulo "Centro da igreja"
-- Avatar do usuário com inicial em círculo laranja
-- Header com backdrop blur para efeito premium
+**Decisão Visual Oficial:**
+- Mudança de tema escuro para tema claro premium
+- Fundo bege claro (#F8F6F3) em vez de cinza escuro
+- Menu lateral fixo à esquerda com fundo azul escuro (gradiente de #1e3a5f para #0f2744)
+- Cards brancos com bordas sutis e sombras
+- Ícones/emojis coloridos para cada seção
+- Aparência premium, acolhedora, familiar e espiritual
 
-**Ajustes na Página:**
-- Criado Hero Section com gradiente e título forte "Centro Família Resgate"
-- Saudação personalizada destacada
-- Cards melhorados com:
-  - Ícones coloridos para cada seção
-  - Bordas sutis e hover effects
-  - Fundo semitransparente (`bg-gray-900/50`)
-  - Cantos arredondados (`rounded-2xl`)
-- Badges "Em breve" em laranja para sistemas futuros
-- Ícones espirituais para Oração e Palavra do dia
+**Ajustes no Layout (FamilyHubLayout.vue):**
+- Fundo alterado de `bg-gray-950` para `bg-[#F8F6F3]` (bege claro)
+- Adicionado sidebar fixo à esquerda com 280px de largura
+- Sidebar com fundo azul escuro premium (gradiente)
+- Logo "R" dourado no topo do sidebar
+- Título "Família Resgate" e subtítulo "Centro da igreja"
+- Itens principais: Centro Família, Secretaria, Departamentos, Acessos, Perfis de Acesso (conforme permissões)
+- Seção "Futuros sistemas" com: Central de Oração, Palavra do Dia, Financeiro, Cantina, Centro Pastoral (todos com badge "Em breve")
+- Footer do sidebar com ilustração de família e frase
+- Header superior claro com breadcrumb "🏠 Centro Família"
+- Ícones de notificação e mensagem (visuais apenas)
+- Avatar do usuário com inicial, nome e saudação
+- Sidebar responsiva: recolhível em mobile com overlay, fixo em desktop
+- Header com backdrop blur e borda cinza suave
+
+**Ajustes na Página (Index.vue):**
+- Hero Section recriado com gradiente bege claro (#FFF8F0 a #F5EBE0)
+- Título: "Bem-vindo ao centro da Família Resgate! 👋"
+- Saudação personalizada: "Olá, {nome}. Que bom ter você aqui."
+- Frase: "🧡 Sua casa dentro do ecossistema Resgate."
+- Versículo: "Eu e a minha casa serviremos ao Senhor. — Josué 24:15"
+- Ilustrações com emojis no fundo do hero (✝️, 👨‍👩‍👧‍👦, 🏠)
+- Cards recriados com:
+  - Fundo branco com bordas cinza sutis
+  - Ícones/emojis grandes e coloridos
+  - Contadores circulares
+  - Gradientes sutis nos mini-cards de sistemas
+  - Cantos arredondados (rounded-2xl)
+- Card de aniversariantes: emoji 🎂, lista com 🎉, contador pink
+- Card de sistemas: emoji 🚀, mini-cards coloridos (Secretaria 👨‍💻 azul, Departamentos 🏛️ roxo, Acessos 🛡️ verde, Perfis de Acesso 🪪 âmbar)
+- Card de avisos: emoji 🔔, check verde ✅
+- Cards futuros (Oração 🙏, Palavra do Dia 📖, Mais sistemas ✨) com badges "Em breve" e opacidade reduzida
+- Footer com versículo e frase "Bem-vindo à sua casa espiritual! 🏠"
+- Responsivo: grid de 3 colunas em desktop, 2 em tablet, 1 em mobile
+- Textos legíveis com bom contraste
 
 **Correção no Controller:**
-- Alterado de `$user->can()` para `$user->hasPermission()` para verificar permissões corretamente
-- Adicionado atalho para "Perfis de Acesso" quando usuário tem permissão `permissions.view`
+- Mantido uso de `$user->hasPermission()` para verificar permissões corretamente
+- Atalhos mantidos: Secretaria, Departamentos, Acessos, Perfis de Acesso
 
 ## Visual
 
 **Identidade visual seguida:**
-- Tema escuro premium (bg-gray-950)
-- Preto/cinza como base
-- Laranja-dourado (amber-500) como destaque principal
-- Azul para informação
+- Tema claro premium (bg-[#F8F6F3] - bege claro)
+- Menu lateral azul escuro (gradiente de #1e3a5f para #0f2744)
+- Cards brancos com bordas cinza sutis
+- Dourado/laranja (amber-400 a amber-600) como destaque principal
+- Azul para informação e sidebar
 - Verde para sucesso
-- Roxo para espiritual
-- Visual premium, espiritual, moderno, elegante, limpo
-- Hero Section com gradiente
-- Ícones coloridos
-- Badges "Em breve" elegantes
+- Roxo para departamentos
+- Pink para aniversariantes
+- Âmbar para perfis
+- Ícones/emojis coloridos para cada seção
+- Badges "Em breve" em âmbar
+- Visual premium, acolhedor, familiar, espiritual, moderno, elegante, limpo
+- Hero Section com gradiente bege claro
+- Ilustrações com emojis
+- Textos legíveis com bom contraste
 
 **Evitado:**
 - Scroll longo
@@ -212,9 +253,11 @@ Após teste manual inicial, foi identificado que o visual não estava no padrão
 - Botões desalinhados
 - Tabelas desnecessárias
 - Informação demais na mesma tela
-- Fundo branco dominante
+- Fundo branco puro demais
 - Visual padrão Laravel
 - Logo padrão Laravel
+- Tema escuro nesta tela
+- Texto sobre fundo sem contraste
 
 ## Testes Manuais Sugeridos
 
