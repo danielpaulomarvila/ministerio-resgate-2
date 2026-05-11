@@ -8,6 +8,7 @@ use App\Events\DepartmentUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\Department;
 use App\Models\DepartmentPerson;
+use App\Models\Person;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
