@@ -90,13 +90,13 @@ const confirmDeleteDepartment = () => {
                             </div>
                             <div>
                                 <span class="text-sm text-slate-500">Tipo:</span>
-                                <span class="ml-2 text-sm font-medium">{{ department.department_type }}</span>
+                                <span class="ml-2 text-sm font-medium">{{ department.department_type_label }}</span>
                             </div>
                             <div>
                                 <span class="text-sm text-slate-500">Status:</span>
                                 <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
                                     :class="department.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
-                                    {{ department.status === 'active' ? 'Ativo' : 'Inativo' }}
+                                    {{ department.status_label }}
                                 </span>
                             </div>
                             <div v-if="department.description">

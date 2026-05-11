@@ -14,9 +14,12 @@ Este módulo gerencia os departamentos e ministérios da igreja, incluindo sua c
 
 ### Proteção de Departamentos do Sistema
 
-- Departamentos marcados como `is_system = true` não podem ser excluídos
+- Departamentos raiz/oficiais são marcados como `is_system = true`
+- Departamentos do sistema não podem ser excluídos
+- Botão Excluir não aparece para departamentos do sistema na interface
 - Mensagem de erro clara: "Este é um departamento do sistema e não pode ser excluído."
 - Departamentos do sistema incluem: Louvor, Mídia, Recepção, Obreiros, Jovens/Resgatados, Infantil, Tesouraria, Secretaria, Cantina, Evangelismo, Intercessão, Ensino/Discipulado
+- Departamentos criados após o lançamento do sistema são `is_system = false` e podem ser excluídos (se não tiverem pessoas ativas vinculadas)
 
 ### Proteção de Departamentos com Pessoas Ativas
 
@@ -50,6 +53,16 @@ Este módulo gerencia os departamentos e ministérios da igreja, incluindo sua c
 - **Liderar departamento não cria permissão automaticamente sem controle**
 - **Excluir departamento não exclui pessoa, usuário, membro ou member_profile**
 - **A exclusão deve gerar ActivityLog através de evento DepartmentDeleted**
+- **Toda interface deve exibir valores em português do Brasil**
+- **Valores técnicos internos podem ser em inglês, mas a interface nunca deve mostrar esses valores crus**
+- **Identificadores/slugs não devem ser traduzidos e devem usar notranslate quando exibidos**
+
+### Tradução Visual
+
+- **Tipos de Departamento**: Valores internos (worship, support, ministry, etc.) são traduzidos para português (Louvor, Apoio, Ministério, etc.) na interface
+- **Status**: Valores internos (active, inactive, archived) são traduzidos para português (Ativo, Inativo, Arquivado) na interface
+- **Labels**: O backend envia `department_type_label` e `status_label` para o frontend
+- **Formulários**: Selects de Tipo mostram opções em português com valores técnicos em inglês
 
 ## Campos do Model Department
 
@@ -57,7 +70,7 @@ Este módulo gerencia os departamentos e ministérios da igreja, incluindo sua c
 - `name` - Nome do departamento
 - `slug` - Identificador único (URL-friendly)
 - `description` - Descrição do departamento
-- `department_type` - Tipo (ministry, administrative, youth, support, financial, worship, children, evangelism, other)
+- `department_type` - Tipo (ministry, administrative, youth, support, financial, worship, children, evangelism, other) - valores técnicos em inglês, traduzidos para português na interface
 - `status` - Status (active, inactive, archived)
 - `parent_department_id` - Departamento pai (hierarquia)
 - `leader_person_id` - Pessoa líder

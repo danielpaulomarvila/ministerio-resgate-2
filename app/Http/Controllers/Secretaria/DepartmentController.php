@@ -44,7 +44,9 @@ class DepartmentController extends Controller
                     'slug' => $department->slug,
                     'description' => $department->description,
                     'department_type' => $department->department_type,
+                    'department_type_label' => $this->departmentTypeLabel($department->department_type),
                     'status' => $department->status,
+                    'status_label' => $this->statusLabel($department->status),
                     'parent_department_id' => $department->parent_department_id,
                     'parent_department_name' => $department->parent?->name,
                     'leader_person_id' => $department->leader_person_id,
@@ -151,7 +153,9 @@ class DepartmentController extends Controller
             'slug' => $department->slug,
             'description' => $department->description,
             'department_type' => $department->department_type,
+            'department_type_label' => $this->departmentTypeLabel($department->department_type),
             'status' => $department->status,
+            'status_label' => $this->statusLabel($department->status),
             'parent_department_id' => $department->parent_department_id,
             'parent_department_name' => $department->parent?->name,
             'leader_person_id' => $department->leader_person_id,
@@ -327,5 +331,43 @@ class DepartmentController extends Controller
         return redirect()
             ->route('secretaria.departments.index')
             ->with('success', "Departamento {$departmentName} excluído com segurança.");
+    }
+
+    /**
+     * Retorna o label em português para o tipo de departamento
+     * 
+     * @param string|null $type Tipo técnico do departamento
+     * @return string Label em português
+     */
+    private function departmentTypeLabel(?string $type): string
+    {
+        return match ($type) {
+            'worship' => 'Louvor',
+            'support' => 'Apoio',
+            'ministry' => 'Ministério',
+            'youth' => 'Jovens',
+            'children' => 'Infantil',
+            'financial' => 'Financeiro',
+            'administrative' => 'Administrativo',
+            'evangelism' => 'Evangelismo',
+            'other' => 'Outro',
+            default => 'Não informado',
+        };
+    }
+
+    /**
+     * Retorna o label em português para o status do departamento
+     * 
+     * @param string|null $status Status técnico do departamento
+     * @return string Label em português
+     */
+    private function statusLabel(?string $status): string
+    {
+        return match ($status) {
+            'active' => 'Ativo',
+            'inactive' => 'Inativo',
+            'archived' => 'Arquivado',
+            default => 'Não informado',
+        };
     }
 }

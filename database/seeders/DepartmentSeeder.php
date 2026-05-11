@@ -23,7 +23,9 @@ class DepartmentSeeder extends Seeder
      */
     public function run(): void
     {
-        // Lista de departamentos iniciais da igreja (Etapa 10)
+        // Lista de departamentos raiz/oficiais da igreja (Etapa 10)
+        // Todos os departamentos raiz são marcados como is_system = true
+        // Departamentos raiz não podem ser excluídos
         $departments = [
             [
                 'name' => 'Louvor',
@@ -31,6 +33,7 @@ class DepartmentSeeder extends Seeder
                 'description' => 'Departamento responsável pelo louvor e adoração',
                 'department_type' => 'worship',
                 'status' => 'active',
+                'is_system' => true,
                 'sort_order' => 1,
             ],
             [
@@ -39,6 +42,7 @@ class DepartmentSeeder extends Seeder
                 'description' => 'Departamento responsável pela produção de mídia e transmissões',
                 'department_type' => 'support',
                 'status' => 'active',
+                'is_system' => true,
                 'sort_order' => 2,
             ],
             [
@@ -47,6 +51,7 @@ class DepartmentSeeder extends Seeder
                 'description' => 'Departamento responsável pelo atendimento e recepção de visitantes',
                 'department_type' => 'support',
                 'status' => 'active',
+                'is_system' => true,
                 'sort_order' => 3,
             ],
             [
@@ -55,6 +60,7 @@ class DepartmentSeeder extends Seeder
                 'description' => 'Departamento para obreiros e líderes da igreja',
                 'department_type' => 'ministry',
                 'status' => 'active',
+                'is_system' => true,
                 'sort_order' => 4,
             ],
             [
@@ -63,6 +69,7 @@ class DepartmentSeeder extends Seeder
                 'description' => 'Departamento para Júniores (11-13 anos) e Jovens (14-17 anos)',
                 'department_type' => 'youth',
                 'status' => 'active',
+                'is_system' => true,
                 'sort_order' => 5,
             ],
             [
@@ -71,6 +78,7 @@ class DepartmentSeeder extends Seeder
                 'description' => 'Departamento para crianças menores de 11 anos',
                 'department_type' => 'children',
                 'status' => 'active',
+                'is_system' => true,
                 'sort_order' => 6,
             ],
             [
@@ -79,6 +87,7 @@ class DepartmentSeeder extends Seeder
                 'description' => 'Departamento responsável pela gestão financeira, dízimos, ofertas e contas',
                 'department_type' => 'financial',
                 'status' => 'active',
+                'is_system' => true,
                 'sort_order' => 7,
             ],
             [
@@ -87,6 +96,7 @@ class DepartmentSeeder extends Seeder
                 'description' => 'Departamento responsável pela gestão administrativa, cadastros e aprovações',
                 'department_type' => 'administrative',
                 'status' => 'active',
+                'is_system' => true,
                 'sort_order' => 8,
             ],
             [
@@ -95,6 +105,7 @@ class DepartmentSeeder extends Seeder
                 'description' => 'Departamento responsável pela operação da cantina e vendas',
                 'department_type' => 'support',
                 'status' => 'active',
+                'is_system' => true,
                 'sort_order' => 9,
             ],
             [
@@ -103,6 +114,7 @@ class DepartmentSeeder extends Seeder
                 'description' => 'Departamento responsável pelo ministério de evangelismo e missões',
                 'department_type' => 'evangelism',
                 'status' => 'active',
+                'is_system' => true,
                 'sort_order' => 10,
             ],
             [
@@ -111,6 +123,7 @@ class DepartmentSeeder extends Seeder
                 'description' => 'Departamento responsável pelo ministério de oração e intercessão',
                 'department_type' => 'ministry',
                 'status' => 'active',
+                'is_system' => true,
                 'sort_order' => 11,
             ],
             [
@@ -119,6 +132,7 @@ class DepartmentSeeder extends Seeder
                 'description' => 'Departamento responsável pelo ensino e discipulado',
                 'department_type' => 'ministry',
                 'status' => 'active',
+                'is_system' => true,
                 'sort_order' => 12,
             ],
         ];

@@ -153,13 +153,13 @@ const confirmDeleteDepartment = () => {
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800">
-                                        {{ department.department_type }}
+                                        {{ department.department_type_label }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
                                         :class="department.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
-                                        {{ department.status === 'active' ? 'Ativo' : 'Inativo' }}
+                                        {{ department.status_label }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
