@@ -1,5 +1,5 @@
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const props = defineProps({
@@ -259,13 +259,12 @@ const submit = () => {
 
                         <!-- Botões -->
                         <div class="flex justify-end space-x-3">
-                            <button
-                                type="button"
-                                @click="form.reset()"
+                            <Link
+                                :href="route('secretaria.departments.show', props.department.id)"
                                 class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
                             >
                                 Cancelar
-                            </button>
+                            </Link>
                             <button
                                 type="submit"
                                 :disabled="form.processing"
