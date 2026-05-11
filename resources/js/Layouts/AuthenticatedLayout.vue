@@ -70,6 +70,12 @@ const showingNavigationDropdown = ref(false);
                                     Perfis de Acesso
                                 </NavLink>
                                 <NavLink
+                                    :href="route('secretaria.departments.index')"
+                                    :active="route().current('secretaria.departments.*')"
+                                >
+                                    Departamentos
+                                </NavLink>
+                                <NavLink
                                     :href="route('people.index')"
                                     :active="route().current('people.index')"
                                 >
@@ -217,6 +223,18 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('secretaria.access.*')"
                         >
                             Acessos
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('secretaria.access-profiles.index')"
+                            :active="route().current('secretaria.access-profiles.*')"
+                        >
+                            Perfis de Acesso
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('secretaria.departments.index')"
+                            :active="route().current('secretaria.departments.*')"
+                        >
+                            Departamentos
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('people.index')"

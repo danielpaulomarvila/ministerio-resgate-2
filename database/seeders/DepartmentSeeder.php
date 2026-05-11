@@ -7,8 +7,14 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 /**
- * Seeder genérico para criar departamentos iniciais do sistema
- * Não contém dados reais de pessoas, apenas a estrutura dos departamentos
+ * Seeder para criar departamentos iniciais do sistema (Etapa 10)
+ * 
+ * IMPORTANTE:
+ * - Departamento não cria membro automaticamente
+ * - Participar de departamento não cria usuário automaticamente
+ * - Liderar departamento não cria permissão automaticamente sem controle
+ * 
+ * Usa updateOrCreate para evitar duplicidade ao rodar múltiplas vezes
  */
 class DepartmentSeeder extends Seeder
 {
@@ -17,69 +23,114 @@ class DepartmentSeeder extends Seeder
      */
     public function run(): void
     {
-        // Lista de departamentos iniciais da igreja
+        // Lista de departamentos iniciais da igreja (Etapa 10)
         $departments = [
-            [
-                'name' => 'Secretaria',
-                'slug' => 'secretaria',
-                'description' => 'Departamento responsável pela gestão administrativa, cadastros e aprovações',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Tesouraria',
-                'slug' => 'tesouraria',
-                'description' => 'Departamento responsável pela gestão financeira, dízimos, ofertas e contas',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Cantina',
-                'slug' => 'cantina',
-                'description' => 'Departamento responsável pela operação da cantina e vendas',
-                'status' => 'active',
-            ],
             [
                 'name' => 'Louvor',
                 'slug' => 'louvor',
-                'description' => 'Departamento responsável pelo louvor e adoração (Worship Central)',
+                'description' => 'Departamento responsável pelo louvor e adoração',
+                'department_type' => 'worship',
                 'status' => 'active',
+                'sort_order' => 1,
             ],
             [
                 'name' => 'Mídia',
                 'slug' => 'midia',
                 'description' => 'Departamento responsável pela produção de mídia e transmissões',
+                'department_type' => 'support',
                 'status' => 'active',
-            ],
-            [
-                'name' => 'Resgatados',
-                'slug' => 'resgatados',
-                'description' => 'Departamento para Júniores (11-13 anos) e Jovens (14-17 anos)',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Intercessão',
-                'slug' => 'intercessao',
-                'description' => 'Departamento responsável pelo ministério de oração e intercessão',
-                'status' => 'active',
+                'sort_order' => 2,
             ],
             [
                 'name' => 'Recepção',
                 'slug' => 'recepcao',
                 'description' => 'Departamento responsável pelo atendimento e recepção de visitantes',
+                'department_type' => 'support',
                 'status' => 'active',
+                'sort_order' => 3,
             ],
             [
-                'name' => 'Pastoral',
-                'slug' => 'pastoral',
-                'description' => 'Departamento responsável pelo acompanhamento pastoral e aconselhamento',
+                'name' => 'Obreiros',
+                'slug' => 'obreiros',
+                'description' => 'Departamento para obreiros e líderes da igreja',
+                'department_type' => 'ministry',
                 'status' => 'active',
+                'sort_order' => 4,
+            ],
+            [
+                'name' => 'Jovens / Resgatados',
+                'slug' => 'jovens-resgatados',
+                'description' => 'Departamento para Júniores (11-13 anos) e Jovens (14-17 anos)',
+                'department_type' => 'youth',
+                'status' => 'active',
+                'sort_order' => 5,
+            ],
+            [
+                'name' => 'Infantil',
+                'slug' => 'infantil',
+                'description' => 'Departamento para crianças menores de 11 anos',
+                'department_type' => 'children',
+                'status' => 'active',
+                'sort_order' => 6,
+            ],
+            [
+                'name' => 'Tesouraria',
+                'slug' => 'tesouraria',
+                'description' => 'Departamento responsável pela gestão financeira, dízimos, ofertas e contas',
+                'department_type' => 'financial',
+                'status' => 'active',
+                'sort_order' => 7,
+            ],
+            [
+                'name' => 'Secretaria',
+                'slug' => 'secretaria',
+                'description' => 'Departamento responsável pela gestão administrativa, cadastros e aprovações',
+                'department_type' => 'administrative',
+                'status' => 'active',
+                'sort_order' => 8,
+            ],
+            [
+                'name' => 'Cantina',
+                'slug' => 'cantina',
+                'description' => 'Departamento responsável pela operação da cantina e vendas',
+                'department_type' => 'support',
+                'status' => 'active',
+                'sort_order' => 9,
+            ],
+            [
+                'name' => 'Evangelismo',
+                'slug' => 'evangelismo',
+                'description' => 'Departamento responsável pelo ministério de evangelismo e missões',
+                'department_type' => 'evangelism',
+                'status' => 'active',
+                'sort_order' => 10,
+            ],
+            [
+                'name' => 'Intercessão',
+                'slug' => 'intercessao',
+                'description' => 'Departamento responsável pelo ministério de oração e intercessão',
+                'department_type' => 'ministry',
+                'status' => 'active',
+                'sort_order' => 11,
+            ],
+            [
+                'name' => 'Ensino / Discipulado',
+                'slug' => 'ensino-discipulado',
+                'description' => 'Departamento responsável pelo ensino e discipulado',
+                'department_type' => 'ministry',
+                'status' => 'active',
+                'sort_order' => 12,
             ],
         ];
 
-        // Cria os departamentos no banco de dados
+        // Cria ou atualiza os departamentos no banco de dados
         foreach ($departments as $department) {
-            Department::create($department);
+            Department::updateOrCreate(
+                ['slug' => $department['slug']],
+                $department
+            );
         }
 
-        $this->command->info('Departamentos criados com sucesso!');
+        $this->command->info('✅ Departamentos criados/atualizados com sucesso!');
     }
 }

@@ -102,9 +102,13 @@ class AccessControlSeeder extends Seeder
             ['name' => 'Visualizar Filhos', 'slug' => 'family.children.view', 'group' => 'familia', 'sort_order' => 2],
             ['name' => 'Criar Solicitação Familiar', 'slug' => 'family.requests.create', 'group' => 'familia', 'sort_order' => 3],
             
-            // Departamentos (futuro)
+            // Departamentos (Etapa 10)
             ['name' => 'Visualizar Departamentos', 'slug' => 'departments.view', 'group' => 'departamentos', 'sort_order' => 1],
-            ['name' => 'Gerenciar Departamentos (Básico)', 'slug' => 'departments.manage_basic', 'group' => 'departamentos', 'sort_order' => 2],
+            ['name' => 'Criar Departamento', 'slug' => 'departments.create', 'group' => 'departamentos', 'sort_order' => 2],
+            ['name' => 'Editar Departamento', 'slug' => 'departments.update', 'group' => 'departamentos', 'sort_order' => 3],
+            ['name' => 'Gerenciar Departamentos', 'slug' => 'departments.manage', 'group' => 'departamentos', 'sort_order' => 4],
+            ['name' => 'Gerenciar Pessoas de Departamento', 'slug' => 'departments.manage_people', 'group' => 'departamentos', 'sort_order' => 5],
+            ['name' => 'Atribuir Líder de Departamento', 'slug' => 'departments.assign_leader', 'group' => 'departamentos', 'sort_order' => 6],
             
             // Financeiro (futuro)
             ['name' => 'Visualizar Financeiro', 'slug' => 'financeiro.view', 'group' => 'financeiro', 'sort_order' => 1],
@@ -249,6 +253,11 @@ class AccessControlSeeder extends Seeder
                 'accesses.update',
                 'accesses.suspend',
                 'accesses.reactivate',
+                // Departamentos (Etapa 10)
+                'departments.view',
+                'departments.create',
+                'departments.update',
+                'departments.manage_people',
             ])->pluck('id');
             $secretaria->permissions()->sync($secretariaPermissions);
         }
@@ -271,8 +280,9 @@ class AccessControlSeeder extends Seeder
         if ($lider) {
             $liderPermissions = Permission::whereIn('slug', [
                 'people.view',
+                // Departamentos (Etapa 10)
                 'departments.view',
-                'departments.manage_basic',
+                'departments.manage_people',
             ])->pluck('id');
             $lider->permissions()->sync($liderPermissions);
         }

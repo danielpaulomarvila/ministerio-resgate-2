@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PersonCreated;
+use App\Events\PersonUpdated;
 use App\Http\Requests\StorePersonRequest;
 use App\Http\Requests\UpdatePersonRequest;
 use App\Models\Person;
@@ -10,6 +12,7 @@ use App\Models\PersonAddress;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
@@ -25,6 +28,9 @@ use Inertia\Response;
  * 
  * Documentos e moradas foram separados em tabelas próprias
  * para deixar a tabela principal mais limpa e organizada.
+ * 
+ * Etapa 9: Adicionados disparos de Events para auditoria
+ * Etapa 9: Adicionada autorização via PersonPolicy
  */
 class PersonController extends Controller
 {
@@ -39,6 +45,9 @@ class PersonController extends Controller
      */
     public function index(): Response
     {
+        // Autorização via PersonPolicy (Etapa 9)
+        $this->authorize('viewAny', Person::class);
+        
         // Busca todas as pessoas com soft deletes incluídos (para mostrar inativas também)
         // Carrega documentos e morada principal para mostrar dados adicionais
         // Ordena por nome completo para facilitar a busca
@@ -90,6 +99,9 @@ class PersonController extends Controller
      */
     public function store(StorePersonRequest $request): RedirectResponse
     {
+        // Autorização via PersonPolicy (Etapa 9)
+        $this->authorize('create', Person::class);
+        
         DB::beginTransaction();
         
         try {
@@ -113,6 +125,9 @@ class PersonController extends Controller
             }
             
             DB::commit();
+            
+            // Disparar evento para registrar log e notificações (Etapa 9)
+            event(new PersonCreated($person, Auth::id()));
             
             return Redirect::route('people.show', $person->id)
                 ->with('success', 'Pessoa cadastrada com sucesso!');
@@ -145,6 +160,9 @@ class PersonController extends Controller
      */
     public function show(Person $person): Response
     {
+        // Autorização via PersonPolicy (Etapa 9)
+        $this->authorize('view', $person);
+        
         // Carrega a pessoa com relacionamentos para mostrar vínculos
         $person->load(['user', 'document', 'primaryAddress', 'memberProfile', 'families', 'departments']);
 
@@ -205,6 +223,9 @@ class PersonController extends Controller
      */
     public function update(UpdatePersonRequest $request, Person $person): RedirectResponse
     {
+        // Autorização via PersonPolicy (Etapa 9)
+        $this->authorize('update', $person);
+        
         DB::beginTransaction();
         
         try {
@@ -235,6 +256,9 @@ class PersonController extends Controller
             
             DB::commit();
             
+            // Disparar evento para registrar log e notificações (Etapa 9)
+            event(new PersonUpdated($person, Auth::id()));
+            
             return Redirect::route('people.show', $person->id)
                 ->with('success', 'Pessoa atualizada com sucesso!');
         } catch (\Exception $e) {
@@ -261,6 +285,9 @@ class PersonController extends Controller
      */
     public function destroy(Person $person): RedirectResponse
     {
+        // Autorização via PersonPolicy (Etapa 9)
+        $this->authorize('delete', $person);
+        
         // Realiza soft delete da pessoa
         $person->delete();
 

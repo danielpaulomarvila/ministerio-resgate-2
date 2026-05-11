@@ -111,12 +111,33 @@ class Person extends Model
     /**
      * Relacionamento: Uma pessoa pode estar em departamentos
      * Usa a tabela pivot department_people
+     * IMPORTANTE: Vínculo em departamento não cria membro automaticamente
      */
     public function departments(): BelongsToMany
     {
         return $this->belongsToMany(Department::class, 'department_people')
-            ->withPivot('role_name', 'category', 'starts_at', 'ends_at', 'status')
+            ->withPivot('role', 'category', 'starts_at', 'ends_at', 'status', 'is_leader', 'is_assistant', 'can_manage_department', 'notes')
             ->withTimestamps();
+    }
+
+    /**
+     * Relacionamento: Departamentos ativos da pessoa
+     */
+    public function activeDepartments(): BelongsToMany
+    {
+        return $this->belongsToMany(Department::class, 'department_people')
+            ->withPivot('role', 'category', 'starts_at', 'ends_at', 'status', 'is_leader', 'is_assistant', 'can_manage_department', 'notes')
+            ->wherePivot('status', 'active')
+            ->whereNull('ends_at')
+            ->withTimestamps();
+    }
+
+    /**
+     * Relacionamento: Vínculos department_people da pessoa
+     */
+    public function departmentMemberships(): HasMany
+    {
+        return $this->hasMany(DepartmentPerson::class);
     }
 
     /**

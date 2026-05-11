@@ -10,6 +10,8 @@ use App\Http\Controllers\SecretaryRequestController;
 use App\Http\Controllers\SecretaryUserAccessController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Secretaria\AccessProfileController;
+use App\Http\Controllers\Secretaria\DepartmentController;
+use App\Http\Controllers\Secretaria\DepartmentPersonController;
 use App\Http\Controllers\Secretaria\UserAccessProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -139,6 +141,22 @@ Route::prefix('secretaria/perfis-acesso')->name('secretaria.access-profiles.')->
     Route::get('/{accessProfile}/editar', [AccessProfileController::class, 'edit'])->name('edit');
     Route::put('/{accessProfile}', [AccessProfileController::class, 'update'])->name('update');
     Route::delete('/{accessProfile}', [AccessProfileController::class, 'destroy'])->name('destroy');
+});
+
+// Rotas para Departamentos - Secretaria - Etapa 10
+Route::prefix('secretaria/departamentos')->name('secretaria.departments.')->middleware(['auth'])->group(function () {
+    Route::get('/', [DepartmentController::class, 'index'])->name('index');
+    Route::get('/criar', [DepartmentController::class, 'create'])->name('create');
+    Route::post('/', [DepartmentController::class, 'store'])->name('store');
+    Route::get('/{department}', [DepartmentController::class, 'show'])->name('show');
+    Route::get('/{department}/editar', [DepartmentController::class, 'edit'])->name('edit');
+    Route::put('/{department}', [DepartmentController::class, 'update'])->name('update');
+    Route::delete('/{department}', [DepartmentController::class, 'destroy'])->name('destroy');
+    
+    // Rotas para vínculos pessoa-departamento
+    Route::post('/{department}/pessoas', [DepartmentPersonController::class, 'store'])->name('people.store');
+    Route::put('/{department}/pessoas/{departmentPerson}', [DepartmentPersonController::class, 'update'])->name('people.update');
+    Route::delete('/{department}/pessoas/{departmentPerson}', [DepartmentPersonController::class, 'destroy'])->name('people.destroy');
 });
 
 Route::middleware('auth')->group(function () {

@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\FamilyCreated;
+use App\Events\FamilyMemberAttached;
+use App\Events\FamilyMemberDetached;
+use App\Events\FamilyUpdated;
 use App\Http\Requests\StoreFamilyRequest;
 use App\Http\Requests\StoreFamilyMemberRequest;
 use App\Http\Requests\UpdateFamilyRequest;
@@ -9,8 +13,20 @@ use App\Models\Family;
 use App\Models\FamilyMember;
 use App\Models\Person;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Controller para gerenciar famílias no sistema
+ * Módulo Secretaria - Fase 2.2
+ * 
+ * Este controller lida com o CRUD básico de famílias,
+ * permitindo que a Secretaria cadastre e gerencie
+ * famílias e seus membros.
+ * 
+ * Etapa 9: Adicionados disparos de Events para auditoria
+ * Etapa 9: Adicionada autorização via FamilyPolicy
+ */
 class FamilyController extends Controller
 {
     /**
@@ -18,6 +34,9 @@ class FamilyController extends Controller
      */
     public function index()
     {
+        // Autorização via FamilyPolicy (Etapa 9)
+        $this->authorize('viewAny', Family::class);
+        
         $families = Family::with('responsible')
             ->withCount('members')
             ->orderBy('name')
@@ -45,6 +64,9 @@ class FamilyController extends Controller
      */
     public function store(StoreFamilyRequest $request)
     {
+        // Autorização via FamilyPolicy (Etapa 9)
+        $this->authorize('create', Family::class);
+        
         DB::beginTransaction();
         try {
             $family = Family::create($request->validated());
@@ -62,6 +84,9 @@ class FamilyController extends Controller
 
             DB::commit();
 
+            // Disparar evento para registrar log e notificações (Etapa 9)
+            event(new FamilyCreated($family, Auth::id()));
+
             return redirect()->route('families.show', $family)
                 ->with('success', 'Família criada com sucesso.');
         } catch (\Exception $e) {
@@ -75,6 +100,9 @@ class FamilyController extends Controller
      */
     public function show(Family $family)
     {
+        // Autorização via FamilyPolicy (Etapa 9)
+        $this->authorize('view', $family);
+        
         $family->load('responsible');
         $family->load(['members' => function ($query) {
             $query->withPivot('role', 'is_responsible', 'joined_at', 'left_at', 'notes')
@@ -122,6 +150,9 @@ class FamilyController extends Controller
      */
     public function update(UpdateFamilyRequest $request, Family $family)
     {
+        // Autorização via FamilyPolicy (Etapa 9)
+        $this->authorize('update', $family);
+        
         DB::beginTransaction();
         try {
             $family->update($request->validated());
@@ -146,6 +177,9 @@ class FamilyController extends Controller
 
             DB::commit();
 
+            // Disparar evento para registrar log e notificações (Etapa 9)
+            event(new FamilyUpdated($family, Auth::id()));
+
             return redirect()->route('families.show', $family)
                 ->with('success', 'Família atualizada com sucesso.');
         } catch (\Exception $e) {
@@ -159,6 +193,9 @@ class FamilyController extends Controller
      */
     public function destroy(Family $family)
     {
+        // Autorização via FamilyPolicy (Etapa 9)
+        $this->authorize('delete', $family);
+        
         try {
             $family->delete();
 
@@ -174,6 +211,9 @@ class FamilyController extends Controller
      */
     public function attachPerson(StoreFamilyMemberRequest $request, Family $family)
     {
+        // Autorização via FamilyPolicy (Etapa 9)
+        $this->authorize('update', $family);
+        
         DB::beginTransaction();
         try {
             // Verificar se pessoa já está na família ativa
@@ -186,12 +226,17 @@ class FamilyController extends Controller
                 return back()->with('error', 'Esta pessoa já está vinculada à família.');
             }
 
+            $person = Person::find($request->validated('person_id'));
+            
             FamilyMember::create(array_merge($request->validated(), [
                 'family_id' => $family->id,
                 'joined_at' => $request->validated('joined_at') ?? now(),
             ]));
 
             DB::commit();
+
+            // Disparar evento para registrar log e notificações (Etapa 9)
+            event(new FamilyMemberAttached($person, $family, $request->validated('role'), Auth::id()));
 
             return redirect()->route('families.show', $family)
                 ->with('success', 'Pessoa vinculada à família com sucesso.');
@@ -206,6 +251,9 @@ class FamilyController extends Controller
      */
     public function updateMember(Request $request, Family $family, FamilyMember $member)
     {
+        // Autorização via FamilyPolicy (Etapa 9)
+        $this->authorize('update', $family);
+        
         try {
             $member->update($request->validate([
                 'role' => 'required|in:father,mother,son,daughter,spouse,guardian,relative,other',
@@ -225,8 +273,16 @@ class FamilyController extends Controller
      */
     public function detachPerson(Family $family, FamilyMember $member)
     {
+        // Autorização via FamilyPolicy (Etapa 9)
+        $this->authorize('update', $family);
+        
         try {
+            $person = $member->person;
+            
             $member->update(['left_at' => now()]);
+
+            // Disparar evento para registrar log e notificações (Etapa 9)
+            event(new FamilyMemberDetached($person, $family, Auth::id()));
 
             return redirect()->route('families.show', $family)
                 ->with('success', 'Pessoa removida da família com sucesso.');
