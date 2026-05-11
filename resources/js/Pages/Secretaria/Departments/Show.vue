@@ -183,7 +183,7 @@ const confirmDeleteDepartment = () => {
                                     {{ member.person_name }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                    {{ member.role }}
+                                    {{ member.role_label }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                     {{ member.category || '-' }}

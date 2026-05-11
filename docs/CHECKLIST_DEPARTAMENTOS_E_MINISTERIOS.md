@@ -20,6 +20,11 @@
 - ✅ Departamento do sistema não pode ser excluído
 - ✅ Departamento com pessoas ativas não pode ser excluído
 - ✅ Exclusão não apaga pessoas, usuários, membros ou member_profile
+- ✅ Departamentos raiz/oficiais são is_system = true (14 departamentos)
+- ✅ Departamentos criados pela interface nascem is_system = false
+- ✅ Tipos, status e funções/roles aparecem em português na interface
+- ✅ Role "member" aparece como "Participante da Equipe" (não "Membro")
+- ✅ Identificadores/slugs continuam técnicos e não são traduzidos
 
 ## Tarefas
 
@@ -85,20 +90,23 @@
 ### 6. Seeder
 - [x] Atualizar DepartmentSeeder
   - Usar updateOrCreate para evitar duplicidade
-  - 12 departamentos iniciais:
-    1. Louvor (worship)
-    2. Mídia (support)
-    3. Recepção (support)
-    4. Obreiros (ministry)
-    5. Jovens / Resgatados (youth)
-    6. Infantil (children)
-    7. Tesouraria (financial)
-    8. Secretaria (administrative)
-    9. Cantina (support)
-    10. Evangelismo (evangelism)
-    11. Intercessão (ministry)
-    12. Ensino / Discipulado (ministry)
-  - Departamentos do sistema marcados com is_system = true
+  - 14 departamentos raiz/oficiais:
+    1. Pastoral (ministry)
+    2. Resgatados (ministry)
+    3. Louvor (worship)
+    4. Mídia (support)
+    5. Recepção (support)
+    6. Obreiros (ministry)
+    7. Jovens / Resgatados (youth)
+    8. Infantil (children)
+    9. Tesouraria (financial)
+    10. Secretaria (administrative)
+    11. Cantina (support)
+    12. Evangelismo (evangelism)
+    13. Intercessão (ministry)
+    14. Ensino / Discipulado (ministry)
+  - Todos os departamentos raiz marcados com is_system = true
+  - Departamentos criados pela interface nascem is_system = false
 
 ### 7. Events
 - [x] DepartmentCreated

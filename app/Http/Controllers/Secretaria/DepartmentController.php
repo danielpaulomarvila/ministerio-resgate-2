@@ -123,9 +123,11 @@ class DepartmentController extends Controller
             'meeting_time' => 'nullable|date_format:H:i',
             'location' => 'nullable|string|max:255',
             'sort_order' => 'nullable|integer',
-            'is_system' => 'boolean',
             'notes' => 'nullable|string',
         ]);
+
+        // Garantir que departamentos criados pela interface nunca sejam do sistema
+        $validated['is_system'] = false;
 
         $department = Department::create([
             ...$validated,
@@ -186,12 +188,14 @@ class DepartmentController extends Controller
                     'person_id' => $dp->person_id,
                     'person_name' => $dp->person->full_name,
                     'role' => $dp->role,
+                    'role_label' => $dp->role_label,
                     'category' => $dp->category,
                     'is_leader' => $dp->is_leader,
                     'is_assistant' => $dp->is_assistant,
                     'can_manage_department' => $dp->can_manage_department,
                     'starts_at' => $dp->starts_at?->format('Y-m-d'),
                     'status' => $dp->status,
+                    'status_label' => $dp->status_label,
                 ];
             });
 

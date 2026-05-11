@@ -28,13 +28,31 @@ class DepartmentSeeder extends Seeder
         // Departamentos raiz não podem ser excluídos
         $departments = [
             [
+                'name' => 'Pastoral',
+                'slug' => 'pastoral',
+                'description' => 'Departamento responsável pelo pastoreio e cuidado espiritual',
+                'department_type' => 'ministry',
+                'status' => 'active',
+                'is_system' => true,
+                'sort_order' => 1,
+            ],
+            [
+                'name' => 'Resgatados',
+                'slug' => 'resgatados',
+                'description' => 'Departamento para pessoas resgatadas e em processo de restauração',
+                'department_type' => 'ministry',
+                'status' => 'active',
+                'is_system' => true,
+                'sort_order' => 2,
+            ],
+            [
                 'name' => 'Louvor',
                 'slug' => 'louvor',
                 'description' => 'Departamento responsável pelo louvor e adoração',
                 'department_type' => 'worship',
                 'status' => 'active',
                 'is_system' => true,
-                'sort_order' => 1,
+                'sort_order' => 3,
             ],
             [
                 'name' => 'Mídia',
@@ -43,7 +61,7 @@ class DepartmentSeeder extends Seeder
                 'department_type' => 'support',
                 'status' => 'active',
                 'is_system' => true,
-                'sort_order' => 2,
+                'sort_order' => 4,
             ],
             [
                 'name' => 'Recepção',
@@ -52,7 +70,7 @@ class DepartmentSeeder extends Seeder
                 'department_type' => 'support',
                 'status' => 'active',
                 'is_system' => true,
-                'sort_order' => 3,
+                'sort_order' => 5,
             ],
             [
                 'name' => 'Obreiros',
@@ -61,7 +79,7 @@ class DepartmentSeeder extends Seeder
                 'department_type' => 'ministry',
                 'status' => 'active',
                 'is_system' => true,
-                'sort_order' => 4,
+                'sort_order' => 6,
             ],
             [
                 'name' => 'Jovens / Resgatados',
@@ -70,7 +88,7 @@ class DepartmentSeeder extends Seeder
                 'department_type' => 'youth',
                 'status' => 'active',
                 'is_system' => true,
-                'sort_order' => 5,
+                'sort_order' => 7,
             ],
             [
                 'name' => 'Infantil',
@@ -79,7 +97,7 @@ class DepartmentSeeder extends Seeder
                 'department_type' => 'children',
                 'status' => 'active',
                 'is_system' => true,
-                'sort_order' => 6,
+                'sort_order' => 8,
             ],
             [
                 'name' => 'Tesouraria',
@@ -88,7 +106,7 @@ class DepartmentSeeder extends Seeder
                 'department_type' => 'financial',
                 'status' => 'active',
                 'is_system' => true,
-                'sort_order' => 7,
+                'sort_order' => 9,
             ],
             [
                 'name' => 'Secretaria',
@@ -97,7 +115,7 @@ class DepartmentSeeder extends Seeder
                 'department_type' => 'administrative',
                 'status' => 'active',
                 'is_system' => true,
-                'sort_order' => 8,
+                'sort_order' => 10,
             ],
             [
                 'name' => 'Cantina',
@@ -106,7 +124,7 @@ class DepartmentSeeder extends Seeder
                 'department_type' => 'support',
                 'status' => 'active',
                 'is_system' => true,
-                'sort_order' => 9,
+                'sort_order' => 11,
             ],
             [
                 'name' => 'Evangelismo',
@@ -115,7 +133,7 @@ class DepartmentSeeder extends Seeder
                 'department_type' => 'evangelism',
                 'status' => 'active',
                 'is_system' => true,
-                'sort_order' => 10,
+                'sort_order' => 12,
             ],
             [
                 'name' => 'Intercessão',
@@ -124,7 +142,7 @@ class DepartmentSeeder extends Seeder
                 'department_type' => 'ministry',
                 'status' => 'active',
                 'is_system' => true,
-                'sort_order' => 11,
+                'sort_order' => 13,
             ],
             [
                 'name' => 'Ensino / Discipulado',
@@ -133,7 +151,7 @@ class DepartmentSeeder extends Seeder
                 'department_type' => 'ministry',
                 'status' => 'active',
                 'is_system' => true,
-                'sort_order' => 12,
+                'sort_order' => 14,
             ],
         ];
 

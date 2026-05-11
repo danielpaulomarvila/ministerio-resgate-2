@@ -126,4 +126,46 @@ class DepartmentPerson extends Model
     {
         return $this->category === 'jovem';
     }
+
+    /**
+     * Retorna o label em português para a função/role da pessoa
+     * 
+     * @return string Label em português
+     */
+    public function getRoleLabelAttribute(): string
+    {
+        return match ($this->role) {
+            'leader' => 'Líder',
+            'assistant_leader' => 'Líder Auxiliar',
+            'member' => 'Participante da Equipe',
+            'volunteer' => 'Voluntário',
+            'trainee' => 'Em Treinamento',
+            'coordinator' => 'Coordenador',
+            'musician' => 'Músico',
+            'singer' => 'Vocal',
+            'media' => 'Mídia',
+            'worker' => 'Obreiro',
+            'teacher' => 'Professor',
+            'helper' => 'Ajudante',
+            'other' => 'Outro',
+            default => 'Não informado',
+        };
+    }
+
+    /**
+     * Retorna o label em português para o status do vínculo
+     * 
+     * @return string Label em português
+     */
+    public function getStatusLabelAttribute(): string
+    {
+        return match ($this->status) {
+            'active' => 'Ativo',
+            'inactive' => 'Inativo',
+            'removed' => 'Removido',
+            'paused' => 'Pausado',
+            'archived' => 'Arquivado',
+            default => 'Não informado',
+        };
+    }
 }
