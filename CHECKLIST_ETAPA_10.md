@@ -96,6 +96,7 @@
 ### 7. Events
 - [x] DepartmentCreated
 - [x] DepartmentUpdated
+- [x] DepartmentDeleted
 - [x] DepartmentPersonAttached
 - [x] DepartmentPersonUpdated
 - [x] DepartmentPersonRemoved
@@ -104,6 +105,7 @@
 ### 8. Listeners
 - [x] LogDepartmentCreated
 - [x] LogDepartmentUpdated
+- [x] LogDepartmentDeleted
 - [x] LogDepartmentPersonAttached
 - [x] LogDepartmentPersonUpdated
 - [x] LogDepartmentPersonRemoved
@@ -124,7 +126,7 @@
   - show: Detalhes do departamento com membros
   - edit: Formulário de edição
   - update: Atualiza departamento, dispara DepartmentUpdated e DepartmentLeaderChanged
-  - destroy: Desativa departamento (status inactive)
+  - destroy: Exclui departamento (soft delete), bloqueia departamento do sistema e com pessoas ativas, dispara DepartmentDeleted
 - [x] DepartmentPersonController
   - store: Adiciona pessoa ao departamento, dispara DepartmentPersonAttached
   - update: Atualiza vínculo, dispara DepartmentPersonUpdated
@@ -168,6 +170,7 @@
 
 ### 15. Documentação
 - [x] Criar documentação de departamentos (este arquivo)
+- [x] Criar documento de departamentos (DOCUMENTO_DEPARTAMENTOS_E_MINISTERIOS.md)
 - [x] Atualizar CHECKLIST_PREPARACAO_WEB_MOBILE.md
 
 ### 16. Testes
@@ -201,8 +204,11 @@
 2. **Vínculo em departamento ≠ Usuário**: Participar de departamento NÃO cria usuário automaticamente
 3. **Liderança ≠ Permissão**: Liderar departamento NÃO cria permissão automaticamente sem controle
 4. **Remover vínculo ≠ Apagar pessoa**: Remover vínculo NÃO apaga pessoa, usuário ou membro
-5. **Preferência por soft delete**: Usar status inactive em vez de delete para departamentos
-6. **Prevenção de duplicação**: Não permitir vínculo ativo duplicado da mesma pessoa no mesmo departamento
+5. **Excluir departamento usa soft delete**: Usa soft delete (deleted_at), não exclusão física
+6. **Departamento do sistema não pode ser excluído**: Departamentos marcados como is_system = true são protegidos
+7. **Departamento com pessoas ativas não pode ser excluído**: Bloqueia exclusão se houver vínculos ativos
+8. **Excluir departamento não apaga dados**: Não apaga pessoas, usuários, membros ou member_profile
+9. **Prevenção de duplicação**: Não permitir vínculo ativo duplicado da mesma pessoa no mesmo departamento
 
 ### Tipos de Departamento
 - ministry: Ministério
@@ -247,8 +253,8 @@
 - **Models**: 3 arquivos atualizados (Department, DepartmentPerson, Person)
 - **Policy**: 1 arquivo atualizado (DepartmentPolicy)
 - **Seeders**: 1 arquivo atualizado (AccessControlSeeder, DepartmentSeeder)
-- **Events**: 6 arquivos criados (DepartmentCreated, DepartmentUpdated, DepartmentPersonAttached, DepartmentPersonUpdated, DepartmentPersonRemoved, DepartmentLeaderChanged)
-- **Listeners**: 6 arquivos criados (LogDepartmentCreated, LogDepartmentUpdated, LogDepartmentPersonAttached, LogDepartmentPersonUpdated, LogDepartmentPersonRemoved, LogDepartmentLeaderChanged)
+- **Events**: 7 arquivos criados (DepartmentCreated, DepartmentUpdated, DepartmentDeleted, DepartmentPersonAttached, DepartmentPersonUpdated, DepartmentPersonRemoved, DepartmentLeaderChanged)
+- **Listeners**: 7 arquivos criados (LogDepartmentCreated, LogDepartmentUpdated, LogDepartmentDeleted, LogDepartmentPersonAttached, LogDepartmentPersonUpdated, LogDepartmentPersonRemoved, LogDepartmentLeaderChanged)
 - **Jobs**: 1 arquivo criado (CheckDepartmentsWithoutLeader)
 - **Scheduler**: 1 arquivo atualizado (routes/console.php)
 - **Controllers**: 2 arquivos criados (DepartmentController, DepartmentPersonController)
@@ -258,9 +264,9 @@
 - **Menu**: 1 arquivo atualizado (AuthenticatedLayout.vue)
 - **Providers**: 2 arquivos criados/atualizados (EventServiceProvider, bootstrap/providers.php)
 - **Testes**: 2 arquivos criados (DepartmentPolicyTest, DepartmentTest)
-- **Documentação**: 2 arquivos criados/atualizados (CHECKLIST_ETAPA_10.md, CHECKLIST_PREPARACAO_WEB_MOBILE.md)
+- **Documentação**: 3 arquivos criados/atualizados (CHECKLIST_ETAPA_10.md, CHECKLIST_PREPARACAO_WEB_MOBILE.md, DOCUMENTO_DEPARTAMENTOS_E_MINISTERIOS.md)
 
-### Total: 37 arquivos criados/atualizados
+### Total: 38 arquivos criados/atualizados
 
 ### Validações Pendentes
 - Executar migrations: `php artisan migrate`

@@ -1,7 +1,6 @@
 <script setup>
-import { Head } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Link } from '@inertiajs/vue3';
 
 const props = defineProps({
     departments: {
@@ -13,6 +12,25 @@ const props = defineProps({
         required: true,
     },
 });
+
+/**
+ * Exclui um departamento (soft delete)
+ * 
+ * IMPORTANTE:
+ * - Departamento do sistema não pode ser excluído
+ * - Departamento com pessoas ativas vinculadas não pode ser excluído
+ * - Usa soft delete (não apaga dados do banco)
+ * - Não apaga pessoas, usuários, membros ou member_profile
+ */
+const deleteDepartment = (department) => {
+    if (!confirm(`Tem certeza que deseja excluir o departamento "${department.name}"?`)) {
+        return;
+    }
+
+    router.delete(route('secretaria.departments.destroy', department.id), {
+        preserveScroll: true,
+    });
+};
 </script>
 
 <template>
@@ -139,9 +157,17 @@ const props = defineProps({
                                     <Link :href="route('secretaria.departments.show', department.id)" class="text-indigo-600 hover:text-indigo-900 mr-3">
                                         Ver
                                     </Link>
-                                    <Link :href="route('secretaria.departments.edit', department.id)" class="text-indigo-600 hover:text-indigo-900">
+                                    <Link :href="route('secretaria.departments.edit', department.id)" class="text-indigo-600 hover:text-indigo-900 mr-3">
                                         Editar
                                     </Link>
+                                    <button
+                                        v-if="!department.is_system"
+                                        type="button"
+                                        @click="deleteDepartment(department)"
+                                        class="text-red-600 hover:text-red-900"
+                                    >
+                                        Excluir
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>

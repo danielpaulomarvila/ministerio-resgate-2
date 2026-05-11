@@ -3,12 +3,14 @@
 namespace App\Providers;
 
 use App\Events\DepartmentCreated;
+use App\Events\DepartmentDeleted;
 use App\Events\DepartmentLeaderChanged;
 use App\Events\DepartmentPersonAttached;
 use App\Events\DepartmentPersonRemoved;
 use App\Events\DepartmentPersonUpdated;
 use App\Events\DepartmentUpdated;
 use App\Listeners\LogDepartmentCreated;
+use App\Listeners\LogDepartmentDeleted;
 use App\Listeners\LogDepartmentLeaderChanged;
 use App\Listeners\LogDepartmentPersonAttached;
 use App\Listeners\LogDepartmentPersonRemoved;
@@ -38,6 +40,10 @@ class EventServiceProvider extends ServiceProvider
         
         DepartmentUpdated::class => [
             LogDepartmentUpdated::class,
+        ],
+        
+        DepartmentDeleted::class => [
+            LogDepartmentDeleted::class,
         ],
         
         DepartmentPersonAttached::class => [

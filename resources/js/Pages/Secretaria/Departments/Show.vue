@@ -1,5 +1,5 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const props = defineProps({
@@ -12,6 +12,23 @@ const props = defineProps({
         required: true,
     },
 });
+
+/**
+ * Exclui um departamento (soft delete)
+ * 
+ * IMPORTANTE:
+ * - Departamento do sistema não pode ser excluído
+ * - Departamento com pessoas ativas vinculadas não pode ser excluído
+ * - Usa soft delete (não apaga dados do banco)
+ * - Não apaga pessoas, usuários, membros ou member_profile
+ */
+const deleteDepartment = () => {
+    if (!confirm(`Tem certeza que deseja excluir o departamento "${props.department.name}"?`)) {
+        return;
+    }
+
+    router.delete(route('secretaria.departments.destroy', props.department.id));
+};
 </script>
 
 <template>
@@ -30,6 +47,14 @@ const props = defineProps({
                     >
                         Editar
                     </Link>
+                    <button
+                        v-if="!department.is_system"
+                        type="button"
+                        @click="deleteDepartment"
+                        class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+                    >
+                        Excluir
+                    </button>
                     <Link
                         :href="route('secretaria.departments.index')"
                         class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"

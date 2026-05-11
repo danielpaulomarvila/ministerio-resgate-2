@@ -281,19 +281,46 @@ class DepartmentController extends Controller
     }
 
     /**
-     * Desativa um departamento (soft delete)
+     * Exclui um departamento (soft delete)
+     * 
+     * IMPORTANTE:
+     * - Departamento do sistema não pode ser excluído
+     * - Departamento com pessoas ativas vinculadas não pode ser excluído
+     * - Usa soft delete (não apaga dados do banco)
+     * - Não apaga pessoas, usuários, membros ou member_profile
+     * - Gera ActivityLog através de evento DepartmentDeleted
      */
     public function destroy(Department $department)
     {
         $this->authorize('delete', $department);
 
-        // Preferência: usar status inactive em vez de delete
-        $department->update([
-            'status' => 'inactive',
-            'updated_by_user_id' => Auth::id(),
-        ]);
+        // Bloquear exclusão de departamento do sistema
+        if ($department->is_system) {
+            return back()->with('error', 'Este é um departamento do sistema e não pode ser excluído.');
+        }
 
-        return redirect()->route('secretaria.departments.index')
-            ->with('success', 'Departamento desativado com sucesso.');
+        // Verificar se há pessoas ativas vinculadas
+        $hasActivePeople = $department->departmentPeople()
+            ->where('status', 'active')
+            ->whereNull('ends_at')
+            ->exists();
+
+        if ($hasActivePeople) {
+            return back()->with('error', 'Este departamento possui pessoas ativas vinculadas. Remova ou inative os vínculos antes de excluir.');
+        }
+
+        // Registrar dados antes da exclusão para log/evento
+        $departmentName = $department->name;
+        $departmentId = $department->id;
+
+        // Soft delete (não apaga dados do banco, apenas marca como deleted_at)
+        $department->delete();
+
+        // Disparar evento para log
+        event(new DepartmentDeleted($department, Auth::id()));
+
+        return redirect()
+            ->route('secretaria.departments.index')
+            ->with('success', "Departamento {$departmentName} excluído com segurança.");
     }
 }
