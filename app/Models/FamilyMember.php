@@ -52,6 +52,6 @@ class FamilyMember extends Model
      */
     public function isActive(): bool
     {
-        return $this->ends_at === null;
+        return $this->left_at === null;
     }
 }
