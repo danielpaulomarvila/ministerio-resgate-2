@@ -28,3 +28,6 @@ Thumbs.db
 
 # Backups locais do banco de dados
 backups/mysql/*.sql
+
+# Backups locais do arquivo .env
+backups/env/*
