@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Person;
 use App\Models\Family;
 use App\Models\GuardianShip;
-use App\Models\FamilyMember;
-use App\Models\SystemAlert;
+use App\Models\Person;
 use App\Models\SecretaryRequest;
+use App\Models\SystemAlert;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Inertia\Response;
 
 /**
  * SecretaryDashboardController
@@ -37,10 +36,21 @@ class SecretaryDashboardController extends Controller
     /**
      * Mostrar o painel inicial da Secretaria
      *
-     * @return \Inertia\Response
+     * @return Response
      */
     public function index()
     {
+        abort_unless(
+            auth()->user()?->isSuperAdmin() || auth()->user()?->hasAccessProfile('secretaria'),
+            403
+        );
+
+        $today = now()->startOfDay();
+        $cutoff11 = $today->copy()->subYears(11)->toDateString();
+        $cutoff14 = $today->copy()->subYears(14)->toDateString();
+        $cutoff18 = $today->copy()->subYears(18)->toDateString();
+        $childNear11EndDate = $today->copy()->addDays(60)->subYears(11)->toDateString();
+
         // 1. Total de pessoas
         $totalPeople = Person::count();
 
@@ -52,24 +62,24 @@ class SecretaryDashboardController extends Controller
 
         // 4. Crianças menores de 11 anos
         $childrenUnder11 = Person::whereNotNull('birth_date')
-            ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) < 11')
+            ->whereDate('birth_date', '>', $cutoff11)
             ->count();
 
         // 5. Júniores (11 até antes de 14)
         $juniors = Person::whereNotNull('birth_date')
-            ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) >= 11')
-            ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) < 14')
+            ->whereDate('birth_date', '<=', $cutoff11)
+            ->whereDate('birth_date', '>', $cutoff14)
             ->count();
 
         // 6. Jovens (14 até antes de 18)
         $youngs = Person::whereNotNull('birth_date')
-            ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) >= 14')
-            ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) < 18')
+            ->whereDate('birth_date', '<=', $cutoff14)
+            ->whereDate('birth_date', '>', $cutoff18)
             ->count();
 
         // 7. Adultos (18 anos ou mais)
         $adults = Person::whereNotNull('birth_date')
-            ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) >= 18')
+            ->whereDate('birth_date', '<=', $cutoff18)
             ->count();
 
         // 8. Pessoas sem família (sem vínculo ativo em family_members)
@@ -78,7 +88,7 @@ class SecretaryDashboardController extends Controller
 
         // 9. Menores sem responsável ativo (menores de 18 anos sem guardianship ativo)
         $minorsWithoutGuardian = Person::whereNotNull('birth_date')
-            ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) < 18')
+            ->whereDate('birth_date', '>', $cutoff18)
             ->whereDoesntHave('guardianshipsAsMinor', function ($query) {
                 $query->where('status', 'active');
             })
@@ -86,14 +96,13 @@ class SecretaryDashboardController extends Controller
 
         // 10. Crianças próximas dos 11 anos (completarão 11 anos nos próximos 60 dias)
         $childrenNear11 = Person::whereNotNull('birth_date')
-            ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) < 11')
-            ->whereRaw('DATE_ADD(birth_date, INTERVAL 11 YEAR) BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 60 DAY)')
+            ->whereBetween('birth_date', [$cutoff11, $childNear11EndDate])
             ->select('id', 'full_name', 'birth_date')
             ->get()
             ->map(function ($person) {
                 $age = $person->age;
                 $turns11At = $person->birth_date?->addYears(11)?->format('Y-m-d');
-                
+
                 return [
                     'id' => $person->id,
                     'full_name' => $person->full_name,
@@ -105,10 +114,10 @@ class SecretaryDashboardController extends Controller
         // 11. Pessoas com cadastro incompleto
         // Sem data de nascimento
         $peopleWithoutBirthDate = Person::whereNull('birth_date')->count();
-        
+
         // Sem telefone principal
         $peopleWithoutPhone = Person::whereNull('primary_phone')->count();
-        
+
         // Sem email e sem telefone
         $peopleWithoutEmailOrPhone = Person::whereNull('email')
             ->whereNull('primary_phone')
@@ -182,13 +191,13 @@ class SecretaryDashboardController extends Controller
             'total_people' => $totalPeople,
             'total_families' => $totalFamilies,
             'total_active_guardianships' => $totalActiveGuardianships,
-            
+
             // Faixa etária
             'children_under_11' => $childrenUnder11,
             'juniors' => $juniors,
             'youngs' => $youngs,
             'adults' => $adults,
-            
+
             // Atenções
             'people_without_family' => $peopleWithoutFamily,
             'minors_without_guardian' => $minorsWithoutGuardian,
@@ -196,21 +205,21 @@ class SecretaryDashboardController extends Controller
             'people_without_birth_date' => $peopleWithoutBirthDate,
             'people_without_phone' => $peopleWithoutPhone,
             'people_without_email_or_phone' => $peopleWithoutEmailOrPhone,
-            
+
             // Listas recentes
             'recent_people' => $recentPeople,
             'recent_families' => $recentFamilies,
             'recent_guardianships' => $recentGuardianships,
-            
+
             // Alertas (Etapa 5)
             'open_alerts' => $openAlerts,
             'urgent_alerts' => $urgentAlerts,
-            
+
             // Solicitações (Etapa 6)
             'pending_requests' => $pendingRequests,
             'urgent_requests' => $urgentRequests,
             'in_review_requests' => $inReviewRequests,
-            
+
             // Acessos ao Sistema (Etapa 7)
             'active_users' => $activeUsers,
             'suspended_users' => $suspendedUsers,

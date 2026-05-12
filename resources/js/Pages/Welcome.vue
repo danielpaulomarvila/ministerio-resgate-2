@@ -1,386 +1,1259 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import PrayerRequestModal from '../Components/PrayerRequestModal.vue';
+import PrayerTrackingModal from '../Components/PrayerTrackingModal.vue';
+import PromiseBox from '../Components/PromiseBox.vue';
 
 defineProps({
     canLogin: {
         type: Boolean,
-    },
-    canRegister: {
-        type: Boolean,
-    },
-    laravelVersion: {
-        type: String,
-        required: true,
-    },
-    phpVersion: {
-        type: String,
-        required: true,
+        default: true,
     },
 });
 
-function handleImageError() {
-    document.getElementById('screenshot-container')?.classList.add('!hidden');
-    document.getElementById('docs-card')?.classList.add('!row-span-1');
-    document.getElementById('docs-card-content')?.classList.add('!flex-row');
-    document.getElementById('background')?.classList.add('!hidden');
+const showPrayerModal = ref(false);
+const showTrackingModal = ref(false);
+const trackingCode = ref('');
+const activeHeroSlide = ref(0);
+const heroImageErrors = ref(new Set());
+let heroCarouselTimer = null;
+
+const navItems = [
+    { label: 'Início', key: 'inicio', active: true },
+    { label: 'Sobre Nós', key: 'sobre-nos', active: false },
+    { label: 'Cultos', key: 'cultos', active: false },
+    { label: 'Eventos', key: 'eventos', active: false },
+    { label: 'Contato', key: 'contato', active: false },
+];
+
+const highlightCards = [
+    {
+        title: 'Comunidade',
+        text: 'Uma família que acolhe você.',
+        icon: 'people',
+    },
+    {
+        title: 'Cultos',
+        text: 'Momentos de adoração e presença de Deus.',
+        icon: 'church',
+    },
+    {
+        title: 'Ensinamentos',
+        text: 'Palavra que transforma e gera frutos.',
+        icon: 'book',
+    },
+    {
+        title: 'Intercessão',
+        text: 'Oramos por você e com você.',
+        icon: 'pray',
+    },
+    {
+        title: 'Ação Social',
+        text: 'Amor que se move e faz a diferença.',
+        icon: 'care',
+    },
+];
+
+const heroSlides = [
+    {
+        image: '/images/hero/resgate-oracao-01.jpg',
+        fallback: 'linear-gradient(135deg, #06152f 0%, #12345f 52%, #d8a241 100%)',
+        position: 'center 42%',
+        title: 'Fui resgatado por Deus.',
+        text: 'Quando eu não tinha forças, Cristo me levantou.',
+    },
+    {
+        image: '/images/hero/resgate-familia-02.jpg',
+        fallback: 'linear-gradient(135deg, #071b3a 0%, #604827 48%, #f2c15b 100%)',
+        position: 'center',
+        title: 'Deus restaurou minha família.',
+        text: 'A graça de Cristo trouxe perdão, cuidado e recomeço.',
+    },
+    {
+        image: '/images/hero/resgate-adoracao-03.jpg',
+        fallback: 'linear-gradient(135deg, #020817 0%, #183153 50%, #f59e0b 100%)',
+        position: 'center',
+        title: 'Cristo me libertou.',
+        text: 'Em adoração, encontrei paz para continuar.',
+    },
+    {
+        image: '/images/hero/resgate-ajoelhado-04.jpg',
+        fallback: 'linear-gradient(135deg, #06152f 0%, #3a2a1b 46%, #f6c65b 100%)',
+        position: 'center 38%',
+        title: 'Deus curou minhas feridas.',
+        text: 'No secreto da oração, Jesus cuidou do meu coração.',
+    },
+    {
+        image: '/images/hero/resgate-biblia-05.jpg',
+        fallback: 'linear-gradient(135deg, #08162e 0%, #564021 48%, #fff1c2 100%)',
+        position: 'center',
+        title: 'Jesus me deu um novo começo.',
+        text: 'Pela Palavra, Deus acendeu esperança outra vez.',
+    },
+    {
+        image: '/images/hero/resgate-abraco-06.jpg',
+        fallback: 'linear-gradient(135deg, #071b3a 0%, #253f4f 46%, #d97706 100%)',
+        position: 'center',
+        title: 'Deus me levantou quando eu não tinha forças.',
+        text: 'A Família Resgate acolheu, e Cristo restaurou.',
+    },
+    {
+        image: '/images/hero/resgate-cruz-07.jpg',
+        fallback: 'linear-gradient(135deg, #020817 0%, #0a2342 48%, #f2c15b 100%)',
+        position: 'center',
+        title: 'Deus transformou minha história.',
+        text: 'Na cruz, Cristo revelou amor maior que a dor.',
+    },
+    {
+        image: '/images/hero/resgate-grupo-orando-08.jpg',
+        fallback: 'linear-gradient(135deg, #06152f 0%, #22425c 52%, #f6c65b 100%)',
+        position: 'center',
+        title: 'Cristo trouxe paz ao meu coração.',
+        text: 'Deus me cercou de oração, cuidado e esperança.',
+    },
+    {
+        image: '/images/hero/resgate-luz-09.jpg',
+        fallback: 'linear-gradient(135deg, #020817 0%, #17324d 48%, #ffd27a 100%)',
+        position: 'center',
+        title: 'Fui alcançado pelo amor de Cristo.',
+        text: 'A luz de Deus me encontrou no caminho.',
+    },
+    {
+        image: '/images/hero/resgate-culto-10.jpg',
+        fallback: 'linear-gradient(135deg, #071b3a 0%, #442d1b 48%, #f59e0b 100%)',
+        position: 'center',
+        title: 'A graça de Deus me encontrou.',
+        text: 'No culto, Cristo renovou minha fé e meu propósito.',
+    },
+];
+
+function openPrayerModal() {
+    showPrayerModal.value = true;
 }
+
+function openTrackingModal(code = '') {
+    trackingCode.value = code;
+    showTrackingModal.value = true;
+}
+
+function handlePrayerTracking(code) {
+    openTrackingModal(code);
+}
+
+function goToNextHeroSlide() {
+    activeHeroSlide.value = (activeHeroSlide.value + 1) % heroSlides.length;
+}
+
+function markHeroImageError(index) {
+    const nextErrors = new Set(heroImageErrors.value);
+    nextErrors.add(index);
+    heroImageErrors.value = nextErrors;
+}
+
+onMounted(() => {
+    heroCarouselTimer = window.setInterval(goToNextHeroSlide, 4000);
+});
+
+onBeforeUnmount(() => {
+    if (heroCarouselTimer) {
+        window.clearInterval(heroCarouselTimer);
+    }
+});
 </script>
 
 <template>
-    <Head title="Welcome" />
-    <div class="bg-gray-50 text-black/50 dark:bg-black dark:text-white/50">
-        <img
-            id="background"
-            class="absolute -left-20 top-0 max-w-[877px]"
-            src="https://laravel.com/assets/img/welcome/background.svg"
-        />
-        <div
-            class="relative flex min-h-screen flex-col items-center justify-center selection:bg-[#FF2D20] selection:text-white"
-        >
-            <div class="relative w-full max-w-2xl px-6 lg:max-w-7xl">
-                <header
-                    class="grid grid-cols-2 items-center gap-2 py-10 lg:grid-cols-3"
+    <Head title="Início" />
+
+    <div class="public-home-screen">
+        <!-- Header público com navegação principal. As demais telas serão ligadas depois com transição lateral. -->
+        <header class="public-header">
+            <a class="brand-mark" href="#inicio" aria-label="Família Resgate">
+                <img
+                    class="brand-logo"
+                    src="/images/brand/logo-resgate-gold.png"
+                    alt="Logo Ministério Resgate"
+                />
+                <span>
+                    <small>Família</small>
+                    <strong>Resgate</strong>
+                </span>
+            </a>
+
+            <nav class="public-nav" aria-label="Navegação pública">
+                <button
+                    v-for="item in navItems"
+                    :key="item.key"
+                    type="button"
+                    class="nav-item"
+                    :class="{ active: item.active }"
                 >
-                    <div class="flex lg:col-start-2 lg:justify-center">
-                        <svg
-                            class="h-12 w-auto text-white lg:h-16 lg:text-[#FF2D20]"
-                            viewBox="0 0 62 65"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                d="M61.8548 14.6253C61.8778 14.7102 61.8895 14.7978 61.8897 14.8858V28.5615C61.8898 28.737 61.8434 28.9095 61.7554 29.0614C61.6675 29.2132 61.5409 29.3392 61.3887 29.4265L49.9104 36.0351V49.1337C49.9104 49.4902 49.7209 49.8192 49.4118 49.9987L25.4519 63.7916C25.3971 63.8227 25.3372 63.8427 25.2774 63.8639C25.255 63.8714 25.2338 63.8851 25.2101 63.8913C25.0426 63.9354 24.8666 63.9354 24.6991 63.8913C24.6716 63.8838 24.6467 63.8689 24.6205 63.8589C24.5657 63.8389 24.5084 63.8215 24.456 63.7916L0.501061 49.9987C0.348882 49.9113 0.222437 49.7853 0.134469 49.6334C0.0465019 49.4816 0.000120578 49.3092 0 49.1337L0 8.10652C0 8.01678 0.0124642 7.92953 0.0348998 7.84477C0.0423783 7.8161 0.0598282 7.78993 0.0697995 7.76126C0.0884958 7.70891 0.105946 7.65531 0.133367 7.6067C0.152063 7.5743 0.179485 7.54812 0.20192 7.51821C0.230588 7.47832 0.256763 7.43719 0.290416 7.40229C0.319084 7.37362 0.356476 7.35243 0.388883 7.32751C0.425029 7.29759 0.457436 7.26518 0.498568 7.2415L12.4779 0.345059C12.6296 0.257786 12.8015 0.211853 12.9765 0.211853C13.1515 0.211853 13.3234 0.257786 13.475 0.345059L25.4531 7.2415H25.4556C25.4955 7.26643 25.5292 7.29759 25.5653 7.32626C25.5977 7.35119 25.6339 7.37362 25.6625 7.40104C25.6974 7.43719 25.7224 7.47832 25.7523 7.51821C25.7735 7.54812 25.8021 7.5743 25.8196 7.6067C25.8483 7.65656 25.8645 7.70891 25.8844 7.76126C25.8944 7.78993 25.9118 7.8161 25.9193 7.84602C25.9423 7.93096 25.954 8.01853 25.9542 8.10652V33.7317L35.9355 27.9844V14.8846C35.9355 14.7973 35.948 14.7088 35.9704 14.6253C35.9792 14.5954 35.9954 14.5692 36.0053 14.5405C36.0253 14.4882 36.0427 14.4346 36.0702 14.386C36.0888 14.3536 36.1163 14.3274 36.1375 14.2975C36.1674 14.2576 36.1923 14.2165 36.2272 14.1816C36.2559 14.1529 36.292 14.1317 36.3244 14.1068C36.3618 14.0769 36.3942 14.0445 36.4341 14.0208L48.4147 7.12434C48.5663 7.03694 48.7383 6.99094 48.9133 6.99094C49.0883 6.99094 49.2602 7.03694 49.4118 7.12434L61.3899 14.0208C61.4323 14.0457 61.4647 14.0769 61.5021 14.1055C61.5333 14.1305 61.5694 14.1529 61.5981 14.1803C61.633 14.2165 61.6579 14.2576 61.6878 14.2975C61.7103 14.3274 61.7377 14.3536 61.7551 14.386C61.7838 14.4346 61.8 14.4882 61.8199 14.5405C61.8312 14.5692 61.8474 14.5954 61.8548 14.6253ZM59.893 27.9844V16.6121L55.7013 19.0252L49.9104 22.3593V33.7317L59.8942 27.9844H59.893ZM47.9149 48.5566V37.1768L42.2187 40.4299L25.953 49.7133V61.2003L47.9149 48.5566ZM1.99677 9.83281V48.5566L23.9562 61.199V49.7145L12.4841 43.2219L12.4804 43.2194L12.4754 43.2169C12.4368 43.1945 12.4044 43.1621 12.3682 43.1347C12.3371 43.1097 12.3009 43.0898 12.2735 43.0624L12.271 43.0586C12.2386 43.0275 12.2162 42.9888 12.1887 42.9539C12.1638 42.9203 12.1339 42.8916 12.114 42.8567L12.1127 42.853C12.0903 42.8156 12.0766 42.7707 12.0604 42.7283C12.0442 42.6909 12.023 42.656 12.013 42.6161C12.0005 42.5688 11.998 42.5177 11.9931 42.4691C11.9881 42.4317 11.9781 42.3943 11.9781 42.3569V15.5801L6.18848 12.2446L1.99677 9.83281ZM12.9777 2.36177L2.99764 8.10652L12.9752 13.8513L22.9541 8.10527L12.9752 2.36177H12.9777ZM18.1678 38.2138L23.9574 34.8809V9.83281L19.7657 12.2459L13.9749 15.5801V40.6281L18.1678 38.2138ZM48.9133 9.14105L38.9344 14.8858L48.9133 20.6305L58.8909 14.8846L48.9133 9.14105ZM47.9149 22.3593L42.124 19.0252L37.9323 16.6121V27.9844L43.7219 31.3174L47.9149 33.7317V22.3593ZM24.9533 47.987L39.59 39.631L46.9065 35.4555L36.9352 29.7145L25.4544 36.3242L14.9907 42.3482L24.9533 47.987Z"
-                                fill="currentColor"
-                            />
+                    {{ item.label }}
+                </button>
+            </nav>
+
+            <Link
+                v-if="canLogin"
+                class="login-button"
+                :href="$page.props.auth.user ? route('dashboard') : route('login')"
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+                    <path d="M4 21a8 8 0 0 1 16 0" />
+                </svg>
+                Entrar
+            </Link>
+        </header>
+
+        <!-- Painel Início em tela única. A estrutura de palco evita scroll no desktop e prepara a troca lateral futura. -->
+        <main id="inicio" class="public-stage">
+            <!-- Hero da página Início com mensagem de boas-vindas, ações principais e cena espiritual clara. -->
+            <section class="hero-zone" aria-label="Boas-vindas à Família Resgate">
+                <div class="hero-copy">
+                    <p class="hero-kicker">Bem-vindo à</p>
+                    <h1>
+                        <span>Família</span>
+                        <strong>Resgate</strong>
+                    </h1>
+                    <p class="hero-mission">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z" />
                         </svg>
-                    </div>
-                    <nav v-if="canLogin" class="-mx-3 flex flex-1 justify-end">
-                        <Link
-                            v-if="$page.props.auth.user"
-                            :href="route('dashboard')"
-                            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                        >
-                            Dashboard
-                        </Link>
-
-                        <template v-else>
-                            <Link
-                                :href="route('login')"
-                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                            >
-                                Log in
-                            </Link>
-
-                            <Link
-                                v-if="canRegister"
-                                :href="route('register')"
-                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                            >
-                                Register
-                            </Link>
-                        </template>
-                    </nav>
-                </header>
-
-                <main class="mt-6">
-                    <div class="grid gap-6 lg:grid-cols-2 lg:gap-8">
-                        <a
-                            href="https://laravel.com/docs"
-                            id="docs-card"
-                            class="flex flex-col items-start gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] md:row-span-3 lg:p-10 lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                        >
-                            <div
-                                id="screenshot-container"
-                                class="relative flex w-full flex-1 items-stretch"
-                            >
-                                <img
-                                    src="https://laravel.com/assets/img/welcome/docs-light.svg"
-                                    alt="Laravel documentation screenshot"
-                                    class="aspect-video h-full w-full flex-1 rounded-[10px] object-cover object-top drop-shadow-[0px_4px_34px_rgba(0,0,0,0.06)] dark:hidden"
-                                    @error="handleImageError"
-                                />
-                                <img
-                                    src="https://laravel.com/assets/img/welcome/docs-dark.svg"
-                                    alt="Laravel documentation screenshot"
-                                    class="hidden aspect-video h-full w-full flex-1 rounded-[10px] object-cover object-top drop-shadow-[0px_4px_34px_rgba(0,0,0,0.25)] dark:block"
-                                />
-                                <div
-                                    class="absolute -bottom-16 -left-16 h-40 w-[calc(100%+8rem)] bg-gradient-to-b from-transparent via-white to-white dark:via-zinc-900 dark:to-zinc-900"
-                                ></div>
-                            </div>
-
-                            <div
-                                class="relative flex items-center gap-6 lg:items-end"
-                            >
-                                <div
-                                    id="docs-card-content"
-                                    class="flex items-start gap-6 lg:flex-col"
-                                >
-                                    <div
-                                        class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16"
-                                    >
-                                        <svg
-                                            class="size-5 sm:size-6"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                fill="#FF2D20"
-                                                d="M23 4a1 1 0 0 0-1.447-.894L12.224 7.77a.5.5 0 0 1-.448 0L2.447 3.106A1 1 0 0 0 1 4v13.382a1.99 1.99 0 0 0 1.105 1.79l9.448 4.728c.14.065.293.1.447.1.154-.005.306-.04.447-.105l9.453-4.724a1.99 1.99 0 0 0 1.1-1.789V4ZM3 6.023a.25.25 0 0 1 .362-.223l7.5 3.75a.251.251 0 0 1 .138.223v11.2a.25.25 0 0 1-.362.224l-7.5-3.75a.25.25 0 0 1-.138-.22V6.023Zm18 11.2a.25.25 0 0 1-.138.224l-7.5 3.75a.249.249 0 0 1-.329-.099.249.249 0 0 1-.033-.12V9.772a.251.251 0 0 1 .138-.224l7.5-3.75a.25.25 0 0 1 .362.224v11.2Z"
-                                            />
-                                            <path
-                                                fill="#FF2D20"
-                                                d="m3.55 1.893 8 4.048a1.008 1.008 0 0 0 .9 0l8-4.048a1 1 0 0 0-.9-1.785l-7.322 3.706a.506.506 0 0 1-.452 0L4.454.108a1 1 0 0 0-.9 1.785H3.55Z"
-                                            />
-                                        </svg>
-                                    </div>
-
-                                    <div class="pt-3 sm:pt-5 lg:pt-0">
-                                        <h2
-                                            class="text-xl font-semibold text-black dark:text-white"
-                                        >
-                                            Documentation
-                                        </h2>
-
-                                        <p class="mt-4 text-sm/relaxed">
-                                            Laravel has wonderful documentation
-                                            covering every aspect of the
-                                            framework. Whether you are a
-                                            newcomer or have prior experience
-                                            with Laravel, we recommend reading
-                                            our documentation from beginning to
-                                            end.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <svg
-                                    class="size-6 shrink-0 stroke-[#FF2D20]"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke-width="1.5"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
-                                    />
-                                </svg>
-                            </div>
-                        </a>
-
-                        <a
-                            href="https://laracasts.com"
-                            class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                        >
-                            <div
-                                class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16"
-                            >
-                                <svg
-                                    class="size-5 sm:size-6"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <g fill="#FF2D20">
-                                        <path
-                                            d="M24 8.25a.5.5 0 0 0-.5-.5H.5a.5.5 0 0 0-.5.5v12a2.5 2.5 0 0 0 2.5 2.5h19a2.5 2.5 0 0 0 2.5-2.5v-12Zm-7.765 5.868a1.221 1.221 0 0 1 0 2.264l-6.626 2.776A1.153 1.153 0 0 1 8 18.123v-5.746a1.151 1.151 0 0 1 1.609-1.035l6.626 2.776ZM19.564 1.677a.25.25 0 0 0-.177-.427H15.6a.106.106 0 0 0-.072.03l-4.54 4.543a.25.25 0 0 0 .177.427h3.783c.027 0 .054-.01.073-.03l4.543-4.543ZM22.071 1.318a.047.047 0 0 0-.045.013l-4.492 4.492a.249.249 0 0 0 .038.385.25.25 0 0 0 .14.042h5.784a.5.5 0 0 0 .5-.5v-2a2.5 2.5 0 0 0-1.925-2.432ZM13.014 1.677a.25.25 0 0 0-.178-.427H9.101a.106.106 0 0 0-.073.03l-4.54 4.543a.25.25 0 0 0 .177.427H8.4a.106.106 0 0 0 .073-.03l4.54-4.543ZM6.513 1.677a.25.25 0 0 0-.177-.427H2.5A2.5 2.5 0 0 0 0 3.75v2a.5.5 0 0 0 .5.5h1.4a.106.106 0 0 0 .073-.03l4.54-4.543Z"
-                                        />
-                                    </g>
-                                </svg>
-                            </div>
-
-                            <div class="pt-3 sm:pt-5">
-                                <h2
-                                    class="text-xl font-semibold text-black dark:text-white"
-                                >
-                                    Laracasts
-                                </h2>
-
-                                <p class="mt-4 text-sm/relaxed">
-                                    Laracasts offers thousands of video
-                                    tutorials on Laravel, PHP, and JavaScript
-                                    development. Check them out, see for
-                                    yourself, and massively level up your
-                                    development skills in the process.
-                                </p>
-                            </div>
-
-                            <svg
-                                class="size-6 shrink-0 self-center stroke-[#FF2D20]"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
-                                />
+                        Um lugar de resgate, cuidado e recomeço.
+                    </p>
+                    <p class="hero-text">
+                        Na Família Resgate, cremos que Cristo continua transformando histórias, restaurando vidas
+                        e chamando pessoas para uma caminhada de fé, serviço e propósito.
+                    </p>
+                    <div class="hero-actions">
+                        <button type="button" class="primary-cta" @click="openPrayerModal">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M9 11V5a2 2 0 0 1 4 0v8M13 11V6a2 2 0 0 1 4 0v7" />
+                                <path d="M7 13 5 9a2 2 0 0 0-3 2l3 7c1 2 3 3 5 3h5c3 0 5-2 5-5v-5" />
                             </svg>
-                        </a>
-
-                        <a
-                            href="https://laravel-news.com"
-                            class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                        >
-                            <div
-                                class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16"
-                            >
-                                <svg
-                                    class="size-5 sm:size-6"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <g fill="#FF2D20">
-                                        <path
-                                            d="M8.75 4.5H5.5c-.69 0-1.25.56-1.25 1.25v4.75c0 .69.56 1.25 1.25 1.25h3.25c.69 0 1.25-.56 1.25-1.25V5.75c0-.69-.56-1.25-1.25-1.25Z"
-                                        />
-                                        <path
-                                            d="M24 10a3 3 0 0 0-3-3h-2V2.5a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2V20a3.5 3.5 0 0 0 3.5 3.5h17A3.5 3.5 0 0 0 24 20V10ZM3.5 21.5A1.5 1.5 0 0 1 2 20V3a.5.5 0 0 1 .5-.5h14a.5.5 0 0 1 .5.5v17c0 .295.037.588.11.874a.5.5 0 0 1-.484.625L3.5 21.5ZM22 20a1.5 1.5 0 1 1-3 0V9.5a.5.5 0 0 1 .5-.5H21a1 1 0 0 1 1 1v10Z"
-                                        />
-                                        <path
-                                            d="M12.751 6.047h2a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-2A.75.75 0 0 1 12 7.3v-.5a.75.75 0 0 1 .751-.753ZM12.751 10.047h2a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-2A.75.75 0 0 1 12 11.3v-.5a.75.75 0 0 1 .751-.753ZM4.751 14.047h10a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-10A.75.75 0 0 1 4 15.3v-.5a.75.75 0 0 1 .751-.753ZM4.75 18.047h7.5a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-7.5A.75.75 0 0 1 4 19.3v-.5a.75.75 0 0 1 .75-.753Z"
-                                        />
-                                    </g>
-                                </svg>
-                            </div>
-
-                            <div class="pt-3 sm:pt-5">
-                                <h2
-                                    class="text-xl font-semibold text-black dark:text-white"
-                                >
-                                    Laravel News
-                                </h2>
-
-                                <p class="mt-4 text-sm/relaxed">
-                                    Laravel News is a community driven portal
-                                    and newsletter aggregating all of the latest
-                                    and most important news in the Laravel
-                                    ecosystem, including new package releases
-                                    and tutorials.
-                                </p>
-                            </div>
-
-                            <svg
-                                class="size-6 shrink-0 self-center stroke-[#FF2D20]"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
-                                />
+                            Pedir Oração
+                        </button>
+                        <button type="button" class="secondary-cta">
+                            Conheça a Igreja
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M5 12h14M13 6l6 6-6 6" />
                             </svg>
-                        </a>
-
-                        <div
-                            class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800"
-                        >
-                            <div
-                                class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16"
-                            >
-                                <svg
-                                    class="size-5 sm:size-6"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <g fill="#FF2D20">
-                                        <path
-                                            d="M16.597 12.635a.247.247 0 0 0-.08-.237 2.234 2.234 0 0 1-.769-1.68c.001-.195.03-.39.084-.578a.25.25 0 0 0-.09-.267 8.8 8.8 0 0 0-4.826-1.66.25.25 0 0 0-.268.181 2.5 2.5 0 0 1-2.4 1.824.045.045 0 0 0-.045.037 12.255 12.255 0 0 0-.093 3.86.251.251 0 0 0 .208.214c2.22.366 4.367 1.08 6.362 2.118a.252.252 0 0 0 .32-.079 10.09 10.09 0 0 0 1.597-3.733ZM13.616 17.968a.25.25 0 0 0-.063-.407A19.697 19.697 0 0 0 8.91 15.98a.25.25 0 0 0-.287.325c.151.455.334.898.548 1.328.437.827.981 1.594 1.619 2.28a.249.249 0 0 0 .32.044 29.13 29.13 0 0 0 2.506-1.99ZM6.303 14.105a.25.25 0 0 0 .265-.274 13.048 13.048 0 0 1 .205-4.045.062.062 0 0 0-.022-.07 2.5 2.5 0 0 1-.777-.982.25.25 0 0 0-.271-.149 11 11 0 0 0-5.6 2.815.255.255 0 0 0-.075.163c-.008.135-.02.27-.02.406.002.8.084 1.598.246 2.381a.25.25 0 0 0 .303.193 19.924 19.924 0 0 1 5.746-.438ZM9.228 20.914a.25.25 0 0 0 .1-.393 11.53 11.53 0 0 1-1.5-2.22 12.238 12.238 0 0 1-.91-2.465.248.248 0 0 0-.22-.187 18.876 18.876 0 0 0-5.69.33.249.249 0 0 0-.179.336c.838 2.142 2.272 4 4.132 5.353a.254.254 0 0 0 .15.048c1.41-.01 2.807-.282 4.117-.802ZM18.93 12.957l-.005-.008a.25.25 0 0 0-.268-.082 2.21 2.21 0 0 1-.41.081.25.25 0 0 0-.217.2c-.582 2.66-2.127 5.35-5.75 7.843a.248.248 0 0 0-.09.299.25.25 0 0 0 .065.091 28.703 28.703 0 0 0 2.662 2.12.246.246 0 0 0 .209.037c2.579-.701 4.85-2.242 6.456-4.378a.25.25 0 0 0 .048-.189 13.51 13.51 0 0 0-2.7-6.014ZM5.702 7.058a.254.254 0 0 0 .2-.165A2.488 2.488 0 0 1 7.98 5.245a.093.093 0 0 0 .078-.062 19.734 19.734 0 0 1 3.055-4.74.25.25 0 0 0-.21-.41 12.009 12.009 0 0 0-10.4 8.558.25.25 0 0 0 .373.281 12.912 12.912 0 0 1 4.826-1.814ZM10.773 22.052a.25.25 0 0 0-.28-.046c-.758.356-1.55.635-2.365.833a.25.25 0 0 0-.022.48c1.252.43 2.568.65 3.893.65.1 0 .2 0 .3-.008a.25.25 0 0 0 .147-.444c-.526-.424-1.1-.917-1.673-1.465ZM18.744 8.436a.249.249 0 0 0 .15.228 2.246 2.246 0 0 1 1.352 2.054c0 .337-.08.67-.23.972a.25.25 0 0 0 .042.28l.007.009a15.016 15.016 0 0 1 2.52 4.6.25.25 0 0 0 .37.132.25.25 0 0 0 .096-.114c.623-1.464.944-3.039.945-4.63a12.005 12.005 0 0 0-5.78-10.258.25.25 0 0 0-.373.274c.547 2.109.85 4.274.901 6.453ZM9.61 5.38a.25.25 0 0 0 .08.31c.34.24.616.561.8.935a.25.25 0 0 0 .3.127.631.631 0 0 1 .206-.034c2.054.078 4.036.772 5.69 1.991a.251.251 0 0 0 .267.024c.046-.024.093-.047.141-.067a.25.25 0 0 0 .151-.23A29.98 29.98 0 0 0 15.957.764a.25.25 0 0 0-.16-.164 11.924 11.924 0 0 0-2.21-.518.252.252 0 0 0-.215.076A22.456 22.456 0 0 0 9.61 5.38Z"
-                                        />
-                                    </g>
-                                </svg>
-                            </div>
-
-                            <div class="pt-3 sm:pt-5">
-                                <h2
-                                    class="text-xl font-semibold text-black dark:text-white"
-                                >
-                                    Vibrant Ecosystem
-                                </h2>
-
-                                <p class="mt-4 text-sm/relaxed">
-                                    Laravel's robust library of first-party
-                                    tools and libraries, such as
-                                    <a
-                                        href="https://forge.laravel.com"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white dark:focus-visible:ring-[#FF2D20]"
-                                        >Forge</a
-                                    >,
-                                    <a
-                                        href="https://vapor.laravel.com"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Vapor</a
-                                    >,
-                                    <a
-                                        href="https://nova.laravel.com"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Nova</a
-                                    >,
-                                    <a
-                                        href="https://envoyer.io"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Envoyer</a
-                                    >, and
-                                    <a
-                                        href="https://herd.laravel.com"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Herd</a
-                                    >
-                                    help you take your projects to the next
-                                    level. Pair them with powerful open source
-                                    libraries like
-                                    <a
-                                        href="https://laravel.com/docs/billing"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Cashier</a
-                                    >,
-                                    <a
-                                        href="https://laravel.com/docs/dusk"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Dusk</a
-                                    >,
-                                    <a
-                                        href="https://laravel.com/docs/broadcasting"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Echo</a
-                                    >,
-                                    <a
-                                        href="https://laravel.com/docs/horizon"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Horizon</a
-                                    >,
-                                    <a
-                                        href="https://laravel.com/docs/sanctum"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Sanctum</a
-                                    >,
-                                    <a
-                                        href="https://laravel.com/docs/telescope"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Telescope</a
-                                    >, and more.
-                                </p>
-                            </div>
-                        </div>
+                        </button>
                     </div>
-                </main>
+                </div>
 
-                <footer
-                    class="py-16 text-center text-sm text-black dark:text-white/70"
-                >
-                    Laravel v{{ laravelVersion }} (PHP v{{ phpVersion }})
-                </footer>
-            </div>
-        </div>
+                <div class="hero-visual" aria-label="Testemunhos visuais da Família Resgate">
+                    <div class="hero-carousel">
+                        <article
+                            v-for="(slide, index) in heroSlides"
+                            :key="slide.image"
+                            class="hero-slide"
+                            :class="{ active: activeHeroSlide === index }"
+                            :style="{ '--hero-fallback': slide.fallback, '--hero-position': slide.position }"
+                            :aria-hidden="activeHeroSlide !== index"
+                        >
+                            <img
+                                v-if="!heroImageErrors.has(index)"
+                                :src="slide.image"
+                                :alt="slide.title"
+                                loading="eager"
+                                @error="markHeroImageError(index)"
+                            />
+                            <span v-else class="hero-photo-placeholder"></span>
+                            <div class="hero-slide-copy">
+                                <strong>{{ slide.title }}</strong>
+                                <span>{{ slide.text }}</span>
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="hero-slide-dots" aria-hidden="true">
+                        <span
+                            v-for="(slide, index) in heroSlides"
+                            :key="`${slide.image}-dot`"
+                            :class="{ active: activeHeroSlide === index }"
+                        ></span>
+                    </div>
+
+                    <article class="verse-card">
+                        <span class="quote-mark">“</span>
+                        <h2>Cristo se deu em resgate por todos.</h2>
+                        <p>O qual se deu a si mesmo em resgate por todos, para servir de testemunho a seu tempo.</p>
+                        <strong>1 Timóteo 2:6</strong>
+                    </article>
+                </div>
+            </section>
+
+            <PromiseBox />
+
+            <!-- Cards compactos de destaque, todos dentro da mesma tela para manter o desktop sem scroll. -->
+            <section class="highlight-row" aria-label="Destaques da igreja">
+                <article v-for="card in highlightCards" :key="card.title" class="highlight-card">
+                    <span class="highlight-icon">
+                        <svg v-if="card.icon === 'people'" viewBox="0 0 48 48" aria-hidden="true">
+                            <path d="M18 21a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM30 21a6 6 0 1 0 0-12" />
+                            <path d="M5 40c1-9 7-14 13-14s12 5 13 14M28 27c6 1 11 5 12 13" />
+                        </svg>
+                        <svg v-else-if="card.icon === 'church'" viewBox="0 0 48 48" aria-hidden="true">
+                            <path d="M8 40h32V20L24 10 8 20Z" />
+                            <path d="M24 6v13M18 12h12M18 40V28h12v12" />
+                        </svg>
+                        <svg v-else-if="card.icon === 'book'" viewBox="0 0 48 48" aria-hidden="true">
+                            <path d="M8 10h14c4 0 6 2 6 6v22c0-4-2-6-6-6H8Z" />
+                            <path d="M40 10H28c-4 0-6 2-6 6v22c0-4 2-6 6-6h12Z" />
+                            <path d="M24 15v22" />
+                        </svg>
+                        <svg v-else-if="card.icon === 'pray'" viewBox="0 0 48 48" aria-hidden="true">
+                            <path d="M20 8v19l-7-9a4 4 0 0 0-6 5l10 15" />
+                            <path d="M28 8v19l7-9a4 4 0 0 1 6 5L31 38" />
+                        </svg>
+                        <svg v-else viewBox="0 0 48 48" aria-hidden="true">
+                            <path d="M24 17c-4-8-15-3-10 6 3 6 10 10 10 10s7-4 10-10c5-9-6-14-10-6Z" />
+                            <path d="M9 38c6-2 11-2 15 1 4-3 9-3 15-1" />
+                        </svg>
+                    </span>
+                    <div>
+                        <h2>{{ card.title }}</h2>
+                        <p>{{ card.text }}</p>
+                    </div>
+                </article>
+            </section>
+
+            <!-- Rodapé visual compacto com versículo, acompanhamento e assinatura discreta da desenvolvedora. -->
+            <footer class="home-footer">
+                <div class="footer-verse">
+                    <span>“</span>
+                    <p>Confie no Senhor de todo o seu coração e não se apoie em seu próprio entendimento.</p>
+                    <strong>Provérbios 3:5</strong>
+                </div>
+                <div class="footer-actions">
+                    <button type="button" class="tracking-card" @click="openTrackingModal()">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15ZM16 16l5 5" />
+                        </svg>
+                        <span>
+                            <strong>Acompanhar Oração</strong>
+                            <small>Já tem um código? Acompanhe seu pedido.</small>
+                        </span>
+                    </button>
+
+                    <div class="marvvium-signature" aria-label="Plataforma desenvolvida por Marvvium">
+                        <img src="/images/brand/logo-marvvium.png" alt="Marvvium" />
+                        <span>
+                            <strong>Plataforma desenvolvida por Marvvium</strong>
+                            <small>Muito além de um sistema</small>
+                        </span>
+                    </div>
+                </div>
+            </footer>
+        </main>
+
+        <PrayerRequestModal
+            :show="showPrayerModal"
+            @close="showPrayerModal = false"
+            @track="handlePrayerTracking"
+        />
+        <PrayerTrackingModal
+            :show="showTrackingModal"
+            :initial-code="trackingCode"
+            @close="showTrackingModal = false"
+        />
     </div>
 </template>
+
+<style scoped>
+.public-home-screen {
+    position: relative;
+    display: grid;
+    grid-template-rows: 78px minmax(0, 1fr);
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding: 0 clamp(26px, 3.6vw, 56px) 10px;
+    color: #08162e;
+    background:
+        radial-gradient(circle at 72% 16%, rgba(246, 198, 91, 0.18), transparent 22%),
+        radial-gradient(circle at 12% 28%, rgba(255, 255, 255, 0.75), transparent 25%),
+        linear-gradient(135deg, #fff8ea 0%, #f7f1e4 48%, #efe0c0 100%);
+}
+
+.public-home-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(90deg, rgba(217, 164, 65, 0.06) 1px, transparent 1px),
+        linear-gradient(rgba(217, 164, 65, 0.05) 1px, transparent 1px);
+    background-size: 84px 84px;
+    mask-image: radial-gradient(circle at center, black, transparent 82%);
+}
+
+.public-header,
+.public-stage {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 1460px);
+    margin-inline: auto;
+}
+
+.public-header {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.82fr) minmax(500px, 1.24fr) minmax(126px, 0.38fr);
+    align-items: center;
+    gap: 18px;
+}
+
+.brand-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #08162e;
+    text-decoration: none;
+}
+
+.brand-logo {
+    width: clamp(62px, 5.2vw, 76px);
+    height: clamp(54px, 4.8vw, 68px);
+    flex: 0 0 auto;
+    object-fit: contain;
+    transform: scale(1.95);
+    transform-origin: center;
+    filter: drop-shadow(0 10px 18px rgba(217, 164, 65, 0.2));
+}
+
+.brand-mark span {
+    display: grid;
+    line-height: 1;
+}
+
+.brand-mark small {
+    font-family: Georgia, 'Times New Roman', serif;
+    color: #b87918;
+    font-size: 0.76rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.brand-mark strong {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(1.28rem, 1.75vw, 1.68rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.public-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(24px, 3.6vw, 56px);
+}
+
+.nav-item {
+    position: relative;
+    border: 0;
+    color: #08162e;
+    background: transparent;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: color 280ms ease, transform 280ms ease;
+}
+
+.nav-item::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -16px;
+    width: 66px;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, #f59e0b, transparent);
+    opacity: 0;
+    transform: translateX(-50%) scaleX(0.65);
+    transition: opacity 280ms ease, transform 280ms ease;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    color: #d97706;
+    transform: translateY(-2px);
+}
+
+.nav-item.active::after,
+.nav-item:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(1);
+}
+
+.login-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    justify-self: end;
+    min-width: 132px;
+    min-height: 48px;
+    border: 1px solid rgba(217, 164, 65, 0.5);
+    border-radius: 16px;
+    color: #fff8ea;
+    background: linear-gradient(135deg, #f6c65b, #f59e0b 62%, #d97706);
+    font-weight: 900;
+    text-decoration: none;
+    box-shadow: 0 16px 28px rgba(245, 158, 11, 0.22);
+    transition: transform 280ms ease, box-shadow 280ms ease;
+}
+
+.login-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 22px 34px rgba(245, 158, 11, 0.3);
+}
+
+.login-button svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+}
+
+.public-stage {
+    display: grid;
+    grid-template-rows: minmax(420px, 50fr) minmax(142px, 22fr) minmax(66px, 10fr) minmax(60px, 8fr);
+    gap: 14px;
+    min-height: calc(100vh - 92px);
+}
+
+.hero-zone {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(350px, 38%) minmax(0, 62%);
+    min-height: 0;
+    overflow: hidden;
+    border-radius: 32px 54px 0 0;
+    background:
+        linear-gradient(90deg, rgba(255, 248, 234, 1) 0%, rgba(255, 248, 234, 0.98) 35%, rgba(255, 248, 234, 0.22) 45%, transparent 57%),
+        linear-gradient(180deg, rgba(255, 248, 234, 0.95), rgba(244, 232, 208, 0.72));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.hero-copy {
+    position: relative;
+    z-index: 6;
+    display: flex;
+    width: auto;
+    height: 100%;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(28px, 3.2vw, 48px) clamp(20px, 2.4vw, 34px) clamp(32px, 3vw, 46px) clamp(34px, 4.2vw, 62px);
+}
+
+.hero-kicker {
+    margin: 0;
+    color: #08162e;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(1.02rem, 1.48vw, 1.38rem);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.hero-copy h1 {
+    display: grid;
+    margin: 4px 0 8px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(2.45rem, 4vw, 3.8rem);
+    font-weight: 800;
+    line-height: 0.92;
+    text-transform: uppercase;
+}
+
+.hero-copy h1 span {
+    color: #06152f;
+}
+
+.hero-copy h1 strong {
+    color: #e59b0b;
+    font-weight: 800;
+    text-shadow: 0 8px 18px rgba(217, 164, 65, 0.18);
+}
+
+.hero-mission {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    color: #08162e;
+    font-size: clamp(0.72rem, 0.9vw, 0.94rem);
+    font-weight: 900;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+
+.hero-mission svg {
+    width: 23px;
+    height: 23px;
+    flex: 0 0 auto;
+    fill: none;
+    stroke: #e59b0b;
+    stroke-width: 1.8;
+}
+
+.hero-text {
+    max-width: 430px;
+    margin: 12px 0 0;
+    color: #1d2939;
+    font-size: clamp(0.8rem, 0.9vw, 0.96rem);
+    line-height: 1.48;
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: clamp(12px, 1.6vw, 18px);
+    padding-bottom: 4px;
+}
+
+.primary-cta,
+.secondary-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 168px;
+    min-height: 44px;
+    border-radius: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform 280ms ease, box-shadow 280ms ease, border-color 280ms ease;
+}
+
+.primary-cta {
+    border: 1px solid rgba(217, 164, 65, 0.7);
+    color: #fff8ea;
+    background: linear-gradient(135deg, #f6c65b, #f59e0b 64%, #d97706);
+    box-shadow: 0 18px 28px rgba(245, 158, 11, 0.24);
+}
+
+.secondary-cta {
+    border: 1px solid rgba(6, 21, 47, 0.52);
+    color: #06152f;
+    background: rgba(255, 248, 234, 0.7);
+}
+
+.primary-cta:hover,
+.secondary-cta:hover {
+    transform: translateY(-3px);
+    border-color: #f59e0b;
+    box-shadow: 0 20px 30px rgba(217, 164, 65, 0.2);
+}
+
+.primary-cta svg,
+.secondary-cta svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+}
+
+.hero-visual {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 0 54px 0 0;
+    background:
+        radial-gradient(circle at 76% 16%, rgba(246, 198, 91, 0.24), transparent 24%),
+        linear-gradient(135deg, #020817, #06152f 54%, #0a2342);
+}
+
+.hero-visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background:
+        linear-gradient(90deg, rgba(2, 8, 23, 0.52) 0%, rgba(6, 21, 47, 0.22) 34%, rgba(2, 8, 23, 0.38) 100%),
+        linear-gradient(180deg, rgba(2, 8, 23, 0.1) 0%, rgba(2, 8, 23, 0.04) 38%, rgba(2, 8, 23, 0.56) 100%),
+        radial-gradient(circle at 76% 18%, rgba(246, 198, 91, 0.26), transparent 28%),
+        radial-gradient(circle at 18% 82%, rgba(246, 198, 91, 0.12), transparent 24%);
+    pointer-events: none;
+}
+
+.hero-visual::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    background-image:
+        radial-gradient(circle at 82% 18%, rgba(246, 198, 91, 0.1), transparent 22%),
+        repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 5px);
+    opacity: 0.42;
+    pointer-events: none;
+}
+
+.hero-carousel {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.hero-slide {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    opacity: 0;
+    background: var(--hero-fallback);
+    transform: scale(1.01);
+    transition: opacity 1100ms ease, transform 4200ms ease;
+}
+
+.hero-slide.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.hero-slide img,
+.hero-photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--hero-position, center);
+    filter: saturate(1.06) contrast(1.02) brightness(0.88);
+    transform: scale(1.035);
+    transition: transform 4200ms ease;
+}
+
+.hero-slide.active img,
+.hero-slide.active .hero-photo-placeholder {
+    transform: scale(1.085);
+}
+
+.hero-photo-placeholder {
+    background:
+        radial-gradient(circle at 72% 18%, rgba(255, 248, 234, 0.34), transparent 22%),
+        radial-gradient(circle at 58% 42%, rgba(246, 198, 91, 0.2), transparent 28%),
+        radial-gradient(circle at 24% 82%, rgba(15, 59, 104, 0.86), transparent 32%),
+        linear-gradient(115deg, rgba(2, 8, 23, 0.16), rgba(255, 255, 255, 0.05) 24%, rgba(2, 8, 23, 0.18) 25%, transparent 48%),
+        var(--hero-fallback);
+}
+
+.hero-slide-copy {
+    position: absolute;
+    z-index: 5;
+    left: clamp(22px, 2.6vw, 38px);
+    bottom: clamp(24px, 3vw, 40px);
+    display: grid;
+    width: min(46%, 390px);
+    max-width: calc(100% - 390px);
+    gap: 6px;
+    padding: clamp(13px, 1.25vw, 18px) clamp(15px, 1.55vw, 22px);
+    border: 1px solid rgba(246, 198, 91, 0.3);
+    border-left: 3px solid rgba(246, 198, 91, 0.88);
+    border-radius: 0 18px 18px 0;
+    color: #fff8ea;
+    background: linear-gradient(90deg, rgba(2, 8, 23, 0.64), rgba(6, 21, 47, 0.34));
+    box-shadow: 0 22px 44px rgba(2, 8, 23, 0.26);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.hero-slide-copy strong {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(1.12rem, 1.58vw, 1.72rem);
+    line-height: 1.08;
+    text-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
+}
+
+.hero-slide-copy span {
+    max-width: 320px;
+    color: rgba(255, 248, 234, 0.9);
+    font-size: clamp(0.74rem, 0.84vw, 0.9rem);
+    line-height: 1.35;
+}
+
+.hero-slide-dots {
+    position: absolute;
+    z-index: 6;
+    left: clamp(22px, 2.6vw, 38px);
+    bottom: clamp(10px, 1.35vw, 18px);
+    display: flex;
+    gap: 7px;
+}
+
+.hero-slide-dots span {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(255, 248, 234, 0.48);
+    transition: width 320ms ease, background 320ms ease;
+}
+
+.hero-slide-dots span.active {
+    width: 25px;
+    background: #f6c65b;
+}
+
+.verse-card {
+    position: absolute;
+    z-index: 7;
+    right: clamp(18px, 2.3vw, 34px);
+    bottom: clamp(24px, 3vw, 40px);
+    display: flex;
+    width: clamp(218px, 19vw, 290px);
+    min-height: auto;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(14px, 1.2vw, 18px);
+    border: 1px solid rgba(246, 198, 91, 0.62);
+    border-radius: 20px;
+    color: #f8f2e6;
+    background:
+        radial-gradient(circle at 84% 76%, rgba(246, 198, 91, 0.18), transparent 30%),
+        linear-gradient(135deg, rgba(10, 35, 66, 0.74), rgba(6, 21, 47, 0.82) 74%);
+    box-shadow: 0 24px 50px rgba(2, 8, 23, 0.34);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.verse-card .quote-mark {
+    color: #f6c65b;
+    font-size: clamp(1.75rem, 2.2vw, 2.35rem);
+    font-family: Georgia, 'Times New Roman', serif;
+    line-height: 0.5;
+}
+
+.verse-card h2 {
+    margin: 4px 0 9px;
+    color: #fff8ea;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(0.88rem, 0.98vw, 1.04rem);
+    line-height: 1.18;
+}
+
+.verse-card p {
+    margin: 0;
+    color: rgba(248, 242, 230, 0.9);
+    font-size: clamp(0.7rem, 0.78vw, 0.82rem);
+    line-height: 1.36;
+}
+
+.verse-card strong {
+    margin-top: 11px;
+    color: #f6c65b;
+    font-size: clamp(0.76rem, 0.84vw, 0.88rem);
+}
+
+.highlight-row {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid rgba(217, 164, 65, 0.35);
+    border-radius: 16px;
+    background: rgba(255, 248, 234, 0.72);
+    box-shadow: 0 16px 34px rgba(10, 35, 66, 0.08);
+}
+
+.highlight-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: clamp(9px, 1vw, 14px);
+    min-width: 0;
+    padding: clamp(9px, 1.1vw, 16px);
+    border-right: 1px solid rgba(10, 35, 66, 0.12);
+    transition: transform 280ms ease, background 280ms ease;
+}
+
+.highlight-card:last-child {
+    border-right: 0;
+}
+
+.highlight-card:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.34);
+}
+
+.highlight-icon {
+    display: grid;
+    width: clamp(48px, 4.4vw, 66px);
+    height: clamp(48px, 4.4vw, 66px);
+    place-items: center;
+    border-radius: 50%;
+    background: #06152f;
+    box-shadow: 0 14px 24px rgba(6, 21, 47, 0.16);
+}
+
+.highlight-icon svg {
+    width: 58%;
+    height: 58%;
+    fill: none;
+    stroke: #f6c65b;
+    stroke-width: 1.7;
+}
+
+.highlight-card h2 {
+    margin: 0 0 4px;
+    color: #08162e;
+    font-size: clamp(0.72rem, 0.84vw, 0.9rem);
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.highlight-card p {
+    margin: 0;
+    color: #1d2939;
+    font-size: clamp(0.7rem, 0.78vw, 0.84rem);
+    line-height: 1.35;
+}
+
+.home-footer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(420px, 0.52fr);
+    align-items: center;
+    gap: 14px;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid rgba(217, 164, 65, 0.28);
+    border-radius: 16px;
+    background: rgba(255, 248, 234, 0.72);
+    box-shadow: 0 16px 34px rgba(10, 35, 66, 0.07);
+}
+
+.footer-verse {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(12px, 1.5vw, 24px);
+    padding-left: clamp(26px, 5vw, 74px);
+    padding-right: 8px;
+}
+
+.footer-verse span {
+    color: #e59b0b;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(2.35rem, 3.2vw, 3.55rem);
+    line-height: 0.5;
+}
+
+.footer-verse p {
+    margin: 0;
+    color: #08162e;
+    font-size: clamp(0.84rem, 1vw, 1.05rem);
+    line-height: 1.28;
+}
+
+.footer-verse strong {
+    border-left: 1px solid rgba(217, 164, 65, 0.34);
+    padding-left: clamp(14px, 2vw, 26px);
+    color: #d97706;
+    font-size: clamp(0.76rem, 0.9vw, 0.92rem);
+    text-transform: uppercase;
+}
+
+.footer-actions {
+    display: grid;
+    grid-template-columns: minmax(218px, 1fr) minmax(156px, 0.82fr);
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding-right: 12px;
+}
+
+.tracking-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    margin-right: 0;
+    padding: 0 12px 0 0;
+    border: 1px solid rgba(217, 164, 65, 0.34);
+    border-radius: 12px;
+    color: #f8f2e6;
+    background: #06152f;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 280ms ease, box-shadow 280ms ease, border-color 280ms ease;
+}
+
+.tracking-card:hover {
+    transform: translateY(-3px);
+    border-color: #f6c65b;
+    box-shadow: 0 20px 34px rgba(6, 21, 47, 0.18);
+}
+
+.tracking-card svg {
+    width: 29px;
+    height: 29px;
+    margin-left: 14px;
+    fill: none;
+    stroke: #f6c65b;
+    stroke-width: 1.7;
+}
+
+.tracking-card strong,
+.tracking-card small {
+    display: block;
+}
+
+.tracking-card strong {
+    font-size: 0.88rem;
+}
+
+.tracking-card small {
+    margin-top: 3px;
+    color: rgba(248, 242, 230, 0.76);
+    font-size: 0.66rem;
+}
+
+.marvvium-signature {
+    display: grid;
+    grid-template-columns: 68px 1fr;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 5px 8px;
+    border-left: 1px solid rgba(217, 164, 65, 0.24);
+    color: #08162e;
+}
+
+.marvvium-signature img {
+    width: 68px;
+    height: 42px;
+    object-fit: contain;
+    opacity: 0.9;
+    transform: scale(1.65);
+    transform-origin: center;
+}
+
+.marvvium-signature strong,
+.marvvium-signature small {
+    display: block;
+}
+
+.marvvium-signature strong {
+    color: #08162e;
+    font-size: 0.62rem;
+    font-weight: 900;
+    line-height: 1.15;
+}
+
+.marvvium-signature small {
+    margin-top: 2px;
+    color: #b87918;
+    font-size: 0.6rem;
+    font-weight: 800;
+}
+
+@media (max-width: 1180px) {
+    .public-home-screen {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+        padding-bottom: 24px;
+    }
+
+    .public-header {
+        grid-template-columns: 1fr auto;
+        min-height: 86px;
+    }
+
+    .public-nav {
+        order: 3;
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 12px;
+    }
+
+    .public-stage {
+        grid-template-rows: auto;
+        gap: 14px;
+    }
+
+    .hero-zone {
+        grid-template-columns: minmax(310px, 42%) minmax(0, 58%);
+        min-height: 650px;
+    }
+
+    .hero-copy {
+        width: auto;
+        padding-right: 24px;
+    }
+
+    .hero-slide-copy {
+        left: 24px;
+        bottom: 210px;
+        width: calc(100% - 48px);
+        max-width: none;
+    }
+
+    .hero-slide-dots {
+        left: 24px;
+        bottom: 190px;
+    }
+
+    .verse-card {
+        right: 24px;
+        bottom: 28px;
+        width: calc(100% - 48px);
+        max-width: none;
+    }
+
+    .highlight-row,
+    .home-footer {
+        grid-template-columns: 1fr;
+    }
+
+    .highlight-card {
+        border-right: 0;
+        border-bottom: 1px solid rgba(10, 35, 66, 0.1);
+    }
+
+    .home-footer {
+        padding: 18px;
+    }
+
+    .footer-verse {
+        padding: 0;
+    }
+
+    .tracking-card {
+        margin: 0;
+    }
+
+    .footer-actions {
+        grid-template-columns: 1fr;
+        padding-right: 0;
+    }
+
+    .marvvium-signature {
+        border-left: 0;
+        border-top: 1px solid rgba(217, 164, 65, 0.24);
+        padding-top: 10px;
+    }
+}
+
+@media (max-width: 760px) {
+    .public-home-screen {
+        padding-inline: 16px;
+    }
+
+    .public-header {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding-top: 14px;
+    }
+
+    .login-button {
+        justify-self: start;
+    }
+
+    .hero-zone {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto minmax(430px, auto);
+        min-height: 0;
+        overflow: visible;
+        border-radius: 28px;
+    }
+
+    .hero-copy {
+        width: 100%;
+        height: auto;
+        padding: 34px 24px 26px;
+    }
+
+    .hero-copy h1 {
+        font-size: clamp(2.35rem, 13vw, 3.35rem);
+    }
+
+    .hero-actions {
+        margin-bottom: 4px;
+    }
+
+    .hero-visual {
+        width: 100%;
+        height: 430px;
+        min-height: 430px;
+        border-radius: 0 0 28px 28px;
+    }
+
+    .hero-visual::after {
+        background:
+            linear-gradient(180deg, rgba(2, 8, 23, 0.12) 0%, rgba(2, 8, 23, 0.16) 34%, rgba(2, 8, 23, 0.58) 100%),
+            radial-gradient(circle at 74% 18%, rgba(246, 198, 91, 0.24), transparent 30%);
+    }
+
+    .hero-slide-copy {
+        left: 18px;
+        right: 18px;
+        bottom: 182px;
+        width: auto;
+        gap: 5px;
+        padding: 13px 15px;
+        max-width: none;
+        border-radius: 16px;
+    }
+
+    .hero-slide-copy strong {
+        font-size: clamp(1.08rem, 6vw, 1.55rem);
+    }
+
+    .hero-slide-copy span {
+        font-size: 0.78rem;
+        line-height: 1.34;
+    }
+
+    .hero-slide-dots {
+        left: 18px;
+        bottom: 164px;
+    }
+
+    .verse-card {
+        right: 18px;
+        top: auto;
+        bottom: 18px;
+        width: calc(100% - 36px);
+        padding: 14px 16px;
+    }
+
+    .verse-card .quote-mark {
+        font-size: 2rem;
+    }
+
+    .verse-card h2 {
+        margin-bottom: 6px;
+        font-size: 0.98rem;
+    }
+
+    .verse-card p {
+        font-size: 0.74rem;
+        line-height: 1.34;
+    }
+
+    .verse-card strong {
+        margin-top: 8px;
+        font-size: 0.78rem;
+    }
+
+    .footer-verse {
+        grid-template-columns: auto 1fr;
+    }
+
+    .footer-verse strong {
+        grid-column: 2;
+        border-left: 0;
+        padding-left: 0;
+    }
+}
+</style>

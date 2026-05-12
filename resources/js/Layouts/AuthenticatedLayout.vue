@@ -14,11 +14,11 @@ const showingNavigationDropdown = ref(false);
     <div>
         <div class="min-h-screen bg-gray-100">
             <nav
-                class="border-b border-gray-100 bg-white overflow-hidden"
+                class="border-b border-gray-100 bg-white"
             >
                 <!-- Primary Navigation Menu -->
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div class="flex h-16 justify-between min-w-0">
+                    <div class="flex h-16 justify-between">
                         <div class="flex min-w-0 flex-1">
                             <!-- Logo -->
                             <div class="flex shrink-0 items-center">
@@ -32,74 +32,64 @@ const showingNavigationDropdown = ref(false);
                             <!-- Navigation Links -->
                             <!-- Correção de responsividade: estrutura flex com min-w-0 permite scroll horizontal quando há muitos itens -->
                             <div
-                                class="hidden sm:ms-10 sm:flex min-w-0 flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap"
+                                class="hidden sm:ms-10 sm:flex flex-1 overflow-visible"
                             >
-                                <div class="flex min-w-max flex-nowrap space-x-8">
+                                <div class="flex flex-nowrap space-x-8 overflow-visible">
                                     <NavLink
-                                        class="shrink-0"
                                         :href="route('dashboard')"
                                         :active="route().current('dashboard')"
                                     >
                                         Dashboard
                                     </NavLink>
                                     <NavLink
-                                        class="shrink-0"
                                         :href="route('secretaria.dashboard')"
                                         :active="route().current('secretaria.dashboard')"
                                     >
                                         Secretaria
                                     </NavLink>
                                     <NavLink
-                                        class="shrink-0"
                                         :href="route('secretaria.alerts.index')"
                                         :active="route().current('secretaria.alerts.index')"
                                     >
                                         Alertas
                                     </NavLink>
                                     <NavLink
-                                        class="shrink-0"
                                         :href="route('secretaria.requests.index')"
                                         :active="route().current('secretaria.requests.*')"
                                     >
                                         Solicitações
                                     </NavLink>
                                     <NavLink
-                                        class="shrink-0"
                                         :href="route('secretaria.access.index')"
                                         :active="route().current('secretaria.access.*')"
                                     >
                                         Acessos
                                     </NavLink>
                                     <NavLink
-                                        class="shrink-0"
                                         :href="route('secretaria.access-profiles.index')"
                                         :active="route().current('secretaria.access-profiles.*')"
                                     >
                                         Perfis de Acesso
                                     </NavLink>
                                     <NavLink
-                                        class="shrink-0"
                                         :href="route('secretaria.departments.index')"
                                         :active="route().current('secretaria.departments.*')"
                                     >
                                         Departamentos
                                     </NavLink>
                                     <NavLink
-                                        class="shrink-0"
                                         :href="route('people.index')"
                                         :active="route().current('people.index')"
                                     >
                                         Pessoas
                                     </NavLink>
                                     <NavLink
-                                        class="shrink-0"
                                         :href="route('families.index')"
                                         :active="route().current('families.index')"
                                     >
                                         Famílias
                                     </NavLink>
                                     <NavLink
-                                        class="shrink-0"
                                         :href="route('guardianships.index')"
                                         :active="route().current('guardianships.index')"
                                     >
@@ -111,7 +101,7 @@ const showingNavigationDropdown = ref(false);
 
                         <div class="hidden sm:ms-6 sm:flex sm:items-center shrink-0">
                             <!-- Settings Dropdown -->
-                            <div class="relative ms-3">
+                            <div class="relative ms-3 z-50 overflow-visible">
                                 <Dropdown align="right" width="48">
                                     <template #trigger>
                                         <span class="inline-flex rounded-md">

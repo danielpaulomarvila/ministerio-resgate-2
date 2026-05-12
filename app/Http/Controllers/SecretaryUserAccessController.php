@@ -12,7 +12,7 @@ use Inertia\Inertia;
 
 /**
  * Controller para gerenciar acessos de usuários pela Secretaria
- * 
+ *
  * Permite criar, editar, suspender e reativar acessos ao sistema
  * Respeita as regras de idade e responsáveis
  */
@@ -30,6 +30,8 @@ class SecretaryUserAccessController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', User::class);
+
         $users = User::with('person')
             ->orderBy('created_at', 'desc')
             ->paginate(20)
@@ -82,6 +84,8 @@ class SecretaryUserAccessController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', User::class);
+
         return Inertia::render('Secretaria/Access/Create');
     }
 
@@ -90,6 +94,8 @@ class SecretaryUserAccessController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', User::class);
+
         $validated = $request->validate([
             'person_id' => 'required|exists:people,id',
             'name' => 'required|string|max:255',
@@ -107,7 +113,7 @@ class SecretaryUserAccessController extends Controller
 
         // Verificar elegibilidade
         $eligibility = $this->eligibilityService->check($person);
-        if (!$eligibility['allowed']) {
+        if (! $eligibility['allowed']) {
             return back()->with('error', $eligibility['reason']);
         }
 
@@ -135,6 +141,8 @@ class SecretaryUserAccessController extends Controller
      */
     public function show(User $user)
     {
+        $this->authorize('view', $user);
+
         $user->load('person');
 
         // Verificar se há violação de regra (menor de 11 anos com usuário)
@@ -197,6 +205,8 @@ class SecretaryUserAccessController extends Controller
      */
     public function edit(User $user)
     {
+        $this->authorize('update', $user);
+
         $user->load('person');
 
         $userData = [
@@ -234,9 +244,11 @@ class SecretaryUserAccessController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        $this->authorize('update', $user);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => 'required|email|unique:users,email,'.$user->id,
             'access_notes' => 'nullable|string',
         ]);
 
@@ -255,6 +267,8 @@ class SecretaryUserAccessController extends Controller
      */
     public function suspend(Request $request, User $user)
     {
+        $this->authorize('update', $user);
+
         $validated = $request->validate([
             'reason' => 'required|string|max:500',
         ]);
@@ -273,11 +287,13 @@ class SecretaryUserAccessController extends Controller
      */
     public function reactivate(Request $request, User $user)
     {
+        $this->authorize('update', $user);
+
         // Revalidar elegibilidade se usuário for de menor
         if ($user->person) {
             $eligibility = $this->eligibilityService->check($user->person);
-            if (!$eligibility['allowed']) {
-                return back()->with('error', 'Não é possível reativar: ' . $eligibility['reason']);
+            if (! $eligibility['allowed']) {
+                return back()->with('error', 'Não é possível reativar: '.$eligibility['reason']);
             }
         }
 
@@ -296,6 +312,8 @@ class SecretaryUserAccessController extends Controller
      */
     public function eligibility(Person $person)
     {
+        $this->authorize('create', User::class);
+
         $eligibility = $this->eligibilityService->check($person);
         $hasActiveUser = $this->eligibilityService->hasActiveUser($person);
 

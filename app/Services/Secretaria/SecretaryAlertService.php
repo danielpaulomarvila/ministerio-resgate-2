@@ -2,7 +2,6 @@
 
 namespace App\Services\Secretaria;
 
-use App\Models\FamilyMember;
 use App\Models\GuardianShip;
 use App\Models\Person;
 use App\Models\SystemAlert;
@@ -11,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Service para geração de alertas internos da Secretaria
- * 
+ *
  * Responsável por detectar e criar alertas automáticos com base nas regras do sistema:
  * - Crianças próximas dos 11 anos
  * - Menores sem responsável ativo
@@ -92,11 +91,11 @@ class SecretaryAlertService
             ->where('type', $data['type'])
             ->where('status', 'pending');
 
-        if (!empty($data['related_person_id'])) {
+        if (! empty($data['related_person_id'])) {
             $query->where('related_person_id', $data['related_person_id']);
         }
 
-        if (!empty($data['related_family_id'])) {
+        if (! empty($data['related_family_id'])) {
             $query->where('related_family_id', $data['related_family_id']);
         }
 
@@ -123,9 +122,12 @@ class SecretaryAlertService
      */
     protected function generateChildTurning11Alerts(): void
     {
+        $turns11Start = Carbon::today()->subYears(11)->toDateString();
+        $turns11End = Carbon::today()->addDays(60)->subYears(11)->toDateString();
+
         // Buscar crianças menores de 11 anos que completarão 11 nos próximos 60 dias
         $childrenTurning11 = Person::whereNotNull('birth_date')
-            ->whereRaw('DATE_ADD(birth_date, INTERVAL 11 YEAR) BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 60 DAY)')
+            ->whereBetween('birth_date', [$turns11Start, $turns11End])
             ->whereNull('deleted_at')
             ->get();
 
@@ -135,7 +137,7 @@ class SecretaryAlertService
 
             $this->createOrUpdatePendingAlert([
                 'type' => 'child_turning_11',
-                'title' => "Criança completará 11 anos em breve",
+                'title' => 'Criança completará 11 anos em breve',
                 'message' => "{$child->full_name} ({$age} anos) completará 11 anos em {$turns11At}. Revise o cadastro para possível transição para Júnior.",
                 'severity' => 'low',
                 'status' => 'pending',
@@ -152,9 +154,11 @@ class SecretaryAlertService
      */
     protected function generateMinorWithoutGuardianAlerts(): void
     {
+        $adultCutoff = Carbon::today()->subYears(18)->toDateString();
+
         // Buscar pessoas menores de 18 anos sem guardianship ativo
         $minorsWithoutGuardian = Person::whereNotNull('birth_date')
-            ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) < 18')
+            ->whereDate('birth_date', '>', $adultCutoff)
             ->whereDoesntHave('guardianshipsAsMinor', function ($query) {
                 $query->where('status', 'active');
             })
@@ -166,7 +170,7 @@ class SecretaryAlertService
 
             $this->createOrUpdatePendingAlert([
                 'type' => 'minor_without_guardian',
-                'title' => "Menor sem responsável ativo",
+                'title' => 'Menor sem responsável ativo',
                 'message' => "{$minor->full_name} ({$age} anos) não possui responsável legal ativo. É necessário vincular um responsável.",
                 'severity' => 'critical',
                 'status' => 'pending',
@@ -185,15 +189,15 @@ class SecretaryAlertService
     {
         // Buscar pessoas sem vínculo familiar ativo
         $peopleWithoutFamily = Person::whereDoesntHave('families', function ($query) {
-                $query->whereNull('family_members.left_at');
-            })
+            $query->whereNull('family_members.left_at');
+        })
             ->whereNull('deleted_at')
             ->get();
 
         foreach ($peopleWithoutFamily as $person) {
             $this->createOrUpdatePendingAlert([
                 'type' => 'person_without_family',
-                'title' => "Pessoa sem família",
+                'title' => 'Pessoa sem família',
                 'message' => "{$person->full_name} não está vinculado a nenhuma família. Considere vincular a uma família existente.",
                 'severity' => 'medium',
                 'status' => 'pending',
@@ -250,13 +254,13 @@ class SecretaryAlertService
                 $message = "{$person->full_name} não possui {$missingLabels[0]}. Este campo é importante para o cadastro.";
             } else {
                 $lastLabel = array_pop($missingLabels);
-                $fieldsText = implode(', ', $missingLabels) . ' e ' . $lastLabel;
+                $fieldsText = implode(', ', $missingLabels).' e '.$lastLabel;
                 $message = "{$person->full_name} não possui {$fieldsText}. Revise o cadastro.";
             }
 
             $this->createOrUpdatePendingAlert([
                 'type' => 'incomplete_registration',
-                'title' => "Cadastro incompleto",
+                'title' => 'Cadastro incompleto',
                 'message' => $message,
                 'severity' => 'medium',
                 'status' => 'pending',
@@ -285,13 +289,13 @@ class SecretaryAlertService
             $guardian = $guardianship->guardian;
             $endsAt = Carbon::parse($guardianship->ends_at)->format('d/m/Y');
 
-            if (!$minor || !$guardian) {
+            if (! $minor || ! $guardian) {
                 continue;
             }
 
             $this->createOrUpdatePendingAlert([
                 'type' => 'guardianship_ending_soon',
-                'title' => "Responsabilidade com data de fim próxima",
+                'title' => 'Responsabilidade com data de fim próxima',
                 'message' => "A responsabilidade de {$guardian->full_name} sobre {$minor->full_name} termina em {$endsAt}. Revise se deve ser estendida.",
                 'severity' => 'medium',
                 'status' => 'pending',
@@ -319,13 +323,13 @@ class SecretaryAlertService
             $guardian = $guardianship->guardian;
             $endsAt = Carbon::parse($guardianship->ends_at)->format('d/m/Y');
 
-            if (!$minor || !$guardian) {
+            if (! $minor || ! $guardian) {
                 continue;
             }
 
             $this->createOrUpdatePendingAlert([
                 'type' => 'guardianship_expired',
-                'title' => "Responsabilidade vencida",
+                'title' => 'Responsabilidade vencida',
                 'message' => "A responsabilidade de {$guardian->full_name} sobre {$minor->full_name} venceu em {$endsAt}. Revise se deve ser estendida ou encerrada.",
                 'severity' => 'critical',
                 'status' => 'pending',
@@ -336,8 +340,7 @@ class SecretaryAlertService
 
     /**
      * Verifica se um alerta foi realmente resolvido
-     * 
-     * @param SystemAlert $alert
+     *
      * @return array ['resolved' => bool, 'message' => string]
      */
     public function isAlertActuallyResolved(SystemAlert $alert): array
@@ -345,13 +348,13 @@ class SecretaryAlertService
         switch ($alert->type) {
             case 'incomplete_registration':
                 return $this->verifyIncompleteRegistrationResolved($alert);
-            
+
             case 'person_without_family':
                 return $this->verifyPersonWithoutFamilyResolved($alert);
-            
+
             case 'minor_without_guardian':
                 return $this->verifyMinorWithoutGuardianResolved($alert);
-            
+
             case 'child_turning_11':
                 // Este alerta é de revisão manual
                 // Se o usuário clicou em verificar resolução, consideramos como confirmado
@@ -359,13 +362,13 @@ class SecretaryAlertService
                     'resolved' => true,
                     'message' => 'Revisão confirmada pela Secretaria.',
                 ];
-            
+
             case 'guardianship_ending_soon':
                 return $this->verifyGuardianshipEndingSoonResolved($alert);
-            
+
             case 'guardianship_expired':
                 return $this->verifyGuardianshipExpiredResolved($alert);
-            
+
             default:
                 return [
                     'resolved' => false,
@@ -379,7 +382,7 @@ class SecretaryAlertService
      */
     protected function verifyIncompleteRegistrationResolved(SystemAlert $alert): array
     {
-        if (!$alert->relatedPerson) {
+        if (! $alert->relatedPerson) {
             return [
                 'resolved' => false,
                 'message' => 'Pessoa relacionada não encontrada.',
@@ -405,8 +408,9 @@ class SecretaryAlertService
             }
         }
 
-        if (!empty($missingFields)) {
+        if (! empty($missingFields)) {
             $fieldsText = implode(', ', $missingFields);
+
             return [
                 'resolved' => false,
                 'message' => "Este cadastro ainda possui pendências: {$fieldsText}.",
@@ -424,7 +428,7 @@ class SecretaryAlertService
      */
     protected function verifyPersonWithoutFamilyResolved(SystemAlert $alert): array
     {
-        if (!$alert->relatedPerson) {
+        if (! $alert->relatedPerson) {
             return [
                 'resolved' => false,
                 'message' => 'Pessoa relacionada não encontrada.',
@@ -438,7 +442,7 @@ class SecretaryAlertService
             ->whereNull('family_members.left_at')
             ->exists();
 
-        if (!$hasActiveFamily) {
+        if (! $hasActiveFamily) {
             return [
                 'resolved' => false,
                 'message' => 'Esta pessoa ainda não está vinculada a uma família.',
@@ -456,7 +460,7 @@ class SecretaryAlertService
      */
     protected function verifyMinorWithoutGuardianResolved(SystemAlert $alert): array
     {
-        if (!$alert->relatedPerson) {
+        if (! $alert->relatedPerson) {
             return [
                 'resolved' => false,
                 'message' => 'Pessoa relacionada não encontrada.',
@@ -470,7 +474,7 @@ class SecretaryAlertService
             ->where('status', 'active')
             ->exists();
 
-        if (!$hasActiveGuardianship) {
+        if (! $hasActiveGuardianship) {
             return [
                 'resolved' => false,
                 'message' => 'Este menor ainda não possui responsável ativo.',
@@ -488,7 +492,7 @@ class SecretaryAlertService
      */
     protected function verifyGuardianshipEndingSoonResolved(SystemAlert $alert): array
     {
-        if (!$alert->relatedPerson) {
+        if (! $alert->relatedPerson) {
             return [
                 'resolved' => false,
                 'message' => 'Pessoa relacionada não encontrada.',
@@ -502,7 +506,7 @@ class SecretaryAlertService
             ->where('status', 'active')
             ->first();
 
-        if (!$guardianship) {
+        if (! $guardianship) {
             return [
                 'resolved' => true,
                 'message' => 'Responsabilidade não existe mais ou foi encerrada.',
@@ -534,7 +538,7 @@ class SecretaryAlertService
      */
     protected function verifyGuardianshipExpiredResolved(SystemAlert $alert): array
     {
-        if (!$alert->relatedPerson) {
+        if (! $alert->relatedPerson) {
             return [
                 'resolved' => false,
                 'message' => 'Pessoa relacionada não encontrada.',
@@ -548,7 +552,7 @@ class SecretaryAlertService
             ->where('status', 'active')
             ->first();
 
-        if (!$guardianship) {
+        if (! $guardianship) {
             return [
                 'resolved' => true,
                 'message' => 'Responsabilidade não existe mais ou foi encerrada.',

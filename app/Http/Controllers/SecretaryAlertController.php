@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\SystemAlert;
 use App\Services\Secretaria\SecretaryAlertService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 /**
  * Controller para gerenciar alertas internos da Secretaria
- * 
+ *
  * Responsável por:
  * - Listar alertas
  * - Mostrar detalhes de um alerta
@@ -34,11 +36,13 @@ class SecretaryAlertController extends Controller
 
     /**
      * Lista todos os alertas da Secretaria
-     * 
-     * @return \Inertia\Response
+     *
+     * @return Response
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', SystemAlert::class);
+
         // Buscar alertas com filtros opcionais
         $query = SystemAlert::with(['relatedPerson', 'relatedFamily', 'resolvedBy']);
 
@@ -109,12 +113,13 @@ class SecretaryAlertController extends Controller
 
     /**
      * Mostra detalhes de um alerta específico
-     * 
-     * @param SystemAlert $systemAlert
-     * @return \Inertia\Response
+     *
+     * @return Response
      */
     public function show(SystemAlert $systemAlert)
     {
+        $this->authorize('view', $systemAlert);
+
         $systemAlert->load(['relatedPerson', 'relatedFamily', 'resolvedBy']);
 
         return Inertia::render('Secretaria/Alerts/Show', [
@@ -147,12 +152,13 @@ class SecretaryAlertController extends Controller
 
     /**
      * Mostra a tela de resolução/tratamento do alerta
-     * 
-     * @param SystemAlert $systemAlert
-     * @return \Inertia\Response
+     *
+     * @return Response
      */
     public function resolveShow(SystemAlert $systemAlert)
     {
+        $this->authorize('resolve', $systemAlert);
+
         $systemAlert->load(['relatedPerson', 'relatedFamily', 'resolvedBy']);
 
         return Inertia::render('Secretaria/Alerts/Resolve', [
@@ -187,13 +193,13 @@ class SecretaryAlertController extends Controller
 
     /**
      * Marca um alerta como em andamento
-     * 
-     * @param Request $request
-     * @param SystemAlert $systemAlert
-     * @return \Illuminate\Http\RedirectResponse
+     *
+     * @return RedirectResponse
      */
     public function markInProgress(Request $request, SystemAlert $systemAlert)
     {
+        $this->authorize('resolve', $systemAlert);
+
         $request->validate([
             'resolution_notes' => 'nullable|string|max:1000',
         ]);
@@ -212,13 +218,13 @@ class SecretaryAlertController extends Controller
 
     /**
      * Verifica se o alerta foi realmente resolvido
-     * 
-     * @param Request $request
-     * @param SystemAlert $systemAlert
-     * @return \Illuminate\Http\RedirectResponse
+     *
+     * @return RedirectResponse
      */
     public function verifyResolution(Request $request, SystemAlert $systemAlert)
     {
+        $this->authorize('resolve', $systemAlert);
+
         $request->validate([
             'resolution_notes' => 'required|string|max:1000',
         ]);
@@ -234,30 +240,30 @@ class SecretaryAlertController extends Controller
             $systemAlert->markAsResolved($userId, $notes);
 
             return redirect()->route('secretaria.alerts.index')
-                ->with('success', 'Alerta marcado como resolvido. ' . $verification['message']);
+                ->with('success', 'Alerta marcado como resolvido. '.$verification['message']);
         } else {
             // Se não foi resolvido, manter em andamento ou pending
             $newStatus = $systemAlert->status === 'pending' ? 'pending' : 'in_progress';
-            
+
             $systemAlert->update([
                 'status' => $newStatus,
                 'resolution_notes' => $notes,
             ]);
 
             return redirect()->route('secretaria.alerts.resolve.show', $systemAlert->id)
-                ->with('error', 'O problema ainda não foi corrigido. ' . $verification['message']);
+                ->with('error', 'O problema ainda não foi corrigido. '.$verification['message']);
         }
     }
 
     /**
      * Marca um alerta como ignorado
-     * 
-     * @param Request $request
-     * @param SystemAlert $systemAlert
-     * @return \Illuminate\Http\RedirectResponse
+     *
+     * @return RedirectResponse
      */
     public function ignore(Request $request, SystemAlert $systemAlert)
     {
+        $this->authorize('update', $systemAlert);
+
         $request->validate([
             'resolution_notes' => 'required|string|max:1000',
         ]);
@@ -274,11 +280,13 @@ class SecretaryAlertController extends Controller
     /**
      * Regenera todos os alertas com base nas regras atuais
      * Não duplica alertas abertos iguais
-     * 
-     * @return \Illuminate\Http\RedirectResponse
+     *
+     * @return RedirectResponse
      */
     public function regenerate()
     {
+        $this->authorize('create', SystemAlert::class);
+
         $this->alertService->regenerateAlerts();
 
         return redirect()->route('secretaria.alerts.index')

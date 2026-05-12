@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\SecretaryRequest;
-use App\Models\Person;
 use App\Models\SystemAlert;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,6 +14,8 @@ class SecretaryRequestController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', SecretaryRequest::class);
+
         $query = SecretaryRequest::with([
             'requesterPerson',
             'relatedAlert',
@@ -61,6 +62,8 @@ class SecretaryRequestController extends Controller
      */
     public function create(Request $request)
     {
+        $this->authorize('create', SecretaryRequest::class);
+
         // Se vier alert_id, busca o alerta para preencher dados
         $alert = null;
         if ($request->has('alert_id')) {
@@ -77,6 +80,8 @@ class SecretaryRequestController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', SecretaryRequest::class);
+
         $validated = $request->validate([
             'type' => 'required|in:registration_review,personal_data_change,family_link_review,guardianship_review,child_transition_review,alert_resolution_review,manual_secretary_request',
             'priority' => 'required|in:low,normal,high,urgent',
@@ -103,6 +108,8 @@ class SecretaryRequestController extends Controller
      */
     public function show(SecretaryRequest $secretaryRequest)
     {
+        $this->authorize('view', $secretaryRequest);
+
         $secretaryRequest->load([
             'requesterUser',
             'requesterPerson',
@@ -124,7 +131,9 @@ class SecretaryRequestController extends Controller
      */
     public function edit(SecretaryRequest $secretaryRequest)
     {
-        if (!$secretaryRequest->canBeEdited()) {
+        $this->authorize('update', $secretaryRequest);
+
+        if (! $secretaryRequest->canBeEdited()) {
             return redirect()->route('secretaria.requests.show', $secretaryRequest)
                 ->with('error', 'Esta solicitação não pode ser editada.');
         }
@@ -141,7 +150,9 @@ class SecretaryRequestController extends Controller
      */
     public function update(Request $request, SecretaryRequest $secretaryRequest)
     {
-        if (!$secretaryRequest->canBeEdited()) {
+        $this->authorize('update', $secretaryRequest);
+
+        if (! $secretaryRequest->canBeEdited()) {
             return redirect()->route('secretaria.requests.show', $secretaryRequest)
                 ->with('error', 'Esta solicitação não pode ser editada.');
         }
@@ -168,7 +179,9 @@ class SecretaryRequestController extends Controller
      */
     public function markInReview(Request $request, SecretaryRequest $secretaryRequest)
     {
-        if (!$secretaryRequest->isPending()) {
+        $this->authorize('update', $secretaryRequest);
+
+        if (! $secretaryRequest->isPending()) {
             return redirect()->route('secretaria.requests.show', $secretaryRequest)
                 ->with('error', 'Apenas solicitações pendentes podem ser marcadas como em análise.');
         }
@@ -188,7 +201,9 @@ class SecretaryRequestController extends Controller
      */
     public function approve(Request $request, SecretaryRequest $secretaryRequest)
     {
-        if (!$secretaryRequest->isPending() && !$secretaryRequest->isInReview()) {
+        $this->authorize('update', $secretaryRequest);
+
+        if (! $secretaryRequest->isPending() && ! $secretaryRequest->isInReview()) {
             return redirect()->route('secretaria.requests.show', $secretaryRequest)
                 ->with('error', 'Apenas solicitações pendentes ou em análise podem ser aprovadas.');
         }
@@ -208,7 +223,9 @@ class SecretaryRequestController extends Controller
      */
     public function reject(Request $request, SecretaryRequest $secretaryRequest)
     {
-        if (!$secretaryRequest->isPending() && !$secretaryRequest->isInReview()) {
+        $this->authorize('update', $secretaryRequest);
+
+        if (! $secretaryRequest->isPending() && ! $secretaryRequest->isInReview()) {
             return redirect()->route('secretaria.requests.show', $secretaryRequest)
                 ->with('error', 'Apenas solicitações pendentes ou em análise podem ser rejeitadas.');
         }
@@ -228,7 +245,9 @@ class SecretaryRequestController extends Controller
      */
     public function complete(Request $request, SecretaryRequest $secretaryRequest)
     {
-        if (!$secretaryRequest->isApproved() && !$secretaryRequest->isInReview()) {
+        $this->authorize('update', $secretaryRequest);
+
+        if (! $secretaryRequest->isApproved() && ! $secretaryRequest->isInReview()) {
             return redirect()->route('secretaria.requests.show', $secretaryRequest)
                 ->with('error', 'Apenas solicitações aprovadas ou em análise podem ser concluídas.');
         }
@@ -248,7 +267,9 @@ class SecretaryRequestController extends Controller
      */
     public function cancel(Request $request, SecretaryRequest $secretaryRequest)
     {
-        if (!$secretaryRequest->isPending() && !$secretaryRequest->isInReview()) {
+        $this->authorize('update', $secretaryRequest);
+
+        if (! $secretaryRequest->isPending() && ! $secretaryRequest->isInReview()) {
             return redirect()->route('secretaria.requests.show', $secretaryRequest)
                 ->with('error', 'Apenas solicitações pendentes ou em análise podem ser canceladas.');
         }
