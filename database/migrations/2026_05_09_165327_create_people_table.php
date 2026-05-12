@@ -17,7 +17,7 @@ return new class extends Migration
         // Pessoa pode existir sem usuário e sem ser membro
         Schema::create('people', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->nullable()->unique()->after('id');
+            $table->uuid('uuid')->nullable()->unique();
 
             // Dados pessoais básicos
             $table->string('full_name'); // Nome completo da pessoa
