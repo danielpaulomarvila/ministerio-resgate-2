@@ -59,72 +59,72 @@ const heroSlides = [
     {
         image: '/images/hero/resgate-oracao-01.jpg',
         fallback: 'linear-gradient(135deg, #06152f 0%, #12345f 52%, #d8a241 100%)',
-        position: 'center 42%',
+        position: 'center',
         title: 'Fui resgatado por Deus.',
         text: 'Quando eu não tinha forças, Cristo me levantou.',
     },
     {
-        image: '/images/hero/resgate-familia-02.jpg',
-        fallback: 'linear-gradient(135deg, #071b3a 0%, #604827 48%, #f2c15b 100%)',
-        position: 'center',
-        title: 'Deus restaurou minha família.',
-        text: 'A graça de Cristo trouxe perdão, cuidado e recomeço.',
-    },
-    {
-        image: '/images/hero/resgate-adoracao-03.jpg',
+        image: '/images/hero/resgate-adoracao-02.jpg',
         fallback: 'linear-gradient(135deg, #020817 0%, #183153 50%, #f59e0b 100%)',
         position: 'center',
         title: 'Cristo me libertou.',
-        text: 'Em adoração, encontrei paz para continuar.',
+        text: 'A verdade de Deus mudou minha história.',
     },
     {
-        image: '/images/hero/resgate-ajoelhado-04.jpg',
-        fallback: 'linear-gradient(135deg, #06152f 0%, #3a2a1b 46%, #f6c65b 100%)',
-        position: 'center 38%',
-        title: 'Deus curou minhas feridas.',
-        text: 'No secreto da oração, Jesus cuidou do meu coração.',
+        image: '/images/hero/resgate-familia-03.jpg',
+        fallback: 'linear-gradient(135deg, #071b3a 0%, #604827 48%, #f2c15b 100%)',
+        position: 'center',
+        title: 'Deus restaurou minha família.',
+        text: 'A graça de Deus trouxe paz para nossa casa.',
     },
     {
-        image: '/images/hero/resgate-biblia-05.jpg',
+        image: '/images/hero/resgate-biblia-04.jpg',
         fallback: 'linear-gradient(135deg, #08162e 0%, #564021 48%, #fff1c2 100%)',
         position: 'center',
-        title: 'Jesus me deu um novo começo.',
-        text: 'Pela Palavra, Deus acendeu esperança outra vez.',
+        title: 'Cristo trouxe paz ao meu coração.',
+        text: 'Em Deus encontrei descanso e direção.',
+    },
+    {
+        image: '/images/hero/resgate-culto-05.jpg',
+        fallback: 'linear-gradient(135deg, #06152f 0%, #3a2a1b 46%, #f6c65b 100%)',
+        position: 'center',
+        title: 'Deus curou minhas feridas.',
+        text: 'O amor de Cristo alcançou o que ninguém via.',
     },
     {
         image: '/images/hero/resgate-abraco-06.jpg',
         fallback: 'linear-gradient(135deg, #071b3a 0%, #253f4f 46%, #d97706 100%)',
         position: 'center',
-        title: 'Deus me levantou quando eu não tinha forças.',
-        text: 'A Família Resgate acolheu, e Cristo restaurou.',
-    },
-    {
-        image: '/images/hero/resgate-cruz-07.jpg',
-        fallback: 'linear-gradient(135deg, #020817 0%, #0a2342 48%, #f2c15b 100%)',
-        position: 'center',
         title: 'Deus transformou minha história.',
-        text: 'Na cruz, Cristo revelou amor maior que a dor.',
+        text: 'O que era dor virou testemunho.',
     },
     {
-        image: '/images/hero/resgate-grupo-orando-08.jpg',
+        image: '/images/hero/resgate-grupo-orando-07.jpg',
         fallback: 'linear-gradient(135deg, #06152f 0%, #22425c 52%, #f6c65b 100%)',
         position: 'center',
-        title: 'Cristo trouxe paz ao meu coração.',
-        text: 'Deus me cercou de oração, cuidado e esperança.',
+        title: 'A graça de Deus me encontrou.',
+        text: 'Quando eu pensei que era o fim, Deus me chamou.',
     },
     {
-        image: '/images/hero/resgate-luz-09.jpg',
-        fallback: 'linear-gradient(135deg, #020817 0%, #17324d 48%, #ffd27a 100%)',
-        position: 'center',
+        image: '/images/hero/resgate-cruz-08.jpg',
+        fallback: 'linear-gradient(135deg, #020817 0%, #0a2342 48%, #f2c15b 100%)',
+        position: 'center 48%',
         title: 'Fui alcançado pelo amor de Cristo.',
         text: 'A luz de Deus me encontrou no caminho.',
     },
     {
-        image: '/images/hero/resgate-culto-10.jpg',
+        image: '/images/hero/resgate-recomeco-09.jpg',
+        fallback: 'linear-gradient(135deg, #020817 0%, #17324d 48%, #ffd27a 100%)',
+        position: 'center',
+        title: 'Jesus me deu um novo começo.',
+        text: 'A esperança voltou a nascer no meu coração.',
+    },
+    {
+        image: '/images/hero/resgate-louvor-10.jpg',
         fallback: 'linear-gradient(135deg, #071b3a 0%, #442d1b 48%, #f59e0b 100%)',
         position: 'center',
-        title: 'A graça de Deus me encontrou.',
-        text: 'No culto, Cristo renovou minha fé e meu propósito.',
+        title: 'Deus me chamou de volta.',
+        text: 'Hoje caminho com fé, propósito e esperança.',
     },
 ];
 
@@ -675,12 +675,11 @@ onBeforeUnmount(() => {
     content: '';
     position: absolute;
     inset: 0;
-    z-index: 3;
+    z-index: 2;
     background:
-        linear-gradient(90deg, rgba(2, 8, 23, 0.52) 0%, rgba(6, 21, 47, 0.22) 34%, rgba(2, 8, 23, 0.38) 100%),
-        linear-gradient(180deg, rgba(2, 8, 23, 0.1) 0%, rgba(2, 8, 23, 0.04) 38%, rgba(2, 8, 23, 0.56) 100%),
-        radial-gradient(circle at 76% 18%, rgba(246, 198, 91, 0.26), transparent 28%),
-        radial-gradient(circle at 18% 82%, rgba(246, 198, 91, 0.12), transparent 24%);
+        radial-gradient(circle at 78% 18%, rgba(246, 198, 91, 0.2), transparent 30%),
+        radial-gradient(circle at 18% 82%, rgba(246, 198, 91, 0.1), transparent 24%);
+    opacity: 0.58;
     pointer-events: none;
 }
 
@@ -688,11 +687,11 @@ onBeforeUnmount(() => {
     content: '';
     position: absolute;
     inset: 0;
-    z-index: 4;
+    z-index: 2;
     background-image:
         radial-gradient(circle at 82% 18%, rgba(246, 198, 91, 0.1), transparent 22%),
         repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 5px);
-    opacity: 0.42;
+    opacity: 0.24;
     pointer-events: none;
 }
 
@@ -707,6 +706,7 @@ onBeforeUnmount(() => {
 .hero-slide {
     position: absolute;
     inset: 0;
+    z-index: 1;
     overflow: hidden;
     opacity: 0;
     background: var(--hero-fallback);
@@ -715,8 +715,34 @@ onBeforeUnmount(() => {
 }
 
 .hero-slide.active {
+    z-index: 4;
     opacity: 1;
     transform: scale(1);
+}
+
+.hero-slide::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    background:
+        linear-gradient(90deg, rgba(2, 8, 23, 0.52) 0%, rgba(6, 21, 47, 0.2) 36%, rgba(2, 8, 23, 0.42) 100%),
+        linear-gradient(180deg, rgba(2, 8, 23, 0.08) 0%, rgba(2, 8, 23, 0.02) 42%, rgba(2, 8, 23, 0.62) 100%);
+    backdrop-filter: blur(1px) saturate(1.04);
+    -webkit-backdrop-filter: blur(1px) saturate(1.04);
+    pointer-events: none;
+}
+
+.hero-slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    background-image:
+        radial-gradient(circle at 82% 18%, rgba(246, 198, 91, 0.1), transparent 22%),
+        repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 5px);
+    opacity: 0.28;
+    pointer-events: none;
 }
 
 .hero-slide img,
@@ -726,7 +752,7 @@ onBeforeUnmount(() => {
     height: 100%;
     object-fit: cover;
     object-position: var(--hero-position, center);
-    filter: saturate(1.06) contrast(1.02) brightness(0.88);
+    filter: saturate(1.08) contrast(1.04) brightness(0.94);
     transform: scale(1.035);
     transition: transform 4200ms ease;
 }
@@ -747,7 +773,7 @@ onBeforeUnmount(() => {
 
 .hero-slide-copy {
     position: absolute;
-    z-index: 5;
+    z-index: 20;
     left: clamp(22px, 2.6vw, 38px);
     bottom: clamp(24px, 3vw, 40px);
     display: grid;
@@ -755,33 +781,36 @@ onBeforeUnmount(() => {
     max-width: calc(100% - 390px);
     gap: 6px;
     padding: clamp(13px, 1.25vw, 18px) clamp(15px, 1.55vw, 22px);
-    border: 1px solid rgba(246, 198, 91, 0.3);
+    border: 1px solid rgba(246, 198, 91, 0.48);
     border-left: 3px solid rgba(246, 198, 91, 0.88);
     border-radius: 0 18px 18px 0;
     color: #fff8ea;
-    background: linear-gradient(90deg, rgba(2, 8, 23, 0.64), rgba(6, 21, 47, 0.34));
-    box-shadow: 0 22px 44px rgba(2, 8, 23, 0.26);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background:
+        radial-gradient(circle at 96% 10%, rgba(246, 198, 91, 0.12), transparent 28%),
+        linear-gradient(90deg, rgba(2, 8, 23, 0.98), rgba(6, 21, 47, 0.94));
+    box-shadow: 0 26px 58px rgba(2, 8, 23, 0.62);
+    backdrop-filter: blur(6px) saturate(1.02);
+    -webkit-backdrop-filter: blur(6px) saturate(1.02);
 }
 
 .hero-slide-copy strong {
     font-family: Georgia, 'Times New Roman', serif;
     font-size: clamp(1.12rem, 1.58vw, 1.72rem);
     line-height: 1.08;
+    color: #fff8ea;
     text-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
 }
 
 .hero-slide-copy span {
     max-width: 320px;
-    color: rgba(255, 248, 234, 0.9);
+    color: rgba(255, 248, 234, 0.96);
     font-size: clamp(0.74rem, 0.84vw, 0.9rem);
     line-height: 1.35;
 }
 
 .hero-slide-dots {
     position: absolute;
-    z-index: 6;
+    z-index: 30;
     left: clamp(22px, 2.6vw, 38px);
     bottom: clamp(10px, 1.35vw, 18px);
     display: flex;
@@ -803,7 +832,7 @@ onBeforeUnmount(() => {
 
 .verse-card {
     position: absolute;
-    z-index: 7;
+    z-index: 31;
     right: clamp(18px, 2.3vw, 34px);
     bottom: clamp(24px, 3vw, 40px);
     display: flex;
@@ -816,11 +845,11 @@ onBeforeUnmount(() => {
     border-radius: 20px;
     color: #f8f2e6;
     background:
-        radial-gradient(circle at 84% 76%, rgba(246, 198, 91, 0.18), transparent 30%),
-        linear-gradient(135deg, rgba(10, 35, 66, 0.74), rgba(6, 21, 47, 0.82) 74%);
-    box-shadow: 0 24px 50px rgba(2, 8, 23, 0.34);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+        radial-gradient(circle at 84% 76%, rgba(246, 198, 91, 0.16), transparent 30%),
+        linear-gradient(135deg, rgba(10, 35, 66, 0.98), rgba(6, 21, 47, 0.98) 74%);
+    box-shadow: 0 30px 64px rgba(2, 8, 23, 0.62);
+    backdrop-filter: blur(6px) saturate(1.02);
+    -webkit-backdrop-filter: blur(6px) saturate(1.02);
 }
 
 .verse-card .quote-mark {
@@ -840,7 +869,7 @@ onBeforeUnmount(() => {
 
 .verse-card p {
     margin: 0;
-    color: rgba(248, 242, 230, 0.9);
+    color: rgba(248, 242, 230, 0.96);
     font-size: clamp(0.7rem, 0.78vw, 0.82rem);
     line-height: 1.36;
 }
