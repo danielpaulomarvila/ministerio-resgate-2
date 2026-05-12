@@ -14,12 +14,12 @@ const showingNavigationDropdown = ref(false);
     <div>
         <div class="min-h-screen bg-gray-100">
             <nav
-                class="border-b border-gray-100 bg-white"
+                class="border-b border-gray-100 bg-white overflow-hidden"
             >
                 <!-- Primary Navigation Menu -->
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div class="flex h-16 justify-between">
-                        <div class="flex">
+                    <div class="flex h-16 justify-between min-w-0">
+                        <div class="flex min-w-0 flex-1">
                             <!-- Logo -->
                             <div class="flex shrink-0 items-center">
                                 <Link :href="route('dashboard')">
@@ -30,73 +30,86 @@ const showingNavigationDropdown = ref(false);
                             </div>
 
                             <!-- Navigation Links -->
+                            <!-- Correção de responsividade: estrutura flex com min-w-0 permite scroll horizontal quando há muitos itens -->
                             <div
-                                class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
+                                class="hidden sm:ms-10 sm:flex min-w-0 flex-1 overflow-x-auto overflow-y-hidden whitespace-nowrap"
                             >
-                                <NavLink
-                                    :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
-                                >
-                                    Dashboard
-                                </NavLink>
-                                <NavLink
-                                    :href="route('secretaria.dashboard')"
-                                    :active="route().current('secretaria.dashboard')"
-                                >
-                                    Secretaria
-                                </NavLink>
-                                <NavLink
-                                    :href="route('secretaria.alerts.index')"
-                                    :active="route().current('secretaria.alerts.index')"
-                                >
-                                    Alertas
-                                </NavLink>
-                                <NavLink
-                                    :href="route('secretaria.requests.index')"
-                                    :active="route().current('secretaria.requests.*')"
-                                >
-                                    Solicitações
-                                </NavLink>
-                                <NavLink
-                                    :href="route('secretaria.access.index')"
-                                    :active="route().current('secretaria.access.*')"
-                                >
-                                    Acessos
-                                </NavLink>
-                                <NavLink
-                                    :href="route('secretaria.access-profiles.index')"
-                                    :active="route().current('secretaria.access-profiles.*')"
-                                >
-                                    Perfis de Acesso
-                                </NavLink>
-                                <NavLink
-                                    :href="route('secretaria.departments.index')"
-                                    :active="route().current('secretaria.departments.*')"
-                                >
-                                    Departamentos
-                                </NavLink>
-                                <NavLink
-                                    :href="route('people.index')"
-                                    :active="route().current('people.index')"
-                                >
-                                    Pessoas
-                                </NavLink>
-                                <NavLink
-                                    :href="route('families.index')"
-                                    :active="route().current('families.index')"
-                                >
-                                    Famílias
-                                </NavLink>
-                                <NavLink
-                                    :href="route('guardianships.index')"
-                                    :active="route().current('guardianships.index')"
-                                >
-                                    Responsáveis
-                                </NavLink>
+                                <div class="flex min-w-max flex-nowrap space-x-8">
+                                    <NavLink
+                                        class="shrink-0"
+                                        :href="route('dashboard')"
+                                        :active="route().current('dashboard')"
+                                    >
+                                        Dashboard
+                                    </NavLink>
+                                    <NavLink
+                                        class="shrink-0"
+                                        :href="route('secretaria.dashboard')"
+                                        :active="route().current('secretaria.dashboard')"
+                                    >
+                                        Secretaria
+                                    </NavLink>
+                                    <NavLink
+                                        class="shrink-0"
+                                        :href="route('secretaria.alerts.index')"
+                                        :active="route().current('secretaria.alerts.index')"
+                                    >
+                                        Alertas
+                                    </NavLink>
+                                    <NavLink
+                                        class="shrink-0"
+                                        :href="route('secretaria.requests.index')"
+                                        :active="route().current('secretaria.requests.*')"
+                                    >
+                                        Solicitações
+                                    </NavLink>
+                                    <NavLink
+                                        class="shrink-0"
+                                        :href="route('secretaria.access.index')"
+                                        :active="route().current('secretaria.access.*')"
+                                    >
+                                        Acessos
+                                    </NavLink>
+                                    <NavLink
+                                        class="shrink-0"
+                                        :href="route('secretaria.access-profiles.index')"
+                                        :active="route().current('secretaria.access-profiles.*')"
+                                    >
+                                        Perfis de Acesso
+                                    </NavLink>
+                                    <NavLink
+                                        class="shrink-0"
+                                        :href="route('secretaria.departments.index')"
+                                        :active="route().current('secretaria.departments.*')"
+                                    >
+                                        Departamentos
+                                    </NavLink>
+                                    <NavLink
+                                        class="shrink-0"
+                                        :href="route('people.index')"
+                                        :active="route().current('people.index')"
+                                    >
+                                        Pessoas
+                                    </NavLink>
+                                    <NavLink
+                                        class="shrink-0"
+                                        :href="route('families.index')"
+                                        :active="route().current('families.index')"
+                                    >
+                                        Famílias
+                                    </NavLink>
+                                    <NavLink
+                                        class="shrink-0"
+                                        :href="route('guardianships.index')"
+                                        :active="route().current('guardianships.index')"
+                                    >
+                                        Responsáveis
+                                    </NavLink>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="hidden sm:ms-6 sm:flex sm:items-center">
+                        <div class="hidden sm:ms-6 sm:flex sm:items-center shrink-0">
                             <!-- Settings Dropdown -->
                             <div class="relative ms-3">
                                 <Dropdown align="right" width="48">
@@ -143,7 +156,7 @@ const showingNavigationDropdown = ref(false);
                         </div>
 
                         <!-- Hamburger -->
-                        <div class="-me-2 flex items-center sm:hidden">
+                        <div class="-me-2 flex items-center sm:hidden shrink-0">
                             <button
                                 @click="
                                     showingNavigationDropdown =

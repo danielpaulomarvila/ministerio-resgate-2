@@ -226,7 +226,7 @@ const props = defineProps({
                 </div>
 
                 <!-- Card de Solicitações (Etapa 6) -->
-                <div class="grid grid-cols-1 gap-6 sm:grid-cols-3 mb-8">
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
                     <div class="bg-white overflow-hidden shadow-sm rounded-lg">
                         <div class="p-6">
                             <div class="text-sm font-medium text-gray-500">Solicitações Pendentes</div>
