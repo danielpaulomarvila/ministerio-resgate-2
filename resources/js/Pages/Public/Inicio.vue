@@ -2,7 +2,6 @@
 import { Head, Link } from '@inertiajs/vue3';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import PrayerRequestModal from '../../Components/PrayerRequestModal.vue';
-import PrayerTrackingModal from '../../Components/PrayerTrackingModal.vue';
 import PromiseBox from '../../Components/PromiseBox.vue';
 import { usePublicPageTransition } from '../../Composables/usePublicPageTransition';
 
@@ -14,8 +13,6 @@ defineProps({
 });
 
 const showPrayerModal = ref(false);
-const showTrackingModal = ref(false);
-const trackingCode = ref('');
 const activeHeroSlide = ref(0);
 const heroImageErrors = ref(new Set());
 const publicPageElement = ref(null);
@@ -132,13 +129,12 @@ function openPrayerModal() {
     showPrayerModal.value = true;
 }
 
-function openTrackingModal(code = '') {
-    trackingCode.value = code;
-    showTrackingModal.value = true;
-}
-
 function handlePrayerTracking(code) {
-    openTrackingModal(code);
+    if (typeof window !== 'undefined') {
+        window.sessionStorage.setItem('familia_resgate_pending_prayer_tracking_code', code);
+    }
+
+    navigatePublicPage(null, '/acompanhar_oracao');
 }
 
 function goToNextHeroSlide() {
@@ -305,7 +301,7 @@ onBeforeUnmount(() => {
                     <strong>Provérbios 3:5</strong>
                 </div>
                 <div class="footer-actions">
-                    <button type="button" class="tracking-card" @click="openTrackingModal()">
+                    <Link class="tracking-card" href="/acompanhar_oracao" @click="navigatePublicPage($event, '/acompanhar_oracao')">
                         <svg viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15ZM16 16l5 5" />
                         </svg>
@@ -313,7 +309,7 @@ onBeforeUnmount(() => {
                             <strong>Acompanhar Oração</strong>
                             <small>Já tem um código? Acompanhe seu pedido.</small>
                         </span>
-                    </button>
+                    </Link>
 
                     <div class="marvvium-signature" aria-label="Plataforma desenvolvida por Marvvium">
                         <img src="/images/brand/logo-marvvium.png" alt="Marvvium" />
@@ -327,7 +323,6 @@ onBeforeUnmount(() => {
         </main>
 
         <PrayerRequestModal :show="showPrayerModal" @close="showPrayerModal = false" @track="handlePrayerTracking" />
-        <PrayerTrackingModal :show="showTrackingModal" :initial-code="trackingCode" @close="showTrackingModal = false" />
     </div>
 </template>
 

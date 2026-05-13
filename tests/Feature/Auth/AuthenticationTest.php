@@ -27,7 +27,14 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('welcome.transition', absolute: false));
+    }
+
+    public function test_welcome_transition_requires_authentication(): void
+    {
+        $response = $this->get('/boas_vindas');
+
+        $response->assertRedirect('/login');
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void

@@ -38,6 +38,15 @@ Route::get('/inicio', function () {
     ]);
 })->name('public.inicio');
 
+Route::get('/acompanhar_oracao', function () {
+    return Inertia::render('Public/AcompanharOracao', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
+})->name('public.acompanhar_oracao');
+
 Route::get('/sobre_nos', function () {
     return Inertia::render('Public/SobreNos', [
         'canLogin' => Route::has('login'),
@@ -77,6 +86,23 @@ Route::get('/contato', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/boas_vindas', function () {
+    $user = request()->user();
+    $person = $user->person ?? null;
+    $fullName = $person->full_name ?? $user->name ?? null;
+    $nameParts = $fullName ? preg_split('/\s+/', trim($fullName)) : [];
+    $fallbackName = count($nameParts) >= 3
+        ? $nameParts[0].' '.$nameParts[count($nameParts) - 1]
+        : ($nameParts[0] ?? 'Família Resgate');
+
+    // Futuramente este destino será definido por permissões e perfil do usuário.
+    // No cadastro futuro, o ideal é separar first_name, last_name, preferred_name e full_name.
+    return Inertia::render('Auth/WelcomeTransition', [
+        'destination' => route('familia.index', absolute: false),
+        'greetingName' => $person->preferred_name ?? $user->preferred_name ?? $user->display_name ?? $user->first_name ?? $fallbackName,
+    ]);
+})->middleware(['auth', 'verified'])->name('welcome.transition');
 
 Route::get('/familia', [FamilyHubController::class, 'index'])
     ->middleware(['auth'])
