@@ -19,13 +19,60 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
+    return Inertia::render('Public/Inicio', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
 });
+
+// Rotas públicas reais do site institucional.
+// Cada tela pública renderiza seu próprio componente para evitar navegação por hash/âncora.
+Route::get('/inicio', function () {
+    return Inertia::render('Public/Inicio', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
+})->name('public.inicio');
+
+Route::get('/sobre_nos', function () {
+    return Inertia::render('Public/SobreNos', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
+})->name('public.sobre_nos');
+
+Route::get('/cultos', function () {
+    return Inertia::render('Public/Cultos', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
+})->name('public.cultos');
+
+Route::get('/eventos', function () {
+    return Inertia::render('Public/Eventos', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
+})->name('public.eventos');
+
+Route::get('/contato', function () {
+    return Inertia::render('Public/Contato', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
+})->name('public.contato');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

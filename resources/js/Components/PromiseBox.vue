@@ -271,10 +271,10 @@ function savePromise() {
 <style scoped>
 .promise-band {
     display: grid;
-    grid-template-columns: minmax(320px, 1.02fr) minmax(250px, 0.72fr) minmax(400px, 1.18fr);
+    grid-template-columns: minmax(300px, 0.96fr) minmax(260px, 0.76fr) minmax(380px, 1.08fr);
     gap: 0;
-    min-height: 0;
-    overflow: hidden;
+    min-height: 220px;
+    overflow: visible;
     border: 1px solid rgba(217, 164, 65, 0.32);
     border-radius: 18px;
     background:
@@ -290,7 +290,7 @@ function savePromise() {
     align-items: center;
     min-width: 0;
     overflow: hidden;
-    padding: clamp(12px, 1.25vw, 22px);
+    padding: clamp(8px, 0.9vw, 14px);
     color: #f8f2e6;
     background:
         radial-gradient(circle at 24% 72%, rgba(245, 158, 11, 0.42), transparent 30%),
@@ -320,32 +320,32 @@ function savePromise() {
 .promise-kicker {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     color: #f8f2e6;
-    font-size: clamp(0.78rem, 0.9vw, 1rem);
+    font-size: clamp(0.68rem, 0.78vw, 0.86rem);
     font-weight: 800;
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
 
 .promise-kicker svg {
-    width: 32px;
-    height: 32px;
+    width: 26px;
+    height: 26px;
     fill: none;
     stroke: #f6c65b;
     stroke-width: 1.7;
 }
 
 .promise-panel-copy p {
-    margin-top: 12px;
+    margin-top: 7px;
     max-width: 210px;
     color: rgba(248, 242, 230, 0.92);
-    font-size: clamp(0.82rem, 0.92vw, 0.98rem);
-    line-height: 1.55;
+    font-size: clamp(0.7rem, 0.8vw, 0.84rem);
+    line-height: 1.34;
 }
 
 .promise-panel-copy .promise-hint {
-    margin-top: 12px;
+    margin-top: 7px;
     color: #fff8ea;
     font-style: italic;
 }
@@ -367,8 +367,8 @@ function savePromise() {
     grid-column: 1;
     grid-row: 1;
     display: block;
-    width: min(100%, 226px);
-    height: clamp(132px, 13.5vw, 176px);
+    width: min(100%, 190px);
+    height: clamp(104px, 10.5vw, 138px);
     justify-self: center;
     border: 0;
     background: transparent;
@@ -530,7 +530,7 @@ function savePromise() {
     display: grid;
     place-items: center;
     min-width: 0;
-    padding: 8px 14px;
+    padding: 18px 12px 12px;
     background: linear-gradient(135deg, rgba(255, 248, 234, 0.98), rgba(244, 232, 208, 0.75));
 }
 
@@ -567,9 +567,9 @@ function savePromise() {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: min(94%, 260px);
-    min-height: clamp(154px, 17vw, 208px);
-    padding: 34px 20px 24px;
+    width: min(92%, 250px);
+    min-height: clamp(146px, 14.2vw, 178px);
+    padding: 30px 16px 20px;
     color: #3b2710;
     text-align: center;
     background:
@@ -595,18 +595,18 @@ function savePromise() {
     position: absolute;
     left: 8%;
     right: 8%;
-    height: 22px;
+    height: 18px;
     border-radius: 999px;
     background: linear-gradient(90deg, #b87918, #f5d08c 18% 82%, #a96a12);
     box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.45), 0 4px 12px rgba(83, 47, 7, 0.18);
 }
 
 .scroll-roller-top {
-    top: -9px;
+    top: -5px;
 }
 
 .scroll-roller-bottom {
-    bottom: -9px;
+    bottom: -5px;
 }
 
 .scroll-seal {
@@ -614,8 +614,8 @@ function savePromise() {
     top: 12px;
     left: 50%;
     display: grid;
-    width: 34px;
-    height: 34px;
+    width: 28px;
+    height: 28px;
     place-items: center;
     border-radius: 50%;
     background: linear-gradient(#f6c65b, #b87918);
@@ -643,16 +643,16 @@ function savePromise() {
 blockquote {
     margin: 0;
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: clamp(0.82rem, 0.96vw, 1.02rem);
+    font-size: clamp(0.72rem, 0.82vw, 0.9rem);
     font-weight: 700;
-    line-height: 1.45;
+    line-height: 1.28;
 }
 
 cite,
 .promise-type {
-    margin-top: 8px;
+    margin-top: 5px;
     color: #5a3914;
-    font-size: 0.9rem;
+    font-size: 0.74rem;
     font-style: normal;
     font-weight: 700;
 }
@@ -662,7 +662,7 @@ cite,
     flex-wrap: wrap;
     justify-content: center;
     gap: 6px;
-    margin-top: 10px;
+    margin-top: 6px;
 }
 
 .promise-action {
@@ -707,11 +707,11 @@ cite,
 
 .wax-seal {
     position: absolute;
-    right: -5px;
-    bottom: 5px;
+    right: 2px;
+    bottom: 8px;
     display: grid;
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
     place-items: center;
     border-radius: 50%;
     background: radial-gradient(circle at 34% 30%, #ffd27a, #a96a12 68%);
@@ -731,8 +731,8 @@ cite,
     min-width: 0;
     flex-direction: column;
     justify-content: center;
-    gap: clamp(8px, 0.8vw, 14px);
-    padding: clamp(10px, 1.1vw, 20px);
+    gap: clamp(7px, 0.7vw, 11px);
+    padding: clamp(10px, 0.9vw, 14px);
     background: rgba(255, 248, 234, 0.72);
 }
 
@@ -764,11 +764,11 @@ cite,
 .edifying-card {
     display: flex;
     min-width: 0;
-    min-height: 136px;
+    min-height: 128px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 10px 9px;
+    padding: 8px 7px;
     text-align: center;
     border: 1px solid rgba(217, 164, 65, 0.42);
     border-radius: 14px;
@@ -784,8 +784,8 @@ cite,
 }
 
 .edifying-card svg {
-    width: clamp(32px, 2.8vw, 48px);
-    height: clamp(32px, 2.8vw, 48px);
+    width: clamp(26px, 2.2vw, 36px);
+    height: clamp(26px, 2.2vw, 36px);
     fill: none;
     stroke: #e59b0b;
     stroke-width: 1.8;
@@ -793,9 +793,9 @@ cite,
 }
 
 .edifying-card h3 {
-    margin: 9px 0 5px;
+    margin: 6px 0 3px;
     color: #c77d0e;
-    font-size: clamp(0.72rem, 0.78vw, 0.86rem);
+    font-size: clamp(0.62rem, 0.68vw, 0.74rem);
     font-weight: 900;
     text-transform: uppercase;
 }
@@ -803,8 +803,8 @@ cite,
 .edifying-card p {
     margin: 0;
     color: #1d2939;
-    font-size: clamp(0.66rem, 0.72vw, 0.76rem);
-    line-height: 1.38;
+    font-size: clamp(0.56rem, 0.62vw, 0.68rem);
+    line-height: 1.24;
 }
 
 @keyframes paper-launch {

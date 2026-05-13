@@ -1,9 +1,10 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import PrayerRequestModal from '../Components/PrayerRequestModal.vue';
-import PrayerTrackingModal from '../Components/PrayerTrackingModal.vue';
-import PromiseBox from '../Components/PromiseBox.vue';
+import PrayerRequestModal from '../../Components/PrayerRequestModal.vue';
+import PrayerTrackingModal from '../../Components/PrayerTrackingModal.vue';
+import PromiseBox from '../../Components/PromiseBox.vue';
+import { usePublicPageTransition } from '../../Composables/usePublicPageTransition';
 
 defineProps({
     canLogin: {
@@ -17,16 +18,13 @@ const showTrackingModal = ref(false);
 const trackingCode = ref('');
 const activeHeroSlide = ref(0);
 const heroImageErrors = ref(new Set());
+const publicPageElement = ref(null);
 let heroCarouselTimer = null;
 
-const navItems = [
-    { label: 'Início', key: 'inicio', active: true },
-    { label: 'Sobre Nós', key: 'sobre-nos', active: false },
-    { label: 'Cultos', key: 'cultos', active: false },
-    { label: 'Eventos', key: 'eventos', active: false },
-    { label: 'Contato', key: 'contato', active: false },
-];
+const { navigatePublicPage } = usePublicPageTransition(publicPageElement);
 
+// Conteúdo provisório da página Início.
+// Futuramente será carregado da Administração Geral → Site Público.
 const highlightCards = [
     {
         title: 'Comunidade',
@@ -55,6 +53,8 @@ const highlightCards = [
     },
 ];
 
+// Imagens provisórias do carrossel principal.
+// Futuramente serão substituídas por uploads da Administração Geral.
 const heroSlides = [
     {
         image: '/images/hero/resgate-oracao-01.jpg',
@@ -165,48 +165,26 @@ onBeforeUnmount(() => {
 <template>
     <Head title="Início" />
 
-    <div class="public-home-screen">
-        <!-- Header público com navegação principal. As demais telas serão ligadas depois com transição lateral. -->
+    <div ref="publicPageElement" class="public-home-screen public-route-page">
         <header class="public-header">
-            <a class="brand-mark" href="#inicio" aria-label="Família Resgate">
-                <img
-                    class="brand-logo"
-                    src="/images/brand/logo-resgate-gold.png"
-                    alt="Logo Ministério Resgate"
-                />
-                <span>
-                    <small>Família</small>
-                    <strong>Resgate</strong>
-                </span>
-            </a>
-
+            <Link class="brand-mark" href="/inicio" aria-label="Família Resgate" @click="navigatePublicPage($event, '/inicio')">
+                <img class="brand-logo" src="/images/brand/logo-resgate-gold.png" alt="Logo Ministério Resgate" />
+                <span><small>Família</small><strong>Resgate</strong></span>
+            </Link>
             <nav class="public-nav" aria-label="Navegação pública">
-                <button
-                    v-for="item in navItems"
-                    :key="item.key"
-                    type="button"
-                    class="nav-item"
-                    :class="{ active: item.active }"
-                >
-                    {{ item.label }}
-                </button>
+                <Link class="nav-item active" href="/inicio" @click="navigatePublicPage($event, '/inicio')">Início</Link>
+                <Link class="nav-item" href="/sobre_nos" @click="navigatePublicPage($event, '/sobre_nos')">Sobre Nós</Link>
+                <Link class="nav-item" href="/cultos" @click="navigatePublicPage($event, '/cultos')">Cultos</Link>
+                <Link class="nav-item" href="/eventos" @click="navigatePublicPage($event, '/eventos')">Eventos</Link>
+                <Link class="nav-item" href="/contato" @click="navigatePublicPage($event, '/contato')">Contato</Link>
             </nav>
-
-            <Link
-                v-if="canLogin"
-                class="login-button"
-                :href="$page.props.auth.user ? route('dashboard') : route('login')"
-            >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
-                    <path d="M4 21a8 8 0 0 1 16 0" />
-                </svg>
+            <Link v-if="canLogin" class="login-button" :href="$page.props.auth.user ? route('dashboard') : route('login')">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
                 Entrar
             </Link>
         </header>
 
-        <!-- Painel Início em tela única. A estrutura de palco evita scroll no desktop e prepara a troca lateral futura. -->
-        <main id="inicio" class="public-stage">
+<main id="inicio" class="public-stage">
             <!-- Hero da página Início com mensagem de boas-vindas, ações principais e cena espiritual clara. -->
             <section class="hero-zone" aria-label="Boas-vindas à Família Resgate">
                 <div class="hero-copy">
@@ -233,12 +211,12 @@ onBeforeUnmount(() => {
                             </svg>
                             Pedir Oração
                         </button>
-                        <button type="button" class="secondary-cta">
+                        <Link class="secondary-cta" href="/sobre_nos" @click="navigatePublicPage($event, '/sobre_nos')">
                             Conheça a Igreja
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M5 12h14M13 6l6 6-6 6" />
                             </svg>
-                        </button>
+                        </Link>
                     </div>
                 </div>
 
@@ -348,16 +326,8 @@ onBeforeUnmount(() => {
             </footer>
         </main>
 
-        <PrayerRequestModal
-            :show="showPrayerModal"
-            @close="showPrayerModal = false"
-            @track="handlePrayerTracking"
-        />
-        <PrayerTrackingModal
-            :show="showTrackingModal"
-            :initial-code="trackingCode"
-            @close="showTrackingModal = false"
-        />
+        <PrayerRequestModal :show="showPrayerModal" @close="showPrayerModal = false" @track="handlePrayerTracking" />
+        <PrayerTrackingModal :show="showTrackingModal" :initial-code="trackingCode" @close="showTrackingModal = false" />
     </div>
 </template>
 
@@ -365,10 +335,10 @@ onBeforeUnmount(() => {
 .public-home-screen {
     position: relative;
     display: grid;
-    grid-template-rows: 78px minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
     min-height: 100vh;
     overflow-x: hidden;
-    padding: 0 clamp(26px, 3.6vw, 56px) 10px;
+    padding: 0 clamp(26px, 3.6vw, 56px) 28px;
     color: #08162e;
     background:
         radial-gradient(circle at 72% 16%, rgba(246, 198, 91, 0.18), transparent 22%),
@@ -401,6 +371,7 @@ onBeforeUnmount(() => {
     grid-template-columns: minmax(260px, 0.82fr) minmax(500px, 1.24fr) minmax(126px, 0.38fr);
     align-items: center;
     gap: 18px;
+    min-height: 86px;
 }
 
 .brand-mark {
@@ -517,18 +488,25 @@ onBeforeUnmount(() => {
     stroke-width: 1.8;
 }
 
+
+
+
+
 .public-stage {
+    position: relative;
+    z-index: 1;
     display: grid;
-    grid-template-rows: minmax(420px, 50fr) minmax(142px, 22fr) minmax(66px, 10fr) minmax(60px, 8fr);
-    gap: 14px;
-    min-height: calc(100vh - 92px);
+    grid-template-rows: auto auto auto auto;
+    gap: 18px;
+    min-height: 0;
+    padding-top: 10px;
 }
 
 .hero-zone {
     position: relative;
     display: grid;
     grid-template-columns: minmax(350px, 38%) minmax(0, 62%);
-    min-height: 0;
+    min-height: clamp(460px, 50vh, 560px);
     overflow: hidden;
     border-radius: 32px 54px 0 0;
     background:
@@ -545,7 +523,7 @@ onBeforeUnmount(() => {
     height: 100%;
     flex-direction: column;
     justify-content: center;
-    padding: clamp(28px, 3.2vw, 48px) clamp(20px, 2.4vw, 34px) clamp(32px, 3vw, 46px) clamp(34px, 4.2vw, 62px);
+    padding: clamp(22px, 2.5vw, 36px) clamp(20px, 2.4vw, 34px) clamp(22px, 2.5vw, 36px) clamp(34px, 4.2vw, 62px);
 }
 
 .hero-kicker {
@@ -775,12 +753,12 @@ onBeforeUnmount(() => {
     position: absolute;
     z-index: 20;
     left: clamp(22px, 2.6vw, 38px);
-    bottom: clamp(24px, 3vw, 40px);
+    bottom: clamp(22px, 2.4vw, 34px);
     display: grid;
     width: min(46%, 390px);
     max-width: calc(100% - 390px);
     gap: 6px;
-    padding: clamp(13px, 1.25vw, 18px) clamp(15px, 1.55vw, 22px);
+    padding: clamp(11px, 1.05vw, 15px) clamp(14px, 1.35vw, 18px);
     border: 1px solid rgba(246, 198, 91, 0.48);
     border-left: 3px solid rgba(246, 198, 91, 0.88);
     border-radius: 0 18px 18px 0;
@@ -812,7 +790,7 @@ onBeforeUnmount(() => {
     position: absolute;
     z-index: 30;
     left: clamp(22px, 2.6vw, 38px);
-    bottom: clamp(10px, 1.35vw, 18px);
+    bottom: clamp(8px, 1vw, 14px);
     display: flex;
     gap: 7px;
 }
@@ -834,13 +812,13 @@ onBeforeUnmount(() => {
     position: absolute;
     z-index: 31;
     right: clamp(18px, 2.3vw, 34px);
-    bottom: clamp(24px, 3vw, 40px);
+    bottom: clamp(22px, 2.4vw, 34px);
     display: flex;
     width: clamp(218px, 19vw, 290px);
     min-height: auto;
     flex-direction: column;
     justify-content: center;
-    padding: clamp(14px, 1.2vw, 18px);
+    padding: clamp(12px, 1vw, 15px);
     border: 1px solid rgba(246, 198, 91, 0.62);
     border-radius: 20px;
     color: #f8f2e6;
@@ -883,8 +861,8 @@ onBeforeUnmount(() => {
 .highlight-row {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    min-height: 0;
-    overflow: hidden;
+    min-height: 112px;
+    overflow: visible;
     border: 1px solid rgba(217, 164, 65, 0.35);
     border-radius: 16px;
     background: rgba(255, 248, 234, 0.72);
@@ -897,7 +875,7 @@ onBeforeUnmount(() => {
     align-items: center;
     gap: clamp(9px, 1vw, 14px);
     min-width: 0;
-    padding: clamp(9px, 1.1vw, 16px);
+    padding: clamp(8px, 0.9vw, 12px);
     border-right: 1px solid rgba(10, 35, 66, 0.12);
     transition: transform 280ms ease, background 280ms ease;
 }
@@ -913,8 +891,8 @@ onBeforeUnmount(() => {
 
 .highlight-icon {
     display: grid;
-    width: clamp(48px, 4.4vw, 66px);
-    height: clamp(48px, 4.4vw, 66px);
+    width: clamp(42px, 3.6vw, 54px);
+    height: clamp(42px, 3.6vw, 54px);
     place-items: center;
     border-radius: 50%;
     background: #06152f;
@@ -946,11 +924,11 @@ onBeforeUnmount(() => {
 
 .home-footer {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(420px, 0.52fr);
+    grid-template-columns: minmax(0, 1fr) minmax(390px, 0.48fr);
     align-items: center;
     gap: 14px;
-    min-height: 0;
-    overflow: hidden;
+    min-height: 82px;
+    overflow: visible;
     border: 1px solid rgba(217, 164, 65, 0.28);
     border-radius: 16px;
     background: rgba(255, 248, 234, 0.72);
@@ -1002,7 +980,7 @@ onBeforeUnmount(() => {
     grid-template-columns: auto 1fr;
     align-items: center;
     gap: 10px;
-    min-height: 52px;
+    min-height: 46px;
     margin-right: 0;
     padding: 0 12px 0 0;
     border: 1px solid rgba(217, 164, 65, 0.34);
@@ -1021,8 +999,8 @@ onBeforeUnmount(() => {
 }
 
 .tracking-card svg {
-    width: 29px;
-    height: 29px;
+    width: 25px;
+    height: 25px;
     margin-left: 14px;
     fill: none;
     stroke: #f6c65b;
@@ -1035,13 +1013,13 @@ onBeforeUnmount(() => {
 }
 
 .tracking-card strong {
-    font-size: 0.88rem;
+    font-size: 0.78rem;
 }
 
 .tracking-card small {
     margin-top: 3px;
     color: rgba(248, 242, 230, 0.76);
-    font-size: 0.66rem;
+    font-size: 0.58rem;
 }
 
 .marvvium-signature {
@@ -1083,6 +1061,7 @@ onBeforeUnmount(() => {
     font-weight: 800;
 }
 
+
 @media (max-width: 1180px) {
     .public-home-screen {
         height: auto;
@@ -1105,70 +1084,10 @@ onBeforeUnmount(() => {
     }
 
     .public-stage {
+        position: relative;
         grid-template-rows: auto;
+        height: auto;
         gap: 14px;
-    }
-
-    .hero-zone {
-        grid-template-columns: minmax(310px, 42%) minmax(0, 58%);
-        min-height: 650px;
-    }
-
-    .hero-copy {
-        width: auto;
-        padding-right: 24px;
-    }
-
-    .hero-slide-copy {
-        left: 24px;
-        bottom: 210px;
-        width: calc(100% - 48px);
-        max-width: none;
-    }
-
-    .hero-slide-dots {
-        left: 24px;
-        bottom: 190px;
-    }
-
-    .verse-card {
-        right: 24px;
-        bottom: 28px;
-        width: calc(100% - 48px);
-        max-width: none;
-    }
-
-    .highlight-row,
-    .home-footer {
-        grid-template-columns: 1fr;
-    }
-
-    .highlight-card {
-        border-right: 0;
-        border-bottom: 1px solid rgba(10, 35, 66, 0.1);
-    }
-
-    .home-footer {
-        padding: 18px;
-    }
-
-    .footer-verse {
-        padding: 0;
-    }
-
-    .tracking-card {
-        margin: 0;
-    }
-
-    .footer-actions {
-        grid-template-columns: 1fr;
-        padding-right: 0;
-    }
-
-    .marvvium-signature {
-        border-left: 0;
-        border-top: 1px solid rgba(217, 164, 65, 0.24);
-        padding-top: 10px;
     }
 }
 
@@ -1274,6 +1193,7 @@ onBeforeUnmount(() => {
         margin-top: 8px;
         font-size: 0.78rem;
     }
+
 
     .footer-verse {
         grid-template-columns: auto 1fr;
