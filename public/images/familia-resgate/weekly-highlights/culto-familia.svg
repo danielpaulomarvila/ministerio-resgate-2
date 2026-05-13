@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 320">
+<defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#071B33"/><stop offset=".62" stop-color="#0B2748"/><stop offset="1" stop-color="#D9A441"/></linearGradient><radialGradient id="light" cx="74%" cy="20%" r="60%"><stop stop-color="#FFF8EA" stop-opacity=".7"/><stop offset="1" stop-color="#FFF8EA" stop-opacity="0"/></radialGradient></defs>
+<rect width="520" height="320" rx="30" fill="url(#bg)"/>
+<rect width="520" height="320" rx="30" fill="url(#light)"/>
+<path d="M388 44v126M336 96h104" stroke="#FFF8EA" stroke-width="12" stroke-linecap="round" opacity=".86"/>
+<text x="44" y="88" fill="#F7C76B" font-family="Arial, sans-serif" font-size="24" font-weight="700">CULTO DA</text>
+<text x="44" y="144" fill="#FFF8EA" font-family="Georgia, serif" font-size="54" font-weight="700">FAMÍLIA</text>
+<text x="44" y="196" fill="#FFF8EA" font-family="Arial, sans-serif" font-size="22" font-weight="700">SEXTA • 20:00</text>
+<text x="44" y="230" fill="#F7C76B" font-family="Arial, sans-serif" font-size="17" font-weight="700">Sede Central</text>
+<path d="M0 258c84-38 126 10 190-18 78-34 132 20 330-4v84H0z" fill="#06172c" opacity=".70"/>
+<path d="M344 248c42-22 82-22 122 0" stroke="#F7C76B" stroke-width="9" stroke-linecap="round" opacity=".9"/>
+</svg>

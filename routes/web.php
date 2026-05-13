@@ -99,7 +99,7 @@ Route::get('/boas_vindas', function () {
     // Futuramente este destino será definido por permissões e perfil do usuário.
     // No cadastro futuro, o ideal é separar first_name, last_name, preferred_name e full_name.
     return Inertia::render('Auth/WelcomeTransition', [
-        'destination' => route('familia.index', absolute: false),
+        'destination' => route('familia-resgate.index', absolute: false),
         'greetingName' => $person->preferred_name ?? $user->preferred_name ?? $user->display_name ?? $user->first_name ?? $fallbackName,
     ]);
 })->middleware(['auth', 'verified'])->name('welcome.transition');
@@ -107,6 +107,105 @@ Route::get('/boas_vindas', function () {
 Route::get('/familia', [FamilyHubController::class, 'index'])
     ->middleware(['auth'])
     ->name('familia.index');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/familia-resgate', function () {
+        $user = request()->user();
+        $person = $user->person ?? null;
+
+        return Inertia::render('FamiliaResgate/Index', [
+            'greetingName' => $person->preferred_name ?? $person->full_name ?? $user->name ?? 'Família Resgate',
+        ]);
+    })->name('familia-resgate.index');
+
+    $familyResgatePages = [
+        'meu-perfil' => ['Meu Perfil', 'Resumo do seu cadastro, vínculos familiares, ministérios e informações pessoais.', '♙'],
+        'meu-financeiro' => ['Meu Financeiro', 'Resumo pessoal de dízimos, ofertas, recibos e pendências financeiras.', '◈'],
+        'minha-caminhada' => ['Minha Caminhada', 'Jornada espiritual, pontuação, conquistas, ranking e crescimento pessoal.', '♕'],
+        'minha-caminhada/nivel' => ['Nível Atual', 'Detalhes do seu nível espiritual e próximos marcos da caminhada.', '♕'],
+        'minha-caminhada/ranking' => ['Ranking Geral', 'Classificação e evolução dentro da comunidade da Família Resgate.', '🏆'],
+        'minha-caminhada/conquistas' => ['Minhas Conquistas', 'Medalhas, marcos espirituais e reconhecimentos conquistados.', '✦'],
+        'minha-caminhada/pontuacao' => ['Sistema de Pontuação', 'Explicação dos critérios de XP, frequência, serviço e leitura bíblica.', '▤'],
+        'minha-caminhada/destaques/mensal' => ['Membro Destaque do Mês', 'Reconhecimento mensal de frutos, constância, serviço, devoção e comunhão saudável.', '♕'],
+        'minha-caminhada/regras-de-pontos' => ['Regras de Pontuação', 'Critérios, pesos e camadas de pontuação da caminhada espiritual.', '▤'],
+        'centro-sabedoria' => ['Centro da Sabedoria', 'Bíblia, devocionais, planos de leitura e perguntas da jornada bíblica.', '▣'],
+        'centro-sabedoria/biblia' => ['Bíblia Online', 'Área preparada para leitura bíblica em diferentes versões.', '▣'],
+        'centro-sabedoria/devocionais' => ['Devocionais', 'Devocionais guiados para fortalecer sua vida com Deus.', '◌'],
+        'centro-sabedoria/devocionais/hoje' => ['Devocional de Hoje', 'Mensagem diária para meditação e prática espiritual.', '◌'],
+        'centro-sabedoria/perguntas-da-leitura' => ['Perguntas da Leitura', 'Perguntas para aprofundar sua compreensão bíblica.', '?'],
+        'centro-sabedoria/leitura-biblica' => ['Minha Leitura Bíblica', 'Progresso dos seus planos e histórico de leitura.', '▤'],
+        'centro-sabedoria/leitura-biblica/destaques/mensal' => ['Destaque em Leitura do Mês', 'Reconhecimento mensal de constância, progresso e amor pela Palavra.', '▣'],
+        'centro-sabedoria/versiculo-do-dia' => ['Versículo do Dia', 'Palavra diária em destaque para edificação pessoal.', '✦'],
+        'rede-fe' => ['Rede de Fé', 'Conexões espirituais, discipulado e acompanhamento comunitário.', '∞'],
+        'oracoes' => ['Orações', 'Pedidos, respostas e intercessões da família espiritual.', '♡'],
+        'oracoes/novo-pedido' => ['Novo Pedido de Oração', 'Formulário reservado para registrar pedidos de oração.', '♡'],
+        'oracoes/respostas' => ['Respostas de Oração', 'Testemunhos e respostas recebidas nos pedidos de oração.', '♡'],
+        'grupos-ministerios' => ['Grupos e Ministérios', 'Participação em grupos, ministérios e equipes de serviço.', '♧'],
+        'grupos-ministerios/meus-grupos' => ['Meus Grupos', 'Resumo dos grupos e ministérios dos quais você participa.', '♧'],
+        'grupos-ministerios/ministerios' => ['Ministérios', 'Lista de ministérios, equipes de serviço e oportunidades de participação.', '♧'],
+        'grupos-ministerios/jovens' => ['Jovens', 'Área dos jovens com grupos, encontros e acompanhamento.', '♧'],
+        'grupos-ministerios/louvor' => ['Louvor', 'Área do ministério de louvor, equipes e encontros.', '♪'],
+        'calendario' => ['Calendário', 'Eventos, cultos, reuniões e compromissos da Família Resgate.', '▤'],
+        'calendario/proximo-culto' => ['Próximo Culto', 'Informações do próximo culto e orientações de participação.', '▤'],
+        'calendario/eventos/ensaio-louvor' => ['Ensaio de Louvor', 'Detalhes do ensaio de louvor reservado na agenda.', '♪'],
+        'calendario/eventos/reuniao-lideres' => ['Reunião de Líderes', 'Detalhes da próxima reunião de líderes.', '✦'],
+        'calendario/eventos/mutirao-limpeza' => ['Mutirão de Limpeza', 'Detalhes do mutirão de cuidado com a casa de Deus.', '✦'],
+        'cultos/confirmar-presenca' => ['Confirmar Presença', 'Confirmação de presença para o próximo culto.', '✓'],
+        'cultos/registrar-biblia' => ['Registrar Bíblia', 'Registro de presença com Bíblia e participação em culto.', '✚'],
+        'obreiros-servicos' => ['Obreiros e Serviços', 'Escalas, equipes e oportunidades de servir.', '✦'],
+        'galeria' => ['Galeria da Família', 'Memórias, fotos e registros dos momentos da igreja.', '▧'],
+        'galeria/fotos' => ['Fotos da Galeria', 'Fotos recentes e momentos registrados da Família Resgate.', '▧'],
+        'galeria/eventos' => ['Fotos de Eventos', 'Registros dos cultos, eventos e encontros da família da igreja.', '▧'],
+        'destaques-semana' => ['Destaques da Semana', 'Cultos, eventos e comunicados visuais em destaque na semana.', '✦'],
+        'destaques-semana/cultos' => ['Cultos em Destaque', 'Flyers e comunicados aprovados dos cultos da semana.', '✦'],
+        'destaques-semana/eventos' => ['Eventos em Destaque', 'Flyers e comunicados aprovados dos eventos da semana.', '✦'],
+        'destaques-semana/comunicados' => ['Comunicados em Destaque', 'Comunicados visuais aprovados pela Administração Geral.', '✦'],
+        'minhas-solicitacoes' => ['Minhas Solicitações', 'Pedidos administrativos e acompanhamentos pessoais.', '☷'],
+        'rede-oportunidades' => ['Rede de Oportunidades', 'Oportunidades de serviço, apoio e crescimento.', '◇'],
+        'notificacoes' => ['Notificações', 'Avisos, lembretes e comunicados importantes.', '♢'],
+        'notificacoes/vigilia-oracao' => ['Vigília de Oração', 'Comunicado sobre a próxima vigília de oração.', '♢'],
+        'notificacoes/curso-discipulado' => ['Curso de Discipulado', 'Comunicado sobre inscrições do curso de discipulado.', '♢'],
+        'notificacoes/congresso-jovens' => ['Congresso de Jovens', 'Comunicado sobre o congresso de jovens.', '♢'],
+        'mensagens' => ['Mensagens', 'Central de mensagens pessoais e comunicados internos.', '☷'],
+        'busca' => ['Busca', 'Busca geral dentro do Centro da Família Resgate.', '⌕'],
+        'minha-familia' => ['Minha Família', 'Vínculos familiares, membros e atualizações cadastrais.', '♡'],
+        'minha-familia/membros' => ['Membros da Família', 'Lista de membros vinculados à sua família.', '♡'],
+        'minha-familia/solicitar-alteracao' => ['Solicitar Alteração Familiar', 'Área preparada para solicitar atualização cadastral familiar.', '♡'],
+        'aniversariantes' => ['Aniversariantes da Família', 'Celebração das vidas da família da igreja, respeitando privacidade e vínculos familiares.', '♡'],
+        'aniversariantes/hoje' => ['Aniversariante do Dia', 'Detalhes do aniversariante do dia e ações de cuidado familiar.', '♡'],
+        'aniversariantes/mes' => ['Aniversariantes do Mês', 'Lista dos aniversariantes do mês conforme permissões de privacidade.', '♡'],
+        'aniversariantes/hoje/enviar-carinho' => ['Enviar Carinho', 'Área preparada para enviar uma mensagem de felicitação ao aniversariante.', '♡'],
+        'documentos' => ['Documentos', 'Declarações, recibos e documentos disponíveis para você.', '☷'],
+        'acessos-privados' => ['Acessos Privados', 'Lista de áreas restritas liberadas por perfil e permissão.', '▥'],
+        'configuracoes' => ['Configurações', 'Preferências de conta, notificações e privacidade.', '⚙'],
+        'lideranca' => ['Liderança', 'Área preparada para liderança, acompanhamento e futuras permissões ministeriais.', '♕'],
+    ];
+
+    foreach ($familyResgatePages as $path => [$title, $description, $icon]) {
+        Route::get('/familia-resgate/'.$path, fn () => Inertia::render('FamiliaResgate/Placeholder', [
+            'title' => $title,
+            'description' => $description,
+            'icon' => $icon,
+        ]))->name('familia-resgate.'.str_replace(['/', '-'], ['.', '_'], $path));
+    }
+
+    $privateAreas = [
+        'secretaria' => ['Secretaria', 'Entrada segura para rotinas administrativas da secretaria.', '▦'],
+        'centro-pastoral' => ['Centro Pastoral', 'Entrada segura para acompanhamento pastoral e cuidado espiritual.', '♡'],
+        'financeiro' => ['Financeiro', 'Entrada segura para gestão financeira autorizada.', '◈'],
+        'cantina' => ['Cantina', 'Entrada segura para gestão de cantina e consumos.', '▤'],
+        'intercessao' => ['Intercessão', 'Entrada segura para equipes de oração e intercessão.', '♢'],
+        'admin-geral' => ['Administração Geral', 'Entrada segura para administração geral do ecossistema.', '♙'],
+    ];
+
+    foreach ($privateAreas as $path => [$title, $description, $icon]) {
+        Route::get('/acesso/'.$path, fn () => Inertia::render('Acessos/AreaAccessGate', [
+            'title' => $title,
+            'description' => $description,
+            'icon' => $icon,
+        ]))->name('acesso.'.str_replace('-', '_', $path));
+    }
+});
 
 Route::get('/secretaria', [SecretaryDashboardController::class, 'index'])
     ->middleware(['auth'])
