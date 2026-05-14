@@ -118,8 +118,46 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ]);
     })->name('familia-resgate.index');
 
+    Route::get('/familia-resgate/meu-perfil', fn () => Inertia::render('FamiliaResgate/MeuPerfil'))
+        ->name('familia-resgate.meu_perfil');
+
+    Route::get('/cartao-resgate/validar/{token}', fn (string $token) => Inertia::render('FamiliaResgate/Placeholder', [
+        'title' => 'Validar Cartão Resgate',
+        'description' => 'Área preparada para validação segura do Cartão Resgate por token não previsível, sem expor dados sensíveis.',
+        'icon' => '▣',
+    ]))->name('cartao-resgate.validar');
+
+    Route::get('/familia-resgate/cartao-resgate/validar/{token}', fn (string $token) => Inertia::render('FamiliaResgate/Placeholder', [
+        'title' => 'Validar Cartão Resgate',
+        'description' => 'Área preparada para leitura segura de QR Code, confirmação de vínculo e registro futuro de activity_log.',
+        'icon' => '▣',
+    ]))->name('familia-resgate.cartao-resgate.validar');
+
     $familyResgatePages = [
-        'meu-perfil' => ['Meu Perfil', 'Resumo do seu cadastro, vínculos familiares, ministérios e informações pessoais.', '♙'],
+        'meu-perfil/editar' => ['Editar Perfil', 'Área preparada para atualizar informações pessoais do perfil.', '♙'],
+        'meu-perfil/alterar-foto' => ['Alterar Foto de Perfil', 'Área preparada para atualizar a foto pessoal do membro.', '▧'],
+        'meu-perfil/alterar-senha' => ['Alterar Senha', 'Área preparada para atualizar credenciais de acesso com segurança.', '▥'],
+        'meu-perfil/notificacoes' => ['Notificações do Perfil', 'Preferências pessoais de notificações e mensagens.', '♢'],
+        'meu-perfil/privacidade' => ['Privacidade do Perfil', 'Preferências de visibilidade, diretório, aniversário e dados pessoais.', '▥'],
+        'meu-perfil/baixar-dados' => ['Baixar Meus Dados', 'Área preparada para solicitação de exportação dos dados pessoais.', '☷'],
+        'meu-perfil/historico-atividades' => ['Histórico de Atividades', 'Registro das atividades pessoais dentro da Central da Família.', '▤'],
+        'meu-perfil/documentos' => ['Documentos do Perfil', 'Documentos pessoais e cadastrais vinculados ao membro.', '☷'],
+        'meu-perfil/preferencias' => ['Preferências do Perfil', 'Configurações pessoais de participação, comunicação e visibilidade.', '⚙'],
+        'meu-perfil/sobre-mim/editar' => ['Editar Sobre Mim', 'Área preparada para atualizar a apresentação pessoal do membro.', '♙'],
+        'meu-perfil/contatos-emergencia' => ['Contatos de Emergência', 'Contatos pessoais autorizados para situações de cuidado e emergência.', '♡'],
+        'meu-perfil/contatos-emergencia/novo' => ['Novo Contato de Emergência', 'Área preparada para adicionar contato pessoal de emergência.', '♡'],
+        'meu-perfil/cartao-resgate' => ['Meu Cartão Resgate', 'Credencial digital segura do membro na Família Resgate.', '▣'],
+        'meu-perfil/cartao-resgate/download' => ['Baixar Cartão Resgate', 'Área preparada para gerar download seguro do cartão em PDF ou PNG.', '▣'],
+        'meu-perfil/cartao-resgate/pdf' => ['Cartão Resgate em PDF', 'Área preparada para geração futura do cartão digital em PDF.', '▣'],
+        'meu-perfil/cartao-resgate/png' => ['Cartão Resgate em PNG', 'Área preparada para geração futura do cartão digital em PNG.', '▣'],
+        'meu-perfil/cartao-resgate/qrcode' => ['QR Code do Cartão Resgate', 'Área preparada para validação segura por QR Code.', '▣'],
+        'minha-caminhada/presencas' => ['Minhas Presenças', 'Histórico pessoal de presenças em cultos, encontros e eventos.', '▤'],
+        'escalas/meus-servicos' => ['Meus Serviços', 'Escalas e serviços pessoais em ministérios e equipes.', '✦'],
+        'documentos/manual-do-membro' => ['Manual do Membro', 'Direitos, deveres e orientações da Família Resgate.', '☷'],
+        'privacidade' => ['Política de Privacidade', 'Como seus dados são tratados e protegidos no ecossistema.', '▥'],
+        'codigo-conduta' => ['Código de Conduta', 'Princípios que orientam convivência, serviço e cuidado.', '✦'],
+        'fale-com-lideranca' => ['Fale com a Liderança', 'Canal preparado para contato com liderança e cuidado pastoral.', '♡'],
+        'ajuda' => ['Ajuda e Suporte', 'Orientações e suporte para uso da Central da Família.', '?'],
         'meu-financeiro' => ['Meu Financeiro', 'Resumo pessoal de dízimos, ofertas, recibos e pendências financeiras.', '◈'],
         'minha-caminhada' => ['Minha Caminhada', 'Jornada espiritual, pontuação, conquistas, ranking e crescimento pessoal.', '♕'],
         'minha-caminhada/nivel' => ['Nível Atual', 'Detalhes do seu nível espiritual e próximos marcos da caminhada.', '♕'],

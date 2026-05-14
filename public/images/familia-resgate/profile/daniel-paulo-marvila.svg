@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="Foto temporária de Daniel Paulo Marvila">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#071B33"/><stop offset="1" stop-color="#0B2748"/></linearGradient>
+    <radialGradient id="gold" cx="35%" cy="20%" r="70%"><stop stop-color="#F7C76B"/><stop offset=".45" stop-color="#D9A441"/><stop offset="1" stop-color="#8A642C"/></radialGradient>
+  </defs>
+  <rect width="320" height="320" rx="160" fill="url(#bg)"/>
+  <circle cx="160" cy="116" r="58" fill="#F3C8A7"/>
+  <path d="M95 285c11-72 119-72 130 0" fill="#FFF8EA"/>
+  <path d="M96 285c10-58 118-58 128 0" fill="#0B2748"/>
+  <path d="M102 111c7-54 109-68 120-1-28-28-83-19-120 1Z" fill="#172033"/>
+  <path d="M123 153c20 19 55 20 76 0-9 28-67 28-76 0Z" fill="#7A3E23" opacity=".42"/>
+  <circle cx="138" cy="126" r="5" fill="#071B33"/><circle cx="183" cy="126" r="5" fill="#071B33"/>
+  <path d="M132 177c15 13 43 13 58 0" stroke="#071B33" stroke-width="8" stroke-linecap="round" fill="none"/>
+  <circle cx="160" cy="160" r="151" fill="none" stroke="url(#gold)" stroke-width="8"/>
+</svg>
