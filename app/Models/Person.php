@@ -167,6 +167,36 @@ class Person extends Model
         return $this->hasMany(SystemAlert::class, 'related_person_id');
     }
 
+    public function financialTransactions(): HasMany
+    {
+        return $this->hasMany(FinancialTransaction::class);
+    }
+
+    public function responsibleFinancialTransactions(): HasMany
+    {
+        return $this->hasMany(FinancialTransaction::class, 'responsible_person_id');
+    }
+
+    public function paymentProofs(): HasMany
+    {
+        return $this->hasMany(PaymentProof::class);
+    }
+
+    public function receipts(): HasMany
+    {
+        return $this->hasMany(Receipt::class);
+    }
+
+    public function financialCorrectionRequests(): HasMany
+    {
+        return $this->hasMany(FinancialCorrectionRequest::class);
+    }
+
+    public function credits(): HasMany
+    {
+        return $this->hasMany(Credit::class);
+    }
+
     /**
      * Relacionamento: Uma pessoa pode ter sido convidada/influenciada/indicada por outra pessoa
      * Campo único para informar quem trouxe a pessoa para a igreja

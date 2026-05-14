@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Familia\FamilyFinancialController;
 use App\Http\Controllers\Familia\FamilyHubController;
 use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\GuardianshipController;
@@ -121,6 +122,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/familia-resgate/meu-perfil', fn () => Inertia::render('FamiliaResgate/MeuPerfil'))
         ->name('familia-resgate.meu_perfil');
 
+    Route::get('/familia-resgate/meu-financeiro', [FamilyFinancialController::class, 'index'])
+        ->name('familia-resgate.meu_financeiro');
+
+    $financialFamilyAreas = [
+        'historico' => 'historico',
+        'recibos' => 'recibos',
+        'comprovantes' => 'comprovantes',
+        'enviar-comprovante' => 'enviar-comprovante',
+        'solicitar-correcao' => 'solicitar-correcao',
+        'solicitacoes' => 'solicitacoes',
+        'cantina' => 'cantina',
+        'eventos' => 'eventos',
+        'filhos' => 'filhos',
+        'pendencias' => 'pendencias',
+        'creditos' => 'creditos',
+    ];
+
+    foreach ($financialFamilyAreas as $path => $area) {
+        Route::get('/familia-resgate/meu-financeiro/'.$path, fn (FamilyFinancialController $controller) => $controller->area(request(), $area))
+            ->name('familia-resgate.meu_financeiro.'.str_replace('-', '_', $path));
+    }
+
+    Route::get('/familia-resgate/meu-financeiro/filhos/{person}', [FamilyFinancialController::class, 'childDetail'])
+        ->name('familia-resgate.meu_financeiro.filhos.show');
+
+    Route::get('/familia-resgate/meu-financeiro/recibos/{receipt}/baixar', [FamilyFinancialController::class, 'downloadReceipt'])
+        ->name('familia-resgate.meu_financeiro.recibos.baixar');
+
     Route::get('/cartao-resgate/validar/{token}', fn (string $token) => Inertia::render('FamiliaResgate/Placeholder', [
         'title' => 'Validar Cartão Resgate',
         'description' => 'Área preparada para validação segura do Cartão Resgate por token não previsível, sem expor dados sensíveis.',
@@ -158,7 +187,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'codigo-conduta' => ['Código de Conduta', 'Princípios que orientam convivência, serviço e cuidado.', '✦'],
         'fale-com-lideranca' => ['Fale com a Liderança', 'Canal preparado para contato com liderança e cuidado pastoral.', '♡'],
         'ajuda' => ['Ajuda e Suporte', 'Orientações e suporte para uso da Central da Família.', '?'],
-        'meu-financeiro' => ['Meu Financeiro', 'Resumo pessoal de dízimos, ofertas, recibos e pendências financeiras.', '◈'],
         'minha-caminhada' => ['Minha Caminhada', 'Jornada espiritual, pontuação, conquistas, ranking e crescimento pessoal.', '♕'],
         'minha-caminhada/nivel' => ['Nível Atual', 'Detalhes do seu nível espiritual e próximos marcos da caminhada.', '♕'],
         'minha-caminhada/ranking' => ['Ranking Geral', 'Classificação e evolução dentro da comunidade da Família Resgate.', '🏆'],

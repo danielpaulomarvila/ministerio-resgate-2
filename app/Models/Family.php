@@ -50,6 +50,16 @@ class Family extends Model
         return $this->hasMany(SystemAlert::class, 'related_family_id');
     }
 
+    public function financialTransactions(): HasMany
+    {
+        return $this->hasMany(FinancialTransaction::class);
+    }
+
+    public function credits(): HasMany
+    {
+        return $this->hasMany(Credit::class);
+    }
+
     /**
      * Verifica se a família está ativa
      */
