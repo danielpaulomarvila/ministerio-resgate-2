@@ -125,6 +125,79 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/familia-resgate/meu-financeiro', [FamilyFinancialController::class, 'index'])
         ->name('familia-resgate.meu_financeiro');
 
+    Route::get('/familia-resgate/minha-caminhada', fn () => Inertia::render('FamiliaResgate/MinhaCaminhada'))
+        ->name('familia-resgate.minha_caminhada');
+
+    Route::get('/familia-resgate/minha-caminhada/conquistas', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaConquistas', [
+        'hasYouthJourney' => (bool) data_get(request()->user(), 'person.is_youth', false),
+    ]))->name('familia-resgate.minha_caminhada.conquistas');
+
+    Route::get('/familia-resgate/minha-caminhada/nivel', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+        'area' => 'nivel',
+        'journey' => 'auto',
+    ]))->name('familia-resgate.minha_caminhada.nivel');
+
+    Route::get('/familia-resgate/minha-caminhada/geral', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+        'area' => 'geral',
+        'journey' => 'geral',
+    ]))->name('familia-resgate.minha_caminhada.geral');
+
+    Route::get('/familia-resgate/minha-caminhada/jovem', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+        'area' => 'jovem',
+        'journey' => 'jovem',
+    ]))->name('familia-resgate.minha_caminhada.jovem');
+
+    Route::get('/familia-resgate/minha-caminhada/historico', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+        'area' => 'historico',
+        'journey' => 'all',
+    ]))->name('familia-resgate.minha_caminhada.historico');
+
+    Route::get('/familia-resgate/minha-caminhada/mentor', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+        'area' => 'mentor',
+        'journey' => 'all',
+    ]))->name('familia-resgate.minha_caminhada.mentor');
+
+    Route::get('/familia-resgate/minha-caminhada/regras', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+        'area' => 'regras',
+        'journey' => 'all',
+    ]))->name('familia-resgate.minha_caminhada.regras');
+
+    Route::get('/familia-resgate/minha-caminhada/ranking', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+        'area' => 'ranking',
+        'journey' => 'all',
+    ]))->name('familia-resgate.minha_caminhada.ranking');
+
+    Route::get('/familia-resgate/minha-caminhada/mapa', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+        'area' => 'mapa',
+        'journey' => 'geral',
+    ]))->name('familia-resgate.minha_caminhada.mapa');
+
+    // Acesso futuro: membro comum acessa caminhada geral; jovem/resgatado acessa geral + jovem. A rota jovem deverá ser protegida no backend/policy, pois frontend não é segurança final.
+    Route::get('/familia-resgate/minha-caminhada/geral/mapa', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+        'area' => 'mapa',
+        'journey' => 'geral',
+    ]))->name('familia-resgate.minha_caminhada.geral.mapa');
+
+    Route::get('/familia-resgate/minha-caminhada/jovem/mapa', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+        'area' => 'mapa',
+        'journey' => 'jovem',
+    ]))->name('familia-resgate.minha_caminhada.jovem.mapa');
+
+    Route::get('/familia-resgate/minha-caminhada/geral/niveis/{level}', fn (string $level) => Inertia::render('FamiliaResgate/MinhaCaminhadaNivel', [
+        'journey' => 'geral',
+        'level' => $level,
+    ]))->where('level', '[1-9]|1[0-9]|20')->name('familia-resgate.minha_caminhada.geral.niveis.show');
+
+    Route::get('/familia-resgate/minha-caminhada/jovem/niveis/{level}', fn (string $level) => Inertia::render('FamiliaResgate/MinhaCaminhadaNivel', [
+        'journey' => 'jovem',
+        'level' => $level,
+    ]))->where('level', '[1-9]|1[0-9]|20')->name('familia-resgate.minha_caminhada.jovem.niveis.show');
+
+    Route::get('/familia-resgate/minha-caminhada/niveis/{level}', fn (string $level) => Inertia::render('FamiliaResgate/MinhaCaminhadaNivel', [
+        'journey' => 'geral',
+        'level' => $level,
+    ]))->where('level', '[1-9]|1[0-9]|20')->name('familia-resgate.minha_caminhada.niveis.show');
+
     $financialFamilyAreas = [
         'historico' => 'historico',
         'recibos' => 'recibos',
@@ -187,10 +260,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'codigo-conduta' => ['Código de Conduta', 'Princípios que orientam convivência, serviço e cuidado.', '✦'],
         'fale-com-lideranca' => ['Fale com a Liderança', 'Canal preparado para contato com liderança e cuidado pastoral.', '♡'],
         'ajuda' => ['Ajuda e Suporte', 'Orientações e suporte para uso da Central da Família.', '?'],
-        'minha-caminhada' => ['Minha Caminhada', 'Jornada espiritual, pontuação, conquistas, ranking e crescimento pessoal.', '♕'],
-        'minha-caminhada/nivel' => ['Nível Atual', 'Detalhes do seu nível espiritual e próximos marcos da caminhada.', '♕'],
-        'minha-caminhada/ranking' => ['Ranking Geral', 'Classificação e evolução dentro da comunidade da Família Resgate.', '🏆'],
-        'minha-caminhada/conquistas' => ['Minhas Conquistas', 'Medalhas, marcos espirituais e reconhecimentos conquistados.', '✦'],
         'minha-caminhada/pontuacao' => ['Sistema de Pontuação', 'Explicação dos critérios de XP, frequência, serviço e leitura bíblica.', '▤'],
         'minha-caminhada/destaques/mensal' => ['Membro Destaque do Mês', 'Reconhecimento mensal de frutos, constância, serviço, devoção e comunhão saudável.', '♕'],
         'minha-caminhada/regras-de-pontos' => ['Regras de Pontuação', 'Critérios, pesos e camadas de pontuação da caminhada espiritual.', '▤'],
