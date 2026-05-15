@@ -691,3 +691,15 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Status escopado:** `docs/HISTORICO_DIARIO_PROJETO_MINISTERIO_RESGATE.md` e `routes/web.php` seguem modificados; `docs/modulos/minha-caminhada/` e os arquivos `MinhaCaminhada*.vue` seguem não rastreados por serem parte da etapa visual em andamento.
 - **Pendências oficiais restantes:** auditoria futura de mocks/dados reais, integração com backend/services/policies, substituição gradual de mocks por props reais, permissões reais no servidor e auditoria de payload Inertia antes de uso real.
 - **Commit:** nenhum commit realizado.
+
+### Etapa — Plano técnico de backend da Minha Caminhada
+
+- **Horário:** 00:13–00:35 aprox.
+- **Objetivo:** criar documento técnico para orientar a implementação futura do backend real da Minha Caminhada após a conclusão, auditoria, commits e push da etapa visual/preparatória.
+- **Arquivo criado:** `docs/modulos/minha-caminhada/05_PLANO_TECNICO_BACKEND_MINHA_CAMINHADA.md`.
+- **Documentos consultados:** estrutura oficial, mapa de permissões, mapa de dados reais/mocks, checklist visual/funcional e base de estudo sobre pontuação, destaques, intercessão, mocks e conferência antes de novas etapas.
+- **Conteúdo registrado:** visão geral pastoral, trilhos oficiais, princípio de segurança, perfis e permissões, tabelas sugeridas, models, relacionamentos, services, policies, props Inertia por página, dados que nunca devem ser enviados sem permissão, fluxos de pontuação, conquistas, destaques, mentor e histórico, testes necessários, ordem segura de implementação e checklist antes de implementar.
+- **Escopo preservado:** nenhum código funcional foi implementado; sem migrations, models, controllers, services, policies, rotas, Vue ou alterações de banco.
+- **Pendências oficiais:** revisar banco atual antes de migrations, evitar duplicidade com estruturas existentes, criar migrations depois, criar policies, criar services, substituir mocks gradualmente por props reais, criar testes e auditar payload Inertia por perfil antes de uso real.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.
