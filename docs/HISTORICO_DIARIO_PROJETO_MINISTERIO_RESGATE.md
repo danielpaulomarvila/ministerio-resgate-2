@@ -810,3 +810,19 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Pendência próxima:** criar seeders mínimos ou policies da Minha Caminhada em etapa separada, conforme aprovação.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Seeders mínimos da Minha Caminhada
+
+- **Horário:** 02:20–02:35 aprox.
+- **Objetivo:** criar seeders mínimos e idempotentes para dados-base/catálogo da Minha Caminhada, sem criar dados pessoais, pontos reais, conquistas atribuídas, destaques, histórico fake ou logs do mentor.
+- **Status inicial:** `git status --short` retornou limpo; busca por seeders relacionados a `Walking`, `Caminhada`, `Journey`, `Level`, `Point`, `Achievement` e `Mentor` não encontrou seeders existentes antes da criação.
+- **Seeders criados:** `WalkingJourneySeeder`, `WalkingLevelSeeder`, `WalkingPointRuleSeeder`, `WalkingAchievementSeeder` e `WalkingMentorResponseTemplateSeeder`.
+- **DatabaseSeeder:** atualizado no padrão existente de `$this->call([...])`, registrando os seeders da Minha Caminhada na ordem `WalkingJourneySeeder`, `WalkingLevelSeeder`, `WalkingPointRuleSeeder`, `WalkingAchievementSeeder` e `WalkingMentorResponseTemplateSeeder`.
+- **Execução realizada:** não foi executado `php artisan db:seed` geral; foram executados somente os seeders específicos da Minha Caminhada, um por vez e na ordem correta.
+- **Dados-base criados:** 2 jornadas oficiais (`general` e `youth`), 40 níveis, 12 regras de pontuação, 13 conquistas de catálogo e 22 templates pré-aprovados do mentor.
+- **Segurança de dados:** as tabelas `walking_point_logs`, `person_walking_achievements`, `walking_highlights`, `walking_mentor_response_logs` e `walking_history_events` permaneceram com `0` registros.
+- **Validações executadas:** lint PHP passou para os 5 seeders novos e para `DatabaseSeeder`; testes `class_exists` via Tinker retornaram `true` para todos os seeders novos; `php artisan migrate:status --no-ansi` confirmou as 10 migrations da Minha Caminhada como `Ran`; `git diff --check` passou.
+- **Escopo preservado:** não foram criadas migrations, controllers, services, policies, rotas ou arquivos Vue; não foram executados `migrate`, `migrate:fresh`, `db:wipe` ou seeders gerais; mocks não foram substituídos.
+- **Pendência próxima:** criar policies ou services da Minha Caminhada em etapa separada, conforme aprovação.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.

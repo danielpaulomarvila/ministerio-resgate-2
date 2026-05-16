@@ -18,6 +18,11 @@ class DatabaseSeeder extends Seeder
             AccessControlSeeder::class,
             DepartmentSeeder::class,
             CreateAdminUserSeeder::class,
+            WalkingJourneySeeder::class,
+            WalkingLevelSeeder::class,
+            WalkingPointRuleSeeder::class,
+            WalkingAchievementSeeder::class,
+            WalkingMentorResponseTemplateSeeder::class,
         ]);
     }
 }
