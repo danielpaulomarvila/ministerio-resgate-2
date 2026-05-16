@@ -843,3 +843,17 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Pendência próxima:** criar services de leitura segura da Minha Caminhada em etapa separada, respeitando as policies e o `WalkingAuthorizationService`.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Services de leitura segura da Minha Caminhada
+
+- **Horário:** 03:00–03:15 aprox.
+- **Objetivo:** criar services de leitura segura para preparar a futura troca de mocks por dados reais, sem controllers, rotas, Vue ou alterações de banco.
+- **Estado inicial:** `git status --short` retornou limpo; busca em `app/Services` confirmou que existia apenas `WalkingAuthorizationService.php` relacionado à Minha Caminhada.
+- **Services criados:** `WalkingLevelService`, `WalkingProgressService`, `WalkingAchievementReadService`, `WalkingMentorReadService` e `WalkingDashboardReadService`.
+- **Autorização reaproveitada:** os services usam `WalkingAuthorizationService` para impedir leitura de dados de outra pessoa, dados jovens ou dados sensíveis sem permissão.
+- **Comportamento seguro:** os services retornam arrays simples preparados para futura Inertia, não retornam Models crus, não criam/alteram/deletam registros, não inventam pontos, conquistas, histórico ou destaques e usam vazio/null/false quando não autorizado.
+- **Validações executadas:** lint PHP passou para os 5 services novos e para `WalkingAuthorizationService`; testes `class_exists` retornaram `true` para os 5 services novos; consultas somente leitura confirmaram catálogos preservados (`WalkingJourney=2`, `WalkingLevel=40`, `WalkingPointRule=12`, `WalkingAchievement=13`, `WalkingMentorResponseTemplate=22`) e tabelas operacionais vazias (`WalkingPointLog=0`, `PersonWalkingAchievement=0`, `WalkingHighlight=0`, `WalkingMentorResponseLog=0`, `WalkingHistoryEvent=0`); `php artisan migrate:status --no-ansi` confirmou as 10 migrations da Minha Caminhada como `Ran`; `git diff --check` passou.
+- **Escopo preservado:** não foram criadas migrations, controllers, rotas, arquivos Vue, jobs ou seeders; não foram executados `migrate`, `migrate:fresh`, `db:wipe` ou seeders; mocks não foram substituídos.
+- **Pendência próxima:** criar controllers/Inertia props ou testes unitários para os services de leitura segura, conforme decisão.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.
