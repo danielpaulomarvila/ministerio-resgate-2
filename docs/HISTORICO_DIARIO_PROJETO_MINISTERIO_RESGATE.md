@@ -794,3 +794,19 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Escopo preservado:** não foram executados `migrate:fresh`, `migrate:refresh`, `db:wipe` ou seeders; não foram criados models, controllers, services, policies, seeders, rotas ou Vue.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Models e relacionamentos da Minha Caminhada
+
+- **Horário:** 01:47–02:00 aprox.
+- **Objetivo:** criar somente os Models Eloquent da Minha Caminhada e seus relacionamentos básicos, sem controllers, services, policies, seeders, rotas, Vue ou novas migrations.
+- **Status inicial:** `git status --short` retornou limpo; busca em `app/Models` por nomes relacionados a `Walking`, `Achievement`, `Mentor`, `Highlight`, `Journey`, `Point` e `History` não encontrou Models existentes antes da criação.
+- **Models criados:** `WalkingJourney`, `WalkingLevel`, `WalkingPointRule`, `WalkingPointLog`, `WalkingAchievement`, `PersonWalkingAchievement`, `WalkingHighlight`, `WalkingMentorResponseTemplate`, `WalkingMentorResponseLog` e `WalkingHistoryEvent`.
+- **Implementação dos Models:** foram adicionados `fillable`, `casts`, comentários didáticos e relacionamentos Eloquent básicos conforme as tabelas da primeira fase da Minha Caminhada.
+- **Relacionamentos em `Person`:** adicionados `walkingPointLogs`, `walkingAchievements`, `walkingHighlights`, `walkingMentorResponseLogs` e `walkingHistoryEvents`.
+- **Relacionamentos em `User`:** adicionados `createdWalkingPointLogs`, `approvedWalkingPointLogs`, `rejectedWalkingPointLogs`, `awardedWalkingAchievements`, `generatedWalkingHighlights` e `approvedWalkingHighlights`.
+- **Relacionamentos em `Family`:** adicionados `walkingPointLogs`, `walkingHighlights` e `walkingMentorResponseLogs`.
+- **Validações executadas:** lint PHP passou para os 10 Models novos e para `Person`, `User` e `Family`; testes `class_exists` via Tinker retornaram `true` para `WalkingJourney`, `WalkingPointLog`, `WalkingAchievement`, `WalkingMentorResponseLog` e `WalkingHistoryEvent`; `php artisan migrate:status --no-ansi` confirmou as 10 migrations da Minha Caminhada como `Ran`; `git diff --check` passou.
+- **Escopo preservado:** não foram criadas migrations, controllers, services, policies, seeders, rotas ou arquivos Vue; mocks não foram substituídos; nenhum comando `migrate`, `migrate:fresh`, `db:wipe` ou seeder foi executado nesta etapa.
+- **Pendência próxima:** criar seeders mínimos ou policies da Minha Caminhada em etapa separada, conforme aprovação.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.

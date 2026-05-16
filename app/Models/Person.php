@@ -198,6 +198,46 @@ class Person extends Model
     }
 
     /**
+     * Relacionamento: uma pessoa pode ter registros de pontos na Minha Caminhada
+     */
+    public function walkingPointLogs(): HasMany
+    {
+        return $this->hasMany(WalkingPointLog::class);
+    }
+
+    /**
+     * Relacionamento: uma pessoa pode ter conquistas e progresso na Minha Caminhada
+     */
+    public function walkingAchievements(): HasMany
+    {
+        return $this->hasMany(PersonWalkingAchievement::class);
+    }
+
+    /**
+     * Relacionamento: uma pessoa pode aparecer em destaques saudáveis da caminhada
+     */
+    public function walkingHighlights(): HasMany
+    {
+        return $this->hasMany(WalkingHighlight::class);
+    }
+
+    /**
+     * Relacionamento: uma pessoa pode ter histórico de respostas do mentor
+     */
+    public function walkingMentorResponseLogs(): HasMany
+    {
+        return $this->hasMany(WalkingMentorResponseLog::class);
+    }
+
+    /**
+     * Relacionamento: uma pessoa possui eventos visíveis no histórico da caminhada
+     */
+    public function walkingHistoryEvents(): HasMany
+    {
+        return $this->hasMany(WalkingHistoryEvent::class);
+    }
+
+    /**
      * Relacionamento: Uma pessoa pode ter sido convidada/influenciada/indicada por outra pessoa
      * Campo único para informar quem trouxe a pessoa para a igreja
      */

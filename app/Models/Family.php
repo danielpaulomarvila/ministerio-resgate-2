@@ -61,6 +61,30 @@ class Family extends Model
     }
 
     /**
+     * Relacionamento: uma família pode estar vinculada a registros de pontos da caminhada
+     */
+    public function walkingPointLogs(): HasMany
+    {
+        return $this->hasMany(WalkingPointLog::class);
+    }
+
+    /**
+     * Relacionamento: uma família pode aparecer em destaques saudáveis da caminhada
+     */
+    public function walkingHighlights(): HasMany
+    {
+        return $this->hasMany(WalkingHighlight::class);
+    }
+
+    /**
+     * Relacionamento: uma família pode ter histórico de respostas do mentor
+     */
+    public function walkingMentorResponseLogs(): HasMany
+    {
+        return $this->hasMany(WalkingMentorResponseLog::class);
+    }
+
+    /**
      * Verifica se a família está ativa
      */
     public function isActive(): bool

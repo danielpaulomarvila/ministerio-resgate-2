@@ -85,6 +85,54 @@ class User extends Authenticatable
     }
 
     /**
+     * Relacionamento: registros de pontos criados ou vinculados ao usuário
+     */
+    public function createdWalkingPointLogs(): HasMany
+    {
+        return $this->hasMany(WalkingPointLog::class, 'user_id');
+    }
+
+    /**
+     * Relacionamento: registros de pontos aprovados pelo usuário
+     */
+    public function approvedWalkingPointLogs(): HasMany
+    {
+        return $this->hasMany(WalkingPointLog::class, 'approved_by');
+    }
+
+    /**
+     * Relacionamento: registros de pontos rejeitados pelo usuário
+     */
+    public function rejectedWalkingPointLogs(): HasMany
+    {
+        return $this->hasMany(WalkingPointLog::class, 'rejected_by');
+    }
+
+    /**
+     * Relacionamento: conquistas concedidas pelo usuário
+     */
+    public function awardedWalkingAchievements(): HasMany
+    {
+        return $this->hasMany(PersonWalkingAchievement::class, 'awarded_by');
+    }
+
+    /**
+     * Relacionamento: destaques gerados pelo usuário
+     */
+    public function generatedWalkingHighlights(): HasMany
+    {
+        return $this->hasMany(WalkingHighlight::class, 'generated_by');
+    }
+
+    /**
+     * Relacionamento: destaques aprovados pelo usuário
+     */
+    public function approvedWalkingHighlights(): HasMany
+    {
+        return $this->hasMany(WalkingHighlight::class, 'approved_by');
+    }
+
+    /**
      * Obtém todas as permissões do usuário através de seus perfis
      * Retorna uma coleção de Permission
      */
