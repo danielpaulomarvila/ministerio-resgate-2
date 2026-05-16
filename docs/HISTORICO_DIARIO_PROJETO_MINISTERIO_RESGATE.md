@@ -857,3 +857,21 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Pendência próxima:** criar controllers/Inertia props ou testes unitários para os services de leitura segura, conforme decisão.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Testes dos services da Minha Caminhada
+
+- **Horário:** 03:17–03:35 aprox.
+- **Objetivo:** criar testes automatizados para os services de leitura segura da Minha Caminhada sem depender de telas, sem criar controllers/rotas/Vue e sem alterar banco real.
+- **Padrão de testes identificado:** projeto usa PHPUnit/Pest via `php artisan test`, `tests/Feature`, `tests/Unit`, `RefreshDatabase` e SQLite em memória no `phpunit.xml` (`DB_CONNECTION=sqlite`, `DB_DATABASE=:memory:`).
+- **Arquivo criado:** `tests/Feature/MinhaCaminhada/WalkingServicesTest.php`.
+- **Services cobertos:** `WalkingLevelService`, `WalkingProgressService`, `WalkingAchievementReadService`, `WalkingMentorReadService`, `WalkingDashboardReadService` e validações indiretas com `WalkingAuthorizationService`.
+- **Helpers internos do teste:** `seedWalkingBase`, `createPersonAndUser`, `giveWalkingPermission`, `getJourney`, `createApprovedPointLog` e `createPersonAchievement`.
+- **Cenários cobertos:** cálculo de níveis, bloqueio sem pessoa vinculada, bloqueio de outra pessoa sem autorização, progresso próprio com pontos aprovados, logs recentes sem `metadata`, catálogo de conquistas filtrando sensíveis, conquistas pessoais filtrando `hidden`, Mentor sem criar log, bloqueio de Mentor para pessoa não autorizada, dashboard seguro próprio, bloqueio de dashboard de outra pessoa e garantia de que services de leitura não criam registros operacionais automaticamente.
+- **Correções realizadas:** nenhuma correção em services/models foi necessária; os testes passaram com os services existentes.
+- **Resultado do teste específico:** `php artisan test tests/Feature/MinhaCaminhada/WalkingServicesTest.php` passou com 13 testes e 46 assertions.
+- **Resultado da suíte geral:** `php artisan test` passou com 63 testes e 208 assertions.
+- **Validações adicionais:** `php -l tests/Feature/MinhaCaminhada/WalkingServicesTest.php` passou; `php artisan test --list-tests` listou os testes, incluindo os 13 novos da Minha Caminhada; `php artisan migrate:status --no-ansi` confirmou as 10 migrations da Minha Caminhada como `Ran`; `git diff --check` passou.
+- **Escopo preservado:** não foram criadas migrations, controllers, rotas, arquivos Vue, mocks, factories ou seeders; os dados criados pelos testes ficam no SQLite em memória do ambiente de teste; não foi executado `migrate`, `migrate:fresh` ou `db:wipe` no banco real/local principal.
+- **Pendência próxima:** criar controllers/Inertia props ou continuar ampliando testes/policies, conforme decisão.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.
