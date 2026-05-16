@@ -722,3 +722,22 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Implementação:** nada foi implementado; esta etapa foi exclusivamente documental.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Decisão técnica das migrations da Minha Caminhada
+
+- **Horário:** 01:05–01:25 aprox.
+- **Objetivo:** registrar a decisão técnica final para orientar as futuras migrations base da Minha Caminhada, antes de qualquer criação de migration real.
+- **Arquivo criado:** `docs/modulos/minha-caminhada/07_DECISAO_TECNICA_MIGRATIONS_MINHA_CAMINHADA.md`.
+- **Documentos consultados:** plano técnico de backend, auditoria do banco atual, mapa de permissões e mapa de dados reais/mocks da Minha Caminhada.
+- **Decisão Resgatados/Jovens:** reaproveitar `departments` e `department_people` como base atual para identificar vínculos com Resgatados, usando `category` para `junior` e `jovem` e campos de liderança como `role`, `is_leader`, `is_assistant` e `can_manage_department`.
+- **Decisão equipes jovens:** não criar `youth_teams` nem `youth_team_members` na primeira fase; equipes jovens ficam como pendência futura até a experiência real dos jovens ser definida.
+- **Decisão histórico:** criar futuramente `walking_history_events` separado de `activity_logs`; `activity_logs` permanece como auditoria administrativa/técnica, não como timeline visível principal da caminhada.
+- **Decisão presença/eventos:** não criar tabela própria de presença/eventos dentro da Minha Caminhada nesta fase; `walking_point_logs` deverá ter `source_type` e `source_id` nullable para aceitar origens reais futuras.
+- **Decisão intercessão:** tratar intercessão inicialmente apenas como categoria em regras/conquistas, sem tabela própria, sem ranking de intercessores e sem exposição de atendimentos pessoais.
+- **Decisão financeiro:** não criar tabelas financeiras nem conquistas financeiras públicas; qualquer uso futuro deverá ser privado, discreto, com policy forte e sem gamificação pública.
+- **Decisão permissões:** não criar sistema paralelo de permissões; o futuro `WalkingPermissionService` deverá usar `User`, `Person`, `AccessProfile`, `Permission`, `GuardianShip` e `DepartmentPerson`.
+- **Tabelas da primeira fase definidas:** `walking_journeys`, `walking_levels`, `walking_point_rules`, `walking_point_logs`, `walking_achievements`, `person_walking_achievements`, `walking_highlights`, `walking_mentor_response_templates`, `walking_mentor_response_logs` e `walking_history_events`.
+- **Tabelas adiadas/proibidas na primeira fase:** `youth_teams`, `youth_team_members`, presença/eventos, financeiro, intercessão própria e avaliações privadas de intercessão.
+- **Campos e foreign keys:** documento definiu campos recomendados para cada tabela, referências para `people`, `users`, `families` e tabelas `walking_*`, além de preferência por preservar logs/históricos sem cascades destrutivos.
+- **Ordem futura das migrations:** definida sequência de criação começando por `walking_journeys` e encerrando com `walking_history_events`.
+- **Escopo preservado:** sem migrations criadas, sem alteração de banco, sem models, controllers, services, policies, rotas, Vue, seeders, commit ou push.
