@@ -703,3 +703,22 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Pendências oficiais:** revisar banco atual antes de migrations, evitar duplicidade com estruturas existentes, criar migrations depois, criar policies, criar services, substituir mocks gradualmente por props reais, criar testes e auditar payload Inertia por perfil antes de uso real.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Auditoria do banco atual da Minha Caminhada
+
+- **Horário:** 00:35–00:55 aprox.
+- **Objetivo:** registrar oficialmente a auditoria do banco/projeto atual antes de criar migrations da Minha Caminhada, evitando duplicidade e identificando estruturas reaproveitáveis e lacunas reais.
+- **Arquivo criado:** `docs/modulos/minha-caminhada/06_AUDITORIA_BANCO_ATUAL_MINHA_CAMINHADA.md`.
+- **Escopo da auditoria:** somente leitura, sem migrations, sem alteração de banco, sem alteração de código/backend, sem Vue, sem rotas, sem seeders, sem commit e sem push.
+- **Migrations auditadas:** registradas as migrations atuais de usuários, pessoas, famílias, responsáveis, departamentos, logs, alertas, perfis/permissões e financeiro, todas com status `Ran` no `migrate:status`.
+- **Models encontrados:** documentados `Person`, `User`, `Family`, `FamilyMember`, `GuardianShip`, `Department`, `DepartmentPerson`, `ActivityLog`, `SystemAlert`, models financeiros, perfis e permissões.
+- **Achados principais:** `Person` é a base principal da Minha Caminhada; `families`, `family_members` e `guardianships` devem ser reaproveitados para família/responsáveis; `departments` e `department_people` parecem ser a base atual mais próxima para Jovens/Resgatados; estruturas financeiras já existem e não devem ser duplicadas; `activity_logs` serve para auditoria administrativa, mas não deve ser tratado automaticamente como histórico visível da caminhada.
+- **Permissões:** `access_profiles`, `permissions` e métodos do `User` já existem; o futuro `WalkingPermissionService` deve usar essa base e evitar sistema paralelo de permissões.
+- **Rotas/API:** rotas `familia-resgate` foram auditadas parcialmente; Minha Caminhada ainda usa rotas Inertia/closures em `routes/web.php`; `routes/api.php` mostrou apenas `/api/health`; ainda não existe API real da Minha Caminhada.
+- **Tabelas registradas:** documentadas as tabelas do schema `ministerio_resgate`, com observação de que `Schema::getTableListing()` também retornou tabelas de outros schemas como `Exercicios` e `Exercicios_b_2`.
+- **Riscos identificados:** duplicar jovens/equipes, duplicar responsáveis, duplicar financeiro, confundir `activity_logs` com histórico visível, criar pontuação sem origem real de presença/eventos e criar permissões paralelas.
+- **Recomendação técnica:** ainda não é seguro criar migrations até decidir como Resgatados estão cadastrados em `departments`, se equipes jovens serão derivadas de `departments/department_people` ou tabelas novas, se `walking_history_events` será separado ou integrado com `activity_logs`, qual será a origem real de presença/eventos, quais foreign keys serão usadas e como `WalkingPermissionService` usará perfis/permissões existentes.
+- **Limitações registradas:** alguns comandos travaram por I/O, `route:list` de API não completou, algumas saídas foram truncadas e nem todas as migrations/controllers/policies foram lidas integralmente; o documento foi produzido com leitura seletiva e comandos leves/escopados.
+- **Implementação:** nada foi implementado; esta etapa foi exclusivamente documental.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.
