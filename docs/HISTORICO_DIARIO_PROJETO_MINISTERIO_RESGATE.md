@@ -895,3 +895,16 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Pendência próxima:** testar visualmente no navegador com usuário autenticado e auditar o payload Inertia final antes de commit/push.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Ajustes pós-auditoria da visão geral da Minha Caminhada
+
+- **Horário:** 16:53 aprox.
+- **Objetivo:** corrigir somente os pontos levantados na auditoria visual/funcional da visão geral, sem avançar para abas internas e sem alterar backend estrutural.
+- **Arquivo ajustado:** `resources/js/Pages/FamiliaResgate/MinhaCaminhada.vue`.
+- **Botão de celebração:** o botão “Celebrar conquista” passou a aparecer somente quando houver motivo real derivado dos dados recebidos, como pontos reais, logs recentes, conquistas ou destaques visíveis; não aparece apenas porque a jornada carregou.
+- **Texto de atualização:** o texto fixo “Atualizado agora há pouco” foi substituído por label baseado em `walkingDashboard.generatedAt`/`generated_at`, com fallback neutro “Resumo gerado a partir dos dados disponíveis”.
+- **Reconhecimento vazio:** o card de reconhecimento passou a exibir estado discreto quando não há destaques reais visíveis, sem parecer reconhecimento ativo.
+- **Mentor vazio:** o texto de fallback do Mentor passou a indicar que ainda não há leitura personalizada, que são necessários registros aprovados suficientes e que a orientação não substitui acompanhamento pastoral ou discipulado.
+- **Escopo preservado:** não foram criadas migrations, seeders, controllers, rotas, dados fake ou arquivos novos; não foram alteradas abas internas da Minha Caminhada nem módulos Central da Família, Meu Perfil ou Meu Financeiro.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.

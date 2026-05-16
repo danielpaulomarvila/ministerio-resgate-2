@@ -89,7 +89,25 @@ const statusLabels = {
   pending_validation: 'Em validação',
 }
 const formatDate = (value) => value ? new Intl.DateTimeFormat('pt-PT', { day: '2-digit', month: '2-digit' }).format(new Date(value)) : 'Sem data'
+const formatDateTime = (value) => {
+  if (!value) {
+    return null
+  }
+
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return null
+  }
+
+  return new Intl.DateTimeFormat('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date)
+}
 const initials = (value) => String(value || 'MC').split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
+const dashboardUpdatedLabel = computed(() => {
+  const formattedDate = formatDateTime(dashboard.value.generatedAt || dashboard.value.generated_at)
+
+  return formattedDate ? `Atualizado em ${formattedDate}` : 'Resumo gerado a partir dos dados disponíveis'
+})
 const levelCatalogFor = (type) => type === 'youth' ? youthLevels : generalLevels
 const buildJourney = (payload, type) => {
   if (!payload?.authorized || !payload?.progress?.authorized) {
@@ -173,8 +191,8 @@ const mentorInsight = computed(() => {
   return {
     summary: mentor.title || 'Sem leitura personalizada ainda.',
     strongArea: mentor.analysis_type || 'Aguardando registros aprovados.',
-    nextStep: mentor.source === 'pre_approved_template' ? 'Orientação pré-aprovada disponível.' : 'Continue caminhando com constância.',
-    suggestion: mentor.body || 'Quando houver registros aprovados, o mentor exibirá uma leitura segura da caminhada.',
+    nextStep: mentor.source === 'pre_approved_template' ? 'Orientação pré-aprovada disponível.' : 'Aguardando dados suficientes.',
+    suggestion: mentor.body || 'Quando houver registros aprovados suficientes, o Mentor exibirá uma orientação simples e segura para sua caminhada. Isso não substitui acompanhamento pastoral ou discipulado.',
     route: `${baseRoute}/mentor`,
   }
 })
@@ -408,6 +426,18 @@ const visibleActivities = computed(() => recentActivities.value.filter((item) =>
 const visibleBadges = computed(() => badges.value.filter((item) => item.scope === 'Geral' || canSeeYouthJourney.value))
 const visibleHighlights = computed(() => highlights.value.filter((item) => item.scope !== 'youth' || canSeeYouthJourney.value))
 const visibleNextSteps = computed(() => nextSteps.value.filter((item) => item.scope === 'general' || canSeeYouthJourney.value))
+const canCelebrateRealProgress = (journey) => {
+  if (!journey) {
+    return false
+  }
+
+  const hasPoints = Number(journey.points || 0) > 0
+  const hasRecentLog = dashboardLogs.value.some((log) => log.scope === journey.type)
+  const hasAchievement = dashboardAchievements.value.some((achievement) => achievement.scope === (journey.type === 'youth' ? 'Jovem' : 'Geral'))
+  const hasVisibleHighlight = journey.type === 'general' && visibleHighlights.value.length > 0
+
+  return hasPoints || hasRecentLog || hasAchievement || hasVisibleHighlight
+}
 const journeyHeroTitle = computed(() => canSeeYouthJourney.value ? 'Duas jornadas, pontos separados.' : 'Sua caminhada geral')
 const journeyHeroText = computed(() => canSeeYouthJourney.value ? 'Acompanhe seus trilhos sem misturar pontos gerais, jovens ou coletivos.' : 'Acompanhe seus pontos gerais, seu nível atual e os próximos passos da sua jornada na igreja.')
 const journeySummaryTitle = computed(() => canSeeYouthJourney.value ? 'Resumo das Jornadas' : 'Resumo da Caminhada')
@@ -428,7 +458,7 @@ const journeyPercent = (journey) => Math.min(100, Math.round((journey.points / M
           <h1>Minha Caminhada</h1>
           <small>Acompanhe sua jornada espiritual, conquistas e próximos passos.</small>
         </div>
-        <span>Atualizado agora há pouco</span>
+        <span>{{ dashboardUpdatedLabel }}</span>
       </header>
 
       <section class="walk-grid">
@@ -462,7 +492,7 @@ const journeyPercent = (journey) => Math.min(100, Math.round((journey.points / M
                       <strong>{{ journey.positionText }}</strong>
                     </div>
                     <div class="journey-actions">
-                      <button type="button" @click="showLevelCelebration(journey)">Celebrar conquista</button>
+                      <button v-if="canCelebrateRealProgress(journey)" type="button" @click="showLevelCelebration(journey)">Celebrar conquista</button>
                       <Link :href="journey.route">Ver detalhes</Link>
                     </div>
                   </footer>
@@ -623,10 +653,10 @@ const journeyPercent = (journey) => Math.min(100, Math.round((journey.points / M
           <section class="recognition-card" aria-label="Reconhecimento saudável">
             <i>✦</i>
             <div>
-              <span>Reconhecimento saudável</span>
-              <h2>Reconhecimento saudável</h2>
-              <p>Veja os destaques da caminhada sem competição espiritual, com foco em constância, serviço e crescimento.</p>
-              <Link :href="`${baseRoute}/ranking`">Ver destaques da caminhada</Link>
+              <span>{{ visibleHighlights.length ? 'Reconhecimento saudável' : 'Sem destaque ativo' }}</span>
+              <h2>{{ visibleHighlights.length ? 'Reconhecimento saudável' : 'Ainda não há destaques visíveis' }}</h2>
+              <p>{{ visibleHighlights.length ? 'Veja os destaques da caminhada sem competição espiritual, com foco em constância, serviço e crescimento.' : 'Quando houver registros aprovados e reconhecimento saudável, eles aparecerão aqui.' }}</p>
+              <Link v-if="visibleHighlights.length" :href="`${baseRoute}/ranking`">Ver destaques da caminhada</Link>
             </div>
           </section>
 
