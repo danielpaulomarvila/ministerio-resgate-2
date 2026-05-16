@@ -826,3 +826,20 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Pendência próxima:** criar policies ou services da Minha Caminhada em etapa separada, conforme aprovação.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Policies e permissões base da Minha Caminhada
+
+- **Horário:** 02:44–03:05 aprox.
+- **Objetivo:** criar a base inicial de autorização backend da Minha Caminhada antes de controllers/services de negócio e antes da substituição de mocks por dados reais.
+- **Estrutura reaproveitada:** confirmado uso do sistema existente `AccessProfile`/`Permission`, com permissões por `slug`, perfis por `access_profile_user` e verificação via `User::hasPermission()`; não foi criado sistema paralelo de permissões.
+- **Seeder de permissões criado:** `WalkingPermissionSeeder`, idempotente com `updateOrCreate` por `slug`, usando os campos reais `uuid`, `name`, `slug`, `group`, `description`, `is_system`, `is_active` e `sort_order`.
+- **Permissões walking criadas:** `walking.view.general`, `walking.view.youth`, `walking.view.family_child`, `walking.view.sensitive`, `walking.manage.rules`, `walking.validate.points`, `walking.approve.highlights`, `walking.manage.mentor_templates`, `walking.view.leadership_dashboard`, `walking.view.youth_leadership` e `walking.view.pastoral`.
+- **DatabaseSeeder:** registrado `WalkingPermissionSeeder` no padrão existente de `$this->call([...])`; a execução realizada foi apenas `php artisan db:seed --class=WalkingPermissionSeeder`, sem rodar `db:seed` geral.
+- **Service de autorização criado:** `app/Services/MinhaCaminhada/WalkingAuthorizationService.php`, focado somente em autorização, usando `User`, `Person`, `GuardianShip`, `DepartmentPerson` e permissões existentes; não inclui regra de pontuação, dashboard ou leitura de dados.
+- **Policies criadas:** `WalkingJourneyPolicy`, `WalkingPointLogPolicy`, `WalkingAchievementPolicy`, `PersonWalkingAchievementPolicy`, `WalkingHighlightPolicy`, `WalkingMentorResponseTemplatePolicy`, `WalkingMentorResponseLogPolicy` e `WalkingHistoryEventPolicy`.
+- **Registro de policies:** não foi criado nem alterado provider; o projeto não possui `AuthServiceProvider` e segue discovery automático/nomeação convencional de policies do Laravel.
+- **Validações executadas:** lint PHP passou para o service, as 8 policies, `WalkingPermissionSeeder` e `DatabaseSeeder`; testes `class_exists` retornaram `true` para o service, policies e seeder; o seeder criou 11 permissões `walking.%`; `php artisan migrate:status --no-ansi` confirmou as 10 migrations da Minha Caminhada como `Ran`; `git diff --check` passou.
+- **Escopo preservado:** não foram criadas migrations, controllers, services de pontuação/dashboard, rotas ou arquivos Vue; não foram executados `migrate`, `migrate:fresh`, `db:wipe` ou seeders gerais; não foram criados dados fake para pessoas reais.
+- **Pendência próxima:** criar services de leitura segura da Minha Caminhada em etapa separada, respeitando as policies e o `WalkingAuthorizationService`.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.

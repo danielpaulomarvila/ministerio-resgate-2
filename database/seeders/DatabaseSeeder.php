@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             WalkingPointRuleSeeder::class,
             WalkingAchievementSeeder::class,
             WalkingMentorResponseTemplateSeeder::class,
+            WalkingPermissionSeeder::class,
         ]);
     }
 }
