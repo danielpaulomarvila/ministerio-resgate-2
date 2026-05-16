@@ -875,3 +875,23 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Pendência próxima:** criar controllers/Inertia props ou continuar ampliando testes/policies, conforme decisão.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Controller e props reais da visão geral da Minha Caminhada
+
+- **Horário:** 16:05–16:31 aprox.
+- **Objetivo:** iniciar a integração real da visão geral da Minha Caminhada com o backend, substituindo mocks da página principal por props seguras de Inertia e estados vazios controlados.
+- **Controller criado:** `app/Http/Controllers/Familia/MinhaCaminhadaController.php`.
+- **Rota ajustada:** `/familia-resgate/minha-caminhada` passou a usar `MinhaCaminhadaController@index`, preservando as demais rotas internas existentes.
+- **Services reaproveitados:** `WalkingDashboardReadService` e `WalkingAuthorizationService`.
+- **Prop real criada:** `walkingDashboard`, com `usesRealData`, `generatedAt`, `viewerContext`, caminhada geral e caminhada jovem somente quando autorizada.
+- **Segurança aplicada:** o controller usa dados já filtrados pelos services de leitura segura, não retorna Models crus, não envia `metadata` sensível e só marca uma jornada como visível quando o dashboard e o progresso estão autorizados.
+- **Página principal ajustada:** `resources/js/Pages/FamiliaResgate/MinhaCaminhada.vue` passou a calcular jornadas, mapa, áreas, atividades recentes, conquistas, Mentor, destaques e próximos passos a partir de `walkingDashboard`.
+- **Mocks removidos da visão geral:** removidos dados fixos de nomes, pontos, atividades, conquistas, destaques e próximos passos da página principal.
+- **Estados vazios seguros:** adicionados estados para jornada indisponível, áreas sem cálculo, atividades sem registros aprovados, conquistas vazias, destaques ausentes e próximos passos ainda não calculados.
+- **Teste criado:** `tests/Feature/MinhaCaminhada/MinhaCaminhadaControllerTest.php`, cobrindo entrega de props reais seguras e usuário autenticado sem `person_id`.
+- **Validações executadas:** `php -l` passou no controller e no teste; `php artisan test tests/Feature/MinhaCaminhada` passou com 15 testes e 98 assertions; `php artisan test` passou com 65 testes e 260 assertions; `npm run build` passou; `php artisan route:list --path=familia-resgate/minha-caminhada --except-vendor --no-ansi` listou 19 rotas; `git diff --check` passou.
+- **Busca de mocks antigos:** busca focada em `MinhaCaminhada.vue` não encontrou `href="#"`, `to="#"`, `javascript:void(0)`, nomes fictícios antigos, pontos fixos antigos, `generalMentorInsight` ou `youthMentorInsight`.
+- **Escopo preservado:** não foram criadas migrations, seeders, dados fake, controllers paralelos, services paralelos ou telas fora da Minha Caminhada.
+- **Pendência próxima:** testar visualmente no navegador com usuário autenticado e auditar o payload Inertia final antes de commit/push.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.

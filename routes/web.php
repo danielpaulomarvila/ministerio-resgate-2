@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Familia\FamilyFinancialController;
 use App\Http\Controllers\Familia\FamilyHubController;
+use App\Http\Controllers\Familia\MinhaCaminhadaController;
 use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\GuardianshipController;
 use App\Http\Controllers\PersonController;
@@ -125,7 +126,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/familia-resgate/meu-financeiro', [FamilyFinancialController::class, 'index'])
         ->name('familia-resgate.meu_financeiro');
 
-    Route::get('/familia-resgate/minha-caminhada', fn () => Inertia::render('FamiliaResgate/MinhaCaminhada'))
+    Route::get('/familia-resgate/minha-caminhada', [MinhaCaminhadaController::class, 'index'])
         ->name('familia-resgate.minha_caminhada');
 
     Route::get('/familia-resgate/minha-caminhada/conquistas', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaConquistas', [

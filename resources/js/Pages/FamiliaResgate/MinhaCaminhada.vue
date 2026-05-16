@@ -3,20 +3,15 @@ import { Head, Link } from '@inertiajs/vue3'
 import { computed, onUnmounted, ref } from 'vue'
 import FamilySidebar from '@/Components/FamiliaResgate/FamilySidebar.vue'
 
-// DADOS TEMPORÁRIOS PARA PROTÓTIPO VISUAL.
-// Remover/substituir quando a integração real com backend for implementada.
-const baseRoute = '/familia-resgate/minha-caminhada'
+const props = defineProps({
+  walkingDashboard: { type: Object, default: () => ({}) },
+})
 
-// Futuro backend:
-// Este contexto deve vir das permissões reais.
-// Membro comum vê apenas Caminhada Geral.
-// Jovem/Resgatado vê Caminhada Geral + Caminhada Jovem.
-// Equipes jovens aparecem apenas no módulo jovem ou para autorizados.
-// Responsáveis veem dados jovens apenas dos filhos vinculados.
-// Administração/liderança vê conforme policy.
-const viewerContext = {
+const baseRoute = '/familia-resgate/minha-caminhada'
+const dashboard = computed(() => props.walkingDashboard || {})
+const defaultViewerContext = {
   profileType: 'member',
-  canSeeGeneralJourney: true,
+  canSeeGeneralJourney: false,
   canSeeYouthJourney: false,
   canSeeYouthTeams: false,
   youthMember: false,
@@ -25,6 +20,7 @@ const viewerContext = {
   isAdmin: false,
   isPastoralLeadership: false,
 }
+const viewerContext = computed(() => ({ ...defaultViewerContext, ...(dashboard.value.viewerContext || {}) }))
 
 const generalLevels = [
   { number: 1, name: 'Primeiros Passos', icon: '👣' },
@@ -72,100 +68,138 @@ const youthLevels = [
   { number: 20, name: 'Chama que Permanece', icon: '🔥' },
 ]
 
-const generalJourney = {
-  type: 'general',
-  title: 'Caminhada Geral da Igreja',
-  shortTitle: 'Geral da Igreja',
-  level: generalLevels[1],
-  points: 380,
-  pointsText: '380 pontos gerais',
-  target: 800,
-  progressText: '380 / 800',
-  next: generalLevels[2],
-  missingText: 'Faltam 420 pontos',
-  positionText: '12º posição geral',
-  route: `${baseRoute}/geral`,
-  icon: '✚',
+const journeyTitleMap = {
+  general: { title: 'Caminhada Geral da Igreja', shortTitle: 'Geral da Igreja', route: `${baseRoute}/geral`, icon: '✚', scope: 'Geral' },
+  youth: { title: 'Caminhada Jovem dos Resgatados', shortTitle: 'Jovens dos Resgatados', route: `${baseRoute}/jovem`, icon: '🔥', scope: 'Jovem' },
 }
-
-const youthJourney = {
-  type: 'youth',
-  title: 'Caminhada Jovem dos Resgatados',
-  shortTitle: 'Jovens dos Resgatados',
-  level: youthLevels[5],
-  points: 920,
-  pointsText: '920 pontos da caminhada jovem',
-  target: 1500,
-  progressText: '920 / 1500',
-  next: youthLevels[6],
-  missingText: 'Faltam 580 pontos',
-  positionText: '5º posição no trilho jovem',
-  route: `${baseRoute}/jovem`,
-  icon: '🔥',
+const categoryPresentation = {
+  presence: { name: 'Presença', icon: '👥', color: '#0ea56b' },
+  word: { name: 'Palavra', icon: '📖', color: '#2f80d1' },
+  devotional: { name: 'Devocional', icon: '🕯️', color: '#d9a441' },
+  service: { name: 'Serviço', icon: '🙌', color: '#69bd45' },
+  evangelism: { name: 'Evangelismo', icon: '📣', color: '#f45b12' },
+  communion: { name: 'Comunhão', icon: '👥', color: '#2f80d1' },
+  formation: { name: 'Formação', icon: '🎓', color: '#e3aa2f' },
 }
-
-const progressAreas = [
-  { name: 'Presença', icon: '👥', percent: 85, points: '170 pts', note: 'Muito bem!', color: '#0ea56b' },
-  { name: 'Palavra', icon: '📖', percent: 70, points: '140 pts', note: 'Continue!', color: '#2f80d1' },
-  { name: 'Devocional', icon: '🕯️', percent: 60, points: '120 pts', note: 'Pode crescer', color: '#d9a441' },
-  { name: 'Serviço', icon: '🙌', percent: 90, points: '180 pts', note: 'Excelente!', color: '#69bd45' },
-  { name: 'Evangelismo', icon: '📣', percent: 65, points: '130 pts', note: 'Vamos avançar', color: '#f45b12' },
-  { name: 'Comunhão', icon: '👥', percent: 75, points: '150 pts', note: 'Quase lá', color: '#2f80d1' },
-  { name: 'Formação', icon: '🎓', percent: 50, points: '90 pts', note: 'Siga firme', color: '#e3aa2f' },
-]
-
-const recentActivities = [
-  { title: 'Presença no culto de domingo', date: '12/05', points: '+10 pts gerais', status: 'Confirmado', icon: 'PR', scope: 'general' },
-  { title: 'Leitura bíblica do dia', date: '12/05', points: '+8 pts gerais', status: 'Confirmado', icon: 'PV', scope: 'general' },
-  { title: 'Serviu na escala', date: '11/05', points: '+20 pts gerais', status: 'Confirmado', icon: 'SV', scope: 'general' },
-  { title: 'Devocional registrado', date: '10/05', points: '+6 pts gerais', status: 'Confirmado', icon: 'DV', scope: 'general' },
-  { title: 'Visitante acompanhado', date: '09/05', points: '+12 pts gerais', status: 'Confirmado', icon: 'VA', scope: 'general' },
-  { title: 'Encontro jovem autorizado', date: '10/05', points: '+15 pts do trilho jovem', status: 'Confirmado', icon: 'JR', scope: 'youth' },
-  { title: 'Desafio bíblico jovem', date: '10/05', points: '+10 pts do trilho jovem', status: 'Confirmado', icon: 'DB', scope: 'youth' },
-]
-
-const badges = [
-  { name: 'Presença Fiel', detail: '15 cultos', icon: '👥', scope: 'Geral' },
-  { name: 'Palavra Viva', detail: '30 dias', icon: '📖', scope: 'Geral' },
-  { name: 'Servo Disponível', detail: '5 serviços', icon: '🤝', scope: 'Geral' },
-  { name: 'Comunhão', detail: '8 encontros', icon: '👥', scope: 'Geral' },
-  { name: 'Formação', detail: '2 estudos', icon: '🎓', scope: 'Geral' },
-  { name: 'Evangelismo', detail: '3 cuidados', icon: '🕊️', scope: 'Geral' },
-  { name: 'Chama da Juventude', detail: 'Constância', icon: '🔥', scope: 'Jovem' },
-  { name: 'Palavra Jovem', detail: '10 vezes', icon: '📘', scope: 'Jovem' },
-  { name: 'Desafio Jovem Concluído', detail: '7 desafios', icon: '⚔️', scope: 'Jovem' },
-]
-
-const generalMentorInsight = {
-  summary: 'Boa constância em presença e Palavra.',
-  strongArea: 'Serviço e presença.',
-  nextStep: 'Fortalecer devocional pessoal.',
-  suggestion: 'Leia Salmo 119:105 e registre uma pequena reflexão.',
-  route: `${baseRoute}/mentor`,
+const statusLabels = {
+  received: 'Recebida',
+  in_progress: 'Em progresso',
+  locked: 'Bloqueada',
+  hidden: 'Oculta',
+  pending_validation: 'Em validação',
 }
+const formatDate = (value) => value ? new Intl.DateTimeFormat('pt-PT', { day: '2-digit', month: '2-digit' }).format(new Date(value)) : 'Sem data'
+const initials = (value) => String(value || 'MC').split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
+const levelCatalogFor = (type) => type === 'youth' ? youthLevels : generalLevels
+const buildJourney = (payload, type) => {
+  if (!payload?.authorized || !payload?.progress?.authorized) {
+    return null
+  }
 
-const youthMentorInsight = {
-  summary: 'Boa constância na caminhada geral e no trilho jovem.',
-  strongArea: 'Serviço e encontros autorizados.',
-  nextStep: 'Fortalecer devocional do trilho jovem.',
-  suggestion: 'Leia 1 Timóteo 4:12 e registre uma pequena reflexão.',
-  route: `${baseRoute}/mentor`,
+  const config = journeyTitleMap[type]
+  const levelProgress = payload.progress.level_progress || {}
+  const currentLevel = levelProgress.current_level || { number: 1, name: 'Primeiros Passos' }
+  const nextLevel = levelProgress.next_level
+  const catalog = levelCatalogFor(type)
+  const visualLevel = catalog.find((level) => level.number === currentLevel.number) || catalog[0]
+  const visualNext = nextLevel ? (catalog.find((level) => level.number === nextLevel.number) || nextLevel) : null
+  const points = Number(payload.progress.total_points || 0)
+  const target = Number(nextLevel?.required_points || currentLevel.required_points || points || 0)
+
+  return {
+    type,
+    title: payload.journey?.name || config.title,
+    shortTitle: config.shortTitle,
+    level: { ...visualLevel, ...currentLevel, icon: visualLevel?.icon || config.icon },
+    points,
+    pointsText: `${points} pontos ${type === 'youth' ? 'da caminhada jovem' : 'gerais'}`,
+    target,
+    progressText: nextLevel ? `${points} / ${target}` : `${points} pontos`,
+    next: visualNext ? { ...visualNext, ...nextLevel, icon: visualNext?.icon || config.icon } : { ...visualLevel, ...currentLevel, icon: visualLevel?.icon || config.icon },
+    missingText: nextLevel ? `Faltam ${Math.max(0, Number(nextLevel.required_points || 0) - points)} pontos` : 'Último nível alcançado',
+    positionText: 'Sem ranking comparativo',
+    route: config.route,
+    icon: config.icon,
+  }
 }
+const generalJourney = computed(() => buildJourney(dashboard.value.general, 'general'))
+const youthJourney = computed(() => buildJourney(dashboard.value.youth, 'youth'))
+const dashboardLogs = computed(() => [
+  ...(dashboard.value.general?.recentLogs || []).map((log) => ({ ...log, scope: 'general' })),
+  ...((viewerContext.value.canSeeYouthJourney ? dashboard.value.youth?.recentLogs : []) || []).map((log) => ({ ...log, scope: 'youth' })),
+])
+const dashboardAchievements = computed(() => [
+  ...(dashboard.value.general?.achievements || []).map((achievement) => ({ ...achievement, scope: 'Geral' })),
+  ...((viewerContext.value.canSeeYouthJourney ? dashboard.value.youth?.achievements : []) || []).map((achievement) => ({ ...achievement, scope: 'Jovem' })),
+])
+const progressAreas = computed(() => {
+  const totals = dashboardLogs.value.reduce((carry, log) => {
+    const key = log.category || 'presence'
+    carry[key] = (carry[key] || 0) + Number(log.points || 0)
+    return carry
+  }, {})
+  const maxPoints = Math.max(1, ...Object.values(totals))
 
-const highlights = [
-  { title: 'Destaque de Constância', name: 'Ana Ribeiro', detail: 'Presença e serviço constantes', icon: 'DC', scope: 'general' },
-  { title: 'Destaque de Palavra', name: 'Júlia Santos', detail: '14 dias de leitura bíblica', icon: 'DP', scope: 'general' },
-  { title: 'Destaque Jovem Autorizado', name: 'Daniel Paulo', detail: 'Constância no trilho jovem', icon: 'DJ', scope: 'youth' },
-  { title: 'Leitura Jovem Autorizada', name: 'Daniel Paulo', detail: '14 dias consecutivos', icon: 'LJ', scope: 'youth' },
-]
+  return Object.entries(totals).map(([category, points]) => {
+    const presentation = categoryPresentation[category] || { name: category, icon: '✦', color: '#d9a441' }
 
-const nextSteps = [
-  { title: 'Palavra', action: 'Ler 1 capítulo por dia', impact: 'Avança Palavra Viva', icon: 'PL', scope: 'general' },
-  { title: 'Devocional', action: 'Registrar 3 devocionais', impact: 'Fortalece constância', icon: 'DV', scope: 'general' },
-  { title: 'Serviço', action: 'Confirmar disponibilidade em uma escala', impact: 'Fortalece serviço', icon: 'SV', scope: 'general' },
-  { title: 'Comunhão', action: 'Participar de um momento da igreja', impact: 'Fortalece vínculos', icon: 'CM', scope: 'general' },
-  { title: 'Trilho jovem', action: 'Responder desafio bíblico autorizado', impact: 'Avança no módulo jovem', icon: 'JV', scope: 'youth' },
-]
+    return {
+      name: presentation.name,
+      icon: presentation.icon,
+      percent: Math.max(1, Math.round((points / maxPoints) * 100)),
+      points: `${points} pts`,
+      note: 'Com base em registros aprovados recentes',
+      color: presentation.color,
+    }
+  })
+})
+const recentActivities = computed(() => dashboardLogs.value.map((log) => ({
+  title: log.notes || categoryPresentation[log.category]?.name || log.category || 'Registro aprovado',
+  date: formatDate(log.created_at),
+  points: `+${log.points || 0} pts`,
+  status: 'Confirmado',
+  icon: initials(log.category),
+  scope: log.scope,
+})))
+const badges = computed(() => dashboardAchievements.value.map((item) => ({
+  name: item.achievement?.name || 'Conquista',
+  detail: statusLabels[item.status] || item.status || 'Registrada',
+  icon: item.achievement?.icon || '🏅',
+  scope: item.scope,
+})))
+const mentorInsight = computed(() => {
+  const mentor = dashboard.value.general?.mentor || {}
+
+  return {
+    summary: mentor.title || 'Sem leitura personalizada ainda.',
+    strongArea: mentor.analysis_type || 'Aguardando registros aprovados.',
+    nextStep: mentor.source === 'pre_approved_template' ? 'Orientação pré-aprovada disponível.' : 'Continue caminhando com constância.',
+    suggestion: mentor.body || 'Quando houver registros aprovados, o mentor exibirá uma leitura segura da caminhada.',
+    route: `${baseRoute}/mentor`,
+  }
+})
+const highlights = computed(() => (dashboard.value.general?.highlights || []).map((item) => ({
+  title: item.title,
+  name: item.category,
+  detail: item.description || 'Destaque visível da caminhada.',
+  icon: initials(item.category),
+  scope: 'general',
+})))
+const nextSteps = computed(() => {
+  const mentor = dashboard.value.general?.mentor
+
+  if (!mentor?.authorized) {
+    return []
+  }
+
+  return [{
+    title: mentor.title,
+    action: mentor.body,
+    impact: mentor.tone || 'Orientação segura',
+    icon: 'MC',
+    scope: 'general',
+  }]
+})
 
 const celebrationThemes = {
   fire: {
@@ -291,7 +325,11 @@ const closeCelebration = () => {
   }
 }
 
-const showLevelCelebration = (journey = generalJourney) => {
+const showLevelCelebration = (journey = generalJourney.value) => {
+  if (!journey) {
+    return
+  }
+
   closeCelebration()
   activeCelebration.value = buildCelebration(journey)
   celebrationTimer = setTimeout(closeCelebration, 15000)
@@ -300,8 +338,8 @@ const showLevelCelebration = (journey = generalJourney) => {
 onUnmounted(closeCelebration)
 
 const activeMapType = ref('general')
-const canSeeGeneralJourney = computed(() => viewerContext.canSeeGeneralJourney)
-const canSeeYouthJourney = computed(() => viewerContext.canSeeYouthJourney)
+const canSeeGeneralJourney = computed(() => viewerContext.value.canSeeGeneralJourney)
+const canSeeYouthJourney = computed(() => viewerContext.value.canSeeYouthJourney)
 const levelDescriptions = {
   1: 'Primeiros passos firmes na casa e na comunhão.',
   2: 'Despertar para uma caminhada mais consciente com Deus.',
@@ -324,10 +362,15 @@ const levelDescriptions = {
   19: 'Vidas alcançadas por uma caminhada madura e disponível.',
   20: 'Legado vivo de fé, serviço, presença e amor.',
 }
-const activeMapJourney = computed(() => activeMapType.value === 'youth' && canSeeYouthJourney.value ? youthJourney : generalJourney)
+const activeMapJourney = computed(() => activeMapType.value === 'youth' && canSeeYouthJourney.value ? youthJourney.value : generalJourney.value)
 const activeMapLevels = computed(() => activeMapType.value === 'youth' && canSeeYouthJourney.value ? youthLevels : generalLevels)
 const mapLevels = computed(() => activeMapLevels.value.map((level) => {
   const journey = activeMapJourney.value
+
+  if (!journey) {
+    return null
+  }
+
   const youthMapEnabled = activeMapType.value === 'youth' && canSeeYouthJourney.value
   const pointsRequired = level.number * (youthMapEnabled ? 250 : 400)
   const status = level.number < journey.level.number
@@ -356,21 +399,20 @@ const mapLevels = computed(() => activeMapLevels.value.map((level) => {
     description: levelDescriptions[level.number],
     verse: youthMapEnabled ? '1 Timóteo 4:12' : level.number === 2 ? 'Salmo 119:105' : 'Filipenses 1:6',
   }
-}))
+}).filter(Boolean))
 const visibleJourneys = computed(() => [
-  ...(canSeeGeneralJourney.value ? [generalJourney] : []),
-  ...(canSeeYouthJourney.value ? [youthJourney] : []),
+  ...(canSeeGeneralJourney.value && generalJourney.value ? [generalJourney.value] : []),
+  ...(canSeeYouthJourney.value && youthJourney.value ? [youthJourney.value] : []),
 ])
-const visibleActivities = computed(() => recentActivities.filter((item) => item.scope === 'general' || canSeeYouthJourney.value))
-const visibleBadges = computed(() => badges.filter((item) => item.scope === 'Geral' || canSeeYouthJourney.value))
-const mentorInsight = computed(() => canSeeYouthJourney.value ? youthMentorInsight : generalMentorInsight)
-const visibleHighlights = computed(() => highlights.filter((item) => item.scope !== 'youth' || canSeeYouthJourney.value))
-const visibleNextSteps = computed(() => nextSteps.filter((item) => item.scope === 'general' || canSeeYouthJourney.value))
+const visibleActivities = computed(() => recentActivities.value.filter((item) => item.scope === 'general' || canSeeYouthJourney.value))
+const visibleBadges = computed(() => badges.value.filter((item) => item.scope === 'Geral' || canSeeYouthJourney.value))
+const visibleHighlights = computed(() => highlights.value.filter((item) => item.scope !== 'youth' || canSeeYouthJourney.value))
+const visibleNextSteps = computed(() => nextSteps.value.filter((item) => item.scope === 'general' || canSeeYouthJourney.value))
 const journeyHeroTitle = computed(() => canSeeYouthJourney.value ? 'Duas jornadas, pontos separados.' : 'Sua caminhada geral')
 const journeyHeroText = computed(() => canSeeYouthJourney.value ? 'Acompanhe seus trilhos sem misturar pontos gerais, jovens ou coletivos.' : 'Acompanhe seus pontos gerais, seu nível atual e os próximos passos da sua jornada na igreja.')
 const journeySummaryTitle = computed(() => canSeeYouthJourney.value ? 'Resumo das Jornadas' : 'Resumo da Caminhada')
 const activeMapRoute = computed(() => `${baseRoute}/${activeMapType.value === 'youth' && canSeeYouthJourney.value ? 'jovem' : 'geral'}/mapa`)
-const journeyPercent = (journey) => Math.min(100, Math.round((journey.points / journey.target) * 100))
+const journeyPercent = (journey) => Math.min(100, Math.round((journey.points / Math.max(1, journey.target)) * 100))
 </script>
 
 <template>
@@ -397,7 +439,7 @@ const journeyPercent = (journey) => Math.min(100, Math.round((journey.points / j
               <p>{{ journeyHeroText }}</p>
             </header>
 
-            <div class="journey-list" :class="{ 'single-journey': !canSeeYouthJourney }">
+            <div v-if="visibleJourneys.length" class="journey-list" :class="{ 'single-journey': !canSeeYouthJourney }">
               <article v-for="journey in visibleJourneys" :key="journey.type" class="journey-card" :class="journey.type">
                 <div class="journey-seal">{{ journey.icon }}</div>
                 <div class="journey-body">
@@ -427,11 +469,15 @@ const journeyPercent = (journey) => Math.min(100, Math.round((journey.points / j
                 </div>
               </article>
             </div>
+            <div v-else class="empty-state dark">
+              <strong>Caminhada ainda não disponível</strong>
+              <span>Assim que seu cadastro estiver vinculado a uma pessoa, a jornada aparecerá aqui com dados reais.</span>
+            </div>
           </section>
 
           <section class="areas-section">
             <h2>Sua caminhada por áreas</h2>
-            <div class="areas-grid">
+            <div v-if="progressAreas.length" class="areas-grid">
               <article v-for="area in progressAreas" :key="area.name" class="area-card" :style="{ '--area-color': area.color, '--area-percent': `${area.percent * 3.6}deg` }">
                 <i>{{ area.icon }}</i>
                 <div class="area-ring">
@@ -442,6 +488,10 @@ const journeyPercent = (journey) => Math.min(100, Math.round((journey.points / j
                 <b>{{ area.name }}</b>
               </article>
             </div>
+            <div v-else class="empty-state">
+              <strong>Sem áreas calculadas ainda</strong>
+              <span>Quando houver registros aprovados, os pontos por área serão exibidos aqui.</span>
+            </div>
           </section>
 
           <section class="mid-grid">
@@ -450,13 +500,17 @@ const journeyPercent = (journey) => Math.min(100, Math.round((journey.points / j
                 <h2>Atividades recentes</h2>
                 <Link :href="`${baseRoute}/historico`">Ver histórico completo</Link>
               </header>
-              <div class="activity-list">
+              <div v-if="visibleActivities.length" class="activity-list">
                 <div v-for="activity in visibleActivities" :key="activity.title" class="activity-item" :class="{ youth: activity.scope === 'youth' }">
                   <i>{{ activity.icon }}</i>
                   <div><strong>{{ activity.title }}</strong><span>{{ activity.date }}</span></div>
                   <b>{{ activity.points }}</b>
                   <small>{{ activity.status }}</small>
                 </div>
+              </div>
+              <div v-else class="empty-state compact">
+                <strong>Nenhuma atividade aprovada</strong>
+                <span>O histórico real aparecerá depois dos primeiros registros aprovados.</span>
               </div>
             </article>
 
@@ -465,13 +519,17 @@ const journeyPercent = (journey) => Math.min(100, Math.round((journey.points / j
                 <h2>Conquistas e badges</h2>
                 <Link :href="`${baseRoute}/conquistas`">Ver todas as conquistas</Link>
               </header>
-              <div class="badges-grid">
+              <div v-if="visibleBadges.length" class="badges-grid">
                 <div v-for="badge in visibleBadges" :key="`${badge.scope}-${badge.name}`" class="badge-item" :class="{ youth: badge.scope === 'Jovem' }">
                   <i>{{ badge.icon }}</i>
                   <strong>{{ badge.name }}</strong>
                   <span>{{ badge.detail }}</span>
                   <small>{{ badge.scope }}</small>
                 </div>
+              </div>
+              <div v-else class="empty-state compact">
+                <strong>Nenhuma conquista recebida</strong>
+                <span>Conquistas reais serão listadas quando forem concedidas ou estiverem em progresso.</span>
               </div>
             </article>
           </section>
@@ -532,7 +590,11 @@ const journeyPercent = (journey) => Math.min(100, Math.round((journey.points / j
               <i>{{ journey.icon }}</i>
               <div><strong>{{ journey.shortTitle }}</strong><b>{{ journey.points }} pts</b><span>Nível {{ journey.level.number }} · {{ journey.level.name }}</span></div>
             </article>
-            <Link :href="activeMapRoute">Ver meu mapa da caminhada</Link>
+            <div v-if="!visibleJourneys.length" class="empty-state dark compact">
+              <strong>Sem jornada liberada</strong>
+              <span>Aguardando vínculo de pessoa para montar o resumo.</span>
+            </div>
+            <Link v-if="visibleJourneys.length" :href="activeMapRoute">Ver meu mapa da caminhada</Link>
           </section>
 
           <section class="mentor-card">
@@ -555,7 +617,7 @@ const journeyPercent = (journey) => Math.min(100, Math.round((journey.points / j
               <i>{{ item.icon }}</i>
               <div><span>{{ item.title }}</span><strong>{{ item.name }}</strong><small>{{ item.detail }}</small></div>
             </article>
-            <p>Reconhecimento saudável de constância e serviço.</p>
+            <p>{{ visibleHighlights.length ? 'Reconhecimento saudável de constância e serviço.' : 'Ainda não há destaques reais visíveis para esta caminhada.' }}</p>
           </section>
 
           <section class="recognition-card" aria-label="Reconhecimento saudável">
@@ -570,12 +632,16 @@ const journeyPercent = (journey) => Math.min(100, Math.round((journey.points / j
 
           <section class="side-panel steps-card">
             <header><h2>Próximos passos com propósito</h2><Link :href="`${baseRoute}/regras`">Ver como avançar</Link></header>
-            <ul>
+            <ul v-if="visibleNextSteps.length">
               <li v-for="step in visibleNextSteps" :key="step.action" :class="{ youth: step.scope === 'youth' }">
                 <i>{{ step.icon }}</i>
                 <div><strong>{{ step.title }}</strong><span>{{ step.action }}</span><small>{{ step.impact }}</small></div>
               </li>
             </ul>
+            <div v-else class="empty-state compact">
+              <strong>Sem próximos passos calculados</strong>
+              <span>O Mentor exibirá sugestões quando os dados reais forem suficientes.</span>
+            </div>
           </section>
         </aside>
       </section>
@@ -674,6 +740,11 @@ a { text-decoration: none; }
 .areas-section, .panel-card, .side-panel { padding: 13px; border: 1px solid rgba(217,164,65,.16); border-radius: 20px; background: rgba(255,248,234,.82); box-shadow: 0 12px 28px rgba(7,27,51,.075), inset 0 1px 0 rgba(255,255,255,.58); }
 .side-panel { display: grid; align-content: start; }
 .areas-section h2, .panel-card h2, .side-panel h2 { color: #071b33; }
+.empty-state { display: grid; gap: 7px; margin-top: 10px; padding: 16px; border: 1px dashed rgba(217,164,65,.3); border-radius: 16px; background: rgba(255,255,255,.48); color: #071b33; }
+.empty-state.dark { border-color: rgba(246,200,95,.28); background: rgba(255,248,234,.08); color: #fff8ea; }
+.empty-state.compact { padding: 11px; }
+.empty-state strong { color: inherit; font-size: .74rem; font-weight: 950; }
+.empty-state span { color: inherit; opacity: .78; font-size: .66rem; font-weight: 780; line-height: 1.35; }
 .areas-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 9px; margin-top: 10px; }
 .area-card { display: grid; justify-items: center; align-content: start; min-height: 152px; padding: 11px 7px 12px; border: 1px solid rgba(217,164,65,.16); border-radius: 16px; background: linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,248,234,.68)); text-align: center; box-shadow: 0 10px 22px rgba(7,27,51,.055), inset 0 1px 0 rgba(255,255,255,.72); }
 .area-card i { position: relative; z-index: 2; display: grid; place-items: center; width: 38px; height: 38px; margin-bottom: -2px; border-radius: 50%; background: color-mix(in srgb, var(--area-color) 14%, #fff8ea); color: var(--area-color); font-style: normal; font-size: 1.08rem; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--area-color) 18%, transparent), 0 7px 16px rgba(7,27,51,.06); }
