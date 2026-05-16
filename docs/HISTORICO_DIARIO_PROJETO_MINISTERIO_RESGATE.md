@@ -908,3 +908,21 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Escopo preservado:** não foram criadas migrations, seeders, controllers, rotas, dados fake ou arquivos novos; não foram alteradas abas internas da Minha Caminhada nem módulos Central da Família, Meu Perfil ou Meu Financeiro.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Integração real da aba Conquistas da Minha Caminhada
+
+- **Horário:** 17:20–17:45 aprox.
+- **Objetivo:** integrar somente `/familia-resgate/minha-caminhada/conquistas` com dados reais, removendo conquistas fake da tela e mantendo as demais abas internas fora do escopo.
+- **Rota ajustada:** `/familia-resgate/minha-caminhada/conquistas` deixou de renderizar `MinhaCaminhadaConquistas` por `Closure` e passou a apontar para `MinhaCaminhadaController@achievements`.
+- **Controller ajustado:** `MinhaCaminhadaController` recebeu o método `achievements`, usando `WalkingAchievementReadService` e `WalkingAuthorizationService` para montar payload seguro por jornada.
+- **Prop real criada:** `walkingAchievements`, com `usesRealData`, `generatedAt`, pessoa vinculada, `canSeeYouthJourney`, dados da caminhada geral, caminhada jovem somente quando autorizada, resumo real e estados vazios.
+- **Payload seguro:** o controller retorna arrays simples, não retorna Models crus, não cria registros, não altera banco e usa os filtros do service para não expor catálogo sensível sem permissão.
+- **Página ajustada:** `resources/js/Pages/FamiliaResgate/MinhaCaminhadaConquistas.vue` passou a consumir `walkingAchievements` com computed properties para jornada atual, catálogo visível, recebidas, em progresso, próximas, categorias, resumo e permissão jovem.
+- **Mocks removidos da aba Conquistas:** removidos `viewerContext` local, array local de conquistas, resumo fake, contadores fixos, conquistas recebidas fake, conquistas em progresso fake e tipos sensíveis locais.
+- **Estados vazios seguros:** adicionados estados para usuário sem pessoa vinculada, sem conquistas recebidas, sem conquistas em progresso e sem catálogo disponível na jornada.
+- **Teste criado:** `tests/Feature/MinhaCaminhada/MinhaCaminhadaConquistasControllerTest.php`, cobrindo autenticação, payload seguro, bloqueio de catálogo sensível para usuário comum e exibição de conquista real recebida.
+- **Validações executadas:** `php -l` passou no controller e no teste; teste da aba Conquistas passou com 4 testes e 48 assertions; `MinhaCaminhadaControllerTest` passou com 2 testes e 52 assertions; `WalkingServicesTest` passou com 13 testes e 46 assertions; `php artisan test --compact` passou com 69 testes e 308 assertions; `npm run build` passou; `git diff --check` passou; rota confirmada via `route:list --json` apontando para `App\Http\Controllers\Familia\MinhaCaminhadaController@achievements`.
+- **Busca de termos fake:** busca focada em `MinhaCaminhadaConquistas.vue` não encontrou `viewerContext`, `achievements =`, `summaryCards`, nomes de conquistas fake antigos, tipos sensíveis locais, `mock`, `fake`, pontos fixos ou links mortos.
+- **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foram criados ou executados seeders, não foram criados dados fake no banco real e não foram alteradas `MinhaCaminhadaArea.vue`, `MinhaCaminhadaNivel.vue` ou outros módulos.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.

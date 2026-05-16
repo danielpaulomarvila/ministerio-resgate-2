@@ -129,9 +129,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/familia-resgate/minha-caminhada', [MinhaCaminhadaController::class, 'index'])
         ->name('familia-resgate.minha_caminhada');
 
-    Route::get('/familia-resgate/minha-caminhada/conquistas', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaConquistas', [
-        'hasYouthJourney' => (bool) data_get(request()->user(), 'person.is_youth', false),
-    ]))->name('familia-resgate.minha_caminhada.conquistas');
+    Route::get('/familia-resgate/minha-caminhada/conquistas', [MinhaCaminhadaController::class, 'achievements'])
+        ->name('familia-resgate.minha_caminhada.conquistas');
 
     Route::get('/familia-resgate/minha-caminhada/nivel', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
         'area' => 'nivel',

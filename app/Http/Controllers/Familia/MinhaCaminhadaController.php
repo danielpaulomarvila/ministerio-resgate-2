@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Familia;
 
 use App\Http\Controllers\Controller;
+use App\Services\MinhaCaminhada\WalkingAchievementReadService;
 use App\Services\MinhaCaminhada\WalkingAuthorizationService;
 use App\Services\MinhaCaminhada\WalkingDashboardReadService;
 use Illuminate\Http\Request;
@@ -47,6 +48,47 @@ class MinhaCaminhadaController extends Controller
         ]);
     }
 
+    public function achievements(Request $request, WalkingAchievementReadService $achievementReadService): Response
+    {
+        $user = $request->user();
+        $person = $user?->person;
+
+        if (!$person) {
+            return Inertia::render('FamiliaResgate/MinhaCaminhadaConquistas', [
+                'walkingAchievements' => $this->emptyAchievementsPayload(
+                    'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+                    false
+                ),
+            ]);
+        }
+
+        $canSeeYouthJourney = $this->authorizationService->userCanViewOwnYouthJourney($user);
+
+        return Inertia::render('FamiliaResgate/MinhaCaminhadaConquistas', [
+            'walkingAchievements' => [
+                'authorized' => true,
+                'usesRealData' => true,
+                'generatedAt' => now()->toISOString(),
+                'person' => [
+                    'id' => $person->id,
+                    'name' => $person->preferred_name ?: $person->full_name,
+                ],
+                'canSeeYouthJourney' => $canSeeYouthJourney,
+                'general' => $this->formatAchievementsJourney(
+                    $achievementReadService->getVisibleCatalog($user),
+                    $achievementReadService->getOwnAchievements($user)
+                ),
+                'youth' => $canSeeYouthJourney
+                    ? $this->formatAchievementsJourney(
+                        $achievementReadService->getVisibleCatalog($user, 'youth'),
+                        $achievementReadService->getOwnAchievements($user, 'youth')
+                    )
+                    : $this->emptyAchievementsJourney(false),
+                'emptyStates' => $this->achievementsEmptyStates(),
+            ],
+        ]);
+    }
+
     private function formatJourneyDashboard(array $dashboard, string $journeyType): array
     {
         if (!($dashboard['authorized'] ?? false)) {
@@ -73,6 +115,146 @@ class MinhaCaminhadaController extends Controller
             'achievements' => $dashboard['achievements'] ?? [],
             'mentor' => $dashboard['mentor'] ?? null,
             'highlights' => $dashboard['highlights'] ?? [],
+        ];
+    }
+
+    private function emptyAchievementsPayload(string $message, bool $authorized): array
+    {
+        return [
+            'authorized' => $authorized,
+            'usesRealData' => true,
+            'generatedAt' => now()->toISOString(),
+            'message' => $message,
+            'person' => null,
+            'canSeeYouthJourney' => false,
+            'general' => $this->emptyAchievementsJourney(false),
+            'youth' => $this->emptyAchievementsJourney(false),
+            'emptyStates' => $this->achievementsEmptyStates(),
+        ];
+    }
+
+    private function emptyAchievementsJourney(bool $authorized = true): array
+    {
+        return [
+            'authorized' => $authorized,
+            'catalog' => [],
+            'received' => [],
+            'inProgress' => [],
+            'locked' => [],
+            'categories' => [],
+            'summary' => [
+                'total_catalog' => 0,
+                'received_count' => 0,
+                'in_progress_count' => 0,
+                'locked_count' => 0,
+            ],
+        ];
+    }
+
+    private function formatAchievementsJourney(array $catalog, array $personAchievements): array
+    {
+        $received = $this->formatPersonAchievementsByStatus($personAchievements, ['received']);
+        $inProgress = $this->formatPersonAchievementsByStatus($personAchievements, ['in_progress', 'pending_validation']);
+        $activeAchievementIds = collect($received)
+            ->merge($inProgress)
+            ->pluck('achievement_id')
+            ->filter()
+            ->unique()
+            ->values();
+        $locked = collect($catalog)
+            ->reject(fn (array $achievement) => $activeAchievementIds->contains($achievement['id'] ?? null))
+            ->map(fn (array $achievement) => $this->formatCatalogAchievementForPage($achievement))
+            ->values()
+            ->all();
+
+        return [
+            'authorized' => true,
+            'catalog' => array_values(array_map(fn (array $achievement) => $this->formatCatalogAchievementForPage($achievement), $catalog)),
+            'received' => $received,
+            'inProgress' => $inProgress,
+            'locked' => $locked,
+            'categories' => $this->formatAchievementCategories($catalog),
+            'summary' => [
+                'total_catalog' => count($catalog),
+                'received_count' => count($received),
+                'in_progress_count' => count($inProgress),
+                'locked_count' => count($locked),
+            ],
+        ];
+    }
+
+    private function formatPersonAchievementsByStatus(array $personAchievements, array $statuses): array
+    {
+        return collect($personAchievements)
+            ->filter(fn (array $personAchievement) => in_array($personAchievement['status'] ?? null, $statuses, true))
+            ->map(function (array $personAchievement) {
+                $achievement = $this->formatCatalogAchievementForPage($personAchievement['achievement'] ?? []);
+                $progressCurrent = (int) ($personAchievement['progress_current'] ?? 0);
+                $progressTarget = (int) ($personAchievement['progress_target'] ?? 0);
+
+                return array_merge($achievement, [
+                    'person_achievement_id' => $personAchievement['id'] ?? null,
+                    'achievement_id' => $achievement['id'] ?? null,
+                    'status' => $personAchievement['status'] ?? 'in_progress',
+                    'progress_current' => $progressCurrent,
+                    'progress_target' => $progressTarget,
+                    'progress_percent' => $progressTarget > 0
+                        ? min(100, (int) round(($progressCurrent / $progressTarget) * 100))
+                        : (($personAchievement['status'] ?? null) === 'received' ? 100 : 0),
+                    'awarded_at' => $personAchievement['awarded_at'] ?? null,
+                ]);
+            })
+            ->values()
+            ->all();
+    }
+
+    private function formatCatalogAchievementForPage(array $achievement): array
+    {
+        return [
+            'id' => $achievement['id'] ?? null,
+            'key' => $achievement['key'] ?? null,
+            'name' => $achievement['name'] ?? 'Conquista',
+            'description' => $achievement['description'] ?? 'Conquista disponível na sua caminhada.',
+            'type' => $achievement['type'] ?? 'general',
+            'category' => $achievement['category'] ?? 'general',
+            'visibility' => $achievement['visibility'] ?? null,
+            'icon' => $achievement['icon'] ?: '✦',
+            'color' => $achievement['color'] ?? null,
+            'requires_validation' => (bool) ($achievement['requires_validation'] ?? false),
+        ];
+    }
+
+    private function formatAchievementCategories(array $catalog): array
+    {
+        return collect($catalog)
+            ->groupBy(fn (array $achievement) => $achievement['category'] ?? 'general')
+            ->map(fn ($items, string $category) => [
+                'key' => $category,
+                'title' => $this->formatAchievementCategoryTitle($category),
+                'count' => $items->count(),
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function formatAchievementCategoryTitle(string $category): string
+    {
+        return str($category)
+            ->replace(['_', '-'], ' ')
+            ->title()
+            ->toString();
+    }
+
+    private function achievementsEmptyStates(): array
+    {
+        return [
+            'withoutPersonTitle' => 'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+            'withoutPersonText' => 'Assim que o cadastro for vinculado, suas conquistas reais aparecerão aqui.',
+            'withoutReceivedTitle' => 'Nenhuma conquista recebida ainda.',
+            'withoutReceivedText' => 'Quando uma conquista real for concedida, ela aparecerá aqui.',
+            'withoutProgressTitle' => 'Nenhuma conquista em progresso no momento.',
+            'withoutProgressText' => 'Conquistas em andamento aparecerão quando houver registros suficientes.',
+            'withoutCatalogTitle' => 'Nenhuma conquista disponível para esta jornada.',
         ];
     }
 

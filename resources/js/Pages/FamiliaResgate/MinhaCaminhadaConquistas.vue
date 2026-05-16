@@ -1,66 +1,16 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import FamilySidebar from '@/Components/FamiliaResgate/FamilySidebar.vue'
 
 const baseRoute = '/familia-resgate/minha-caminhada'
 
-// Futuro backend:
-// Este contexto deve vir das permissões reais.
-// Membro comum vê conquistas gerais pessoais.
-// Outros perfis autorizados podem receber trilhas complementares.
-// Conquistas coletivas específicas aparecem apenas para autorizados.
-// Conquistas administrativas, financeiras e sensíveis devem respeitar policies.
-// Conquistas não medem espiritualidade nem valor diante de Deus.
-const viewerContext = {
-  profileType: 'member',
-  canSeeGeneralAchievements: true,
-  canSeeYouthAchievements: false,
-  canSeeYouthTeamAchievements: false,
-  canSeeAdministrativeAchievements: false,
-  canSeeFinancialAchievements: false,
-  canSeeSensitiveAchievements: false,
-  youthMember: false,
-  youthLeader: false,
-  isGuardian: false,
-  isAdmin: false,
-  isPastoralLeadership: false,
-}
-
-// Futuro backend:
-// As conquistas devem vir filtradas por policy antes de chegar ao Vue.
-// O frontend não deve receber conquistas restritas, financeiras, administrativas
-// ou sensíveis quando o perfil não tiver permissão.
-// Estados como received, in_progress, pending_validation, locked e hidden
-// devem vir do service de conquistas.
-// Nenhuma conquista mede espiritualidade ou valor diante de Deus.
-const achievements = [
-  { id: 'presenca-fiel', type: 'general', status: 'received', title: 'Presença Fiel', category: 'Presença', icon: '👥', text: 'Constância nos cultos e encontros gerais.', detail: 'Recebida por participação constante na vida da igreja.', progress: 100 },
-  { id: 'palavra-viva', type: 'general', status: 'received', title: 'Palavra Viva', category: 'Palavra', icon: '📖', text: 'Ritmo saudável de leitura bíblica.', detail: 'Recebida por constância em leitura e reflexão.', progress: 100 },
-  { id: 'servo-disponivel', type: 'general', status: 'received', title: 'Servo Disponível', category: 'Serviço', icon: '🤝', text: 'Serviço confirmado em escala ou apoio.', detail: 'Recebida por disponibilidade prática na casa.', progress: 100 },
-  { id: 'comunhao', type: 'general', status: 'received', title: 'Comunhão', category: 'Comunhão', icon: '🕊️', text: 'Participação em momentos da igreja.', detail: 'Recebida por caminhar junto da família da fé.', progress: 100 },
-  { id: 'devocional-constante', type: 'general', status: 'in_progress', title: 'Devocional Constante', category: 'Devocional', icon: '🕯️', text: '2 de 3 registros nesta semana.', detail: 'Próximo passo: registrar mais um devocional.', progress: 66 },
-  { id: 'coracao-missionario', type: 'general', status: 'in_progress', title: 'Coração Missionário', category: 'Evangelismo', icon: '💒', text: '1 de 2 acompanhamentos de visitante.', detail: 'Avanço saudável em cuidado e acolhimento.', progress: 50 },
-  { id: 'formacao', type: 'general', status: 'in_progress', title: 'Formação', category: 'Formação', icon: '🎓', text: '50% de participação em aula ou curso.', detail: 'Crescimento em ensino, discipulado e maturidade.', progress: 50 },
-  { id: 'intercessao-com-cuidado', type: 'general', status: 'locked', title: 'Intercessão com cuidado', category: 'Intercessão', icon: '🙏', text: 'Categoria futura para registros de serviço e oração.', detail: 'Sempre com sigilo, validação pastoral e sem exposição.', progress: 0 },
-  { id: 'validacao-servico', type: 'general', status: 'pending_validation', title: 'Serviço em validação', category: 'Serviço', icon: '✅', text: 'Registro aguardando confirmação.', detail: 'Alguns marcos precisam de confirmação da liderança ou secretaria.', progress: 80 },
-  { id: 'palavra-trilho-autorizado', type: 'youth', status: 'hidden', title: 'Palavra do trilho autorizado', category: 'Trilho autorizado', icon: '🔥', text: 'Preparação futura para perfis autorizados.', detail: 'Não é enviada para membro comum quando não houver permissão.', progress: 0 },
-  { id: 'coletivo-autorizado-futuro', type: 'youth_team', status: 'hidden', title: 'Conquista coletiva autorizada', category: 'Coletivo autorizado', icon: '🤝', text: 'Preparação futura para módulo autorizado.', detail: 'Não aparece para membro comum e não compara grupos.', progress: 0 },
-  { id: 'administrativo-futuro', type: 'administrative', status: 'hidden', title: 'Conquista administrativa interna', category: 'Administração', icon: '♙', text: 'Preparação futura para gestão autorizada.', detail: 'Não deve virar catálogo público comum.', progress: 0 },
-  { id: 'financeiro-futuro', type: 'financial', status: 'hidden', title: 'Registro financeiro privado', category: 'Financeiro', icon: '◈', text: 'Preparação futura privada e controlada por policy.', detail: 'Não deve expor vida financeira nem espiritualizar regularidade.', progress: 0 },
-  { id: 'pastoral-sensivel-futuro', type: 'pastoral_sensitive', status: 'hidden', title: 'Registro pastoral sensível', category: 'Cuidado pastoral', icon: '🕊️', text: 'Preparação futura para registros internos com sigilo.', detail: 'Pode nem aparecer como badge, conforme decisão pastoral.', progress: 0 },
-]
-
-const generalCategories = [
-  { icon: '👥', title: 'Presença', text: 'Constância em cultos e encontros gerais.' },
-  { icon: '📖', title: 'Palavra', text: 'Leitura bíblica e crescimento no fundamento.' },
-  { icon: '🕯️', title: 'Devocional', text: 'Pequenos registros de reflexão e prática.' },
-  { icon: '🤝', title: 'Serviço', text: 'Escalas, apoio e disponibilidade na casa.' },
-  { icon: '🕊️', title: 'Comunhão', text: 'Caminhada junto da família da fé.' },
-  { icon: '💒', title: 'Evangelismo', text: 'Cuidado com visitantes e acolhimento.' },
-  { icon: '🎓', title: 'Formação', text: 'Estudos, discipulado e maturidade.' },
-  { icon: '🙏', title: 'Intercessão', text: 'Categoria futura com sigilo e validação pastoral.' },
-]
+const props = defineProps({
+  walkingAchievements: {
+    type: Object,
+    default: () => ({}),
+  },
+})
 
 const statusLabels = {
   received: 'Recebida',
@@ -69,46 +19,71 @@ const statusLabels = {
   pending_validation: 'Em validação',
 }
 
+const categoryLabels = {
+  bible: 'Bíblia',
+  bible_challenge: 'Desafio bíblico',
+  communion: 'Comunhão',
+  devotional: 'Devocional',
+  evangelism: 'Evangelismo',
+  general: 'Geral',
+  presence: 'Presença',
+  service: 'Serviço',
+}
+
+const payload = computed(() => props.walkingAchievements || {})
+const canSeeYouthJourney = computed(() => Boolean(payload.value.canSeeYouthJourney))
+const currentJourneyType = ref('general')
+const activeFilter = ref('all')
+const emptyStates = computed(() => payload.value.emptyStates || {})
+
+watch(canSeeYouthJourney, (canSeeYouth) => {
+  if (!canSeeYouth && currentJourneyType.value === 'youth') {
+    currentJourneyType.value = 'general'
+  }
+})
+
+const currentJourneyData = computed(() => {
+  if (currentJourneyType.value === 'youth' && canSeeYouthJourney.value) {
+    return payload.value.youth || {}
+  }
+
+  return payload.value.general || {}
+})
+
+const journeyLabel = computed(() => currentJourneyType.value === 'youth' ? 'Caminhada Jovem' : 'Caminhada Geral')
+const isAuthorized = computed(() => payload.value.authorized !== false)
+const visibleCatalog = computed(() => currentJourneyData.value.catalog || [])
+const receivedItems = computed(() => currentJourneyData.value.received || [])
+const progressItems = computed(() => currentJourneyData.value.inProgress || [])
+const lockedItems = computed(() => currentJourneyData.value.locked || [])
+const categoryItems = computed(() => currentJourneyData.value.categories || [])
+const realSummary = computed(() => currentJourneyData.value.summary || {})
+
 const filters = computed(() => [
   { key: 'all', label: 'Todas' },
   { key: 'received', label: 'Recebidas' },
   { key: 'in_progress', label: 'Em progresso' },
   { key: 'locked', label: 'Próximas' },
   { key: 'categories', label: 'Categorias' },
-  ...(viewerContext.canSeeYouthAchievements ? [{ key: 'youth', label: 'Trilho autorizado' }] : []),
-  ...(viewerContext.canSeeYouthTeamAchievements ? [{ key: 'youth_team', label: 'Coletivas' }] : []),
-  ...(viewerContext.canSeeAdministrativeAchievements ? [{ key: 'administrative', label: 'Administração' }] : []),
-  ...(viewerContext.canSeeFinancialAchievements ? [{ key: 'financial', label: 'Financeiro' }] : []),
 ])
-const activeFilter = ref('all')
 
-const canSeeAchievement = (achievement) => {
-  if (achievement.status === 'hidden') return false
-  if (achievement.type === 'general') return viewerContext.canSeeGeneralAchievements
-  if (achievement.type === 'youth') return viewerContext.canSeeYouthAchievements
-  if (achievement.type === 'youth_team') return viewerContext.canSeeYouthTeamAchievements
-  if (achievement.type === 'administrative') return viewerContext.canSeeAdministrativeAchievements
-  if (achievement.type === 'financial') return viewerContext.canSeeFinancialAchievements
-  return viewerContext.canSeeSensitiveAchievements
-}
-
-const visibleAchievements = computed(() => achievements.filter((achievement) => {
-  if (!canSeeAchievement(achievement)) return false
-  if (activeFilter.value === 'all' || activeFilter.value === 'categories') return true
-  if (['received', 'in_progress', 'locked'].includes(activeFilter.value)) return achievement.status === activeFilter.value
-  return achievement.type === activeFilter.value
-}))
-const receivedAchievements = computed(() => visibleAchievements.value.filter((achievement) => achievement.status === 'received'))
-const progressAchievements = computed(() => visibleAchievements.value.filter((achievement) => ['in_progress', 'pending_validation', 'locked'].includes(achievement.status)))
-const nextAchievement = computed(() => progressAchievements.value.find((achievement) => achievement.status === 'in_progress') || progressAchievements.value[0])
-const featuredCategory = computed(() => nextAchievement.value?.category || 'Serviço')
 const showAchievementLists = computed(() => activeFilter.value !== 'categories')
-const summaryCards = computed(() => [
-  { label: 'Conquistas recebidas', value: receivedAchievements.value.length, note: 'Marcos gerais pessoais' },
-  { label: 'Em progresso', value: progressAchievements.value.filter((item) => item.status !== 'locked').length, note: 'Próximos passos visíveis' },
-  { label: 'Próxima conquista', value: nextAchievement.value?.title || 'Palavra Viva', note: 'Sem pressa e sem comparação' },
-  { label: 'Categoria em destaque', value: featuredCategory.value, note: 'Foco pastoral da semana' },
+const currentCatalogList = computed(() => {
+  if (activeFilter.value === 'received') return receivedItems.value
+  if (activeFilter.value === 'in_progress') return progressItems.value
+  if (activeFilter.value === 'locked') return lockedItems.value
+
+  return visibleCatalog.value
+})
+const dashboardCards = computed(() => [
+  { label: 'Catálogo visível', value: realSummary.value.total_catalog || 0, note: 'Conquistas disponíveis nesta jornada' },
+  { label: 'Conquistas recebidas', value: realSummary.value.received_count || 0, note: 'Marcos reais concedidos' },
+  { label: 'Em progresso', value: realSummary.value.in_progress_count || 0, note: 'Registros reais em andamento' },
+  { label: 'Próximas', value: realSummary.value.locked_count || 0, note: 'Ainda não concedidas ou iniciadas' },
 ])
+
+const categoryTitle = (category) => categoryLabels[category] || String(category || 'Geral')
+const progressPercent = (item) => Math.max(0, Math.min(100, Number(item.progress_percent || 0)))
 </script>
 
 <template>
@@ -122,55 +97,78 @@ const summaryCards = computed(() => [
         <div>
           <p>Minha Caminhada</p>
           <h1>Conquistas da Caminhada</h1>
-          <span>Acompanhe marcos saudáveis da sua caminhada geral, celebrando constância, serviço e crescimento sem comparação espiritual.</span>
+          <span>Acompanhe marcos reais da sua caminhada, celebrando constância, serviço e crescimento sem comparação espiritual.</span>
         </div>
-        <strong>Caminhada Geral</strong>
+        <strong>{{ journeyLabel }}</strong>
       </header>
 
-      <section class="summary-strip" aria-label="Resumo das conquistas">
-        <article v-for="card in summaryCards" :key="card.label">
-          <span>{{ card.label }}</span>
-          <strong>{{ card.value }}</strong>
-          <small>{{ card.note }}</small>
-        </article>
+      <section v-if="!isAuthorized" class="empty-state" aria-label="Conquistas indisponíveis">
+        <strong>{{ emptyStates.withoutPersonTitle }}</strong>
+        <p>{{ emptyStates.withoutPersonText }}</p>
       </section>
 
-      <nav class="filters" aria-label="Filtros de conquistas">
-        <button v-for="filter in filters" :key="filter.key" type="button" :class="{ active: activeFilter === filter.key }" @click="activeFilter = filter.key">
-          {{ filter.label }}
-        </button>
-      </nav>
+      <template v-else>
+        <nav v-if="canSeeYouthJourney" class="journey-tabs" aria-label="Jornadas de conquistas">
+          <button type="button" :class="{ active: currentJourneyType === 'general' }" @click="currentJourneyType = 'general'">Geral</button>
+          <button type="button" :class="{ active: currentJourneyType === 'youth' }" @click="currentJourneyType = 'youth'">Jovem</button>
+        </nav>
 
-      <section v-if="showAchievementLists" class="achievement-groups">
-        <article class="achievement-section">
-          <header><span>Minhas conquistas</span><h2>Minhas conquistas</h2><p>Marcos já recebidos na sua caminhada geral.</p></header>
-          <div class="achievement-grid">
-            <article v-for="achievement in receivedAchievements" :key="achievement.id" class="achievement-card status-received">
-              <i>{{ achievement.icon }}</i>
-              <div><small>{{ achievement.category }}</small><strong>{{ achievement.title }}</strong><p>{{ achievement.text }}</p><em>{{ statusLabels[achievement.status] }}</em></div>
-            </article>
+        <section class="summary-strip" aria-label="Resumo das conquistas">
+          <article v-for="card in dashboardCards" :key="card.label">
+            <span>{{ card.label }}</span>
+            <strong>{{ card.value }}</strong>
+            <small>{{ card.note }}</small>
+          </article>
+        </section>
+
+        <nav class="filters" aria-label="Filtros de conquistas">
+          <button v-for="filter in filters" :key="filter.key" type="button" :class="{ active: activeFilter === filter.key }" @click="activeFilter = filter.key">
+            {{ filter.label }}
+          </button>
+        </nav>
+
+        <section v-if="showAchievementLists" class="achievement-groups">
+          <article class="achievement-section">
+            <header><span>Minhas conquistas</span><h2>Minhas conquistas</h2><p>Marcos já recebidos na sua caminhada.</p></header>
+            <div v-if="receivedItems.length" class="achievement-grid">
+              <article v-for="item in receivedItems" :key="item.person_achievement_id || item.id" class="achievement-card status-received">
+                <i>{{ item.icon }}</i>
+                <div><small>{{ categoryTitle(item.category) }}</small><strong>{{ item.name }}</strong><p>{{ item.description }}</p><em>{{ statusLabels[item.status] || 'Recebida' }}</em></div>
+              </article>
+            </div>
+            <div v-else class="empty-inline"><strong>{{ emptyStates.withoutReceivedTitle }}</strong><p>{{ emptyStates.withoutReceivedText }}</p></div>
+          </article>
+
+          <article class="achievement-section">
+            <header><span>Em progresso</span><h2>Em progresso</h2><p>Conquistas em andamento ou aguardando validação real.</p></header>
+            <div v-if="progressItems.length" class="progress-grid">
+              <article v-for="item in progressItems" :key="item.person_achievement_id || item.id" class="progress-card" :class="`status-${item.status}`">
+                <header><i>{{ item.icon }}</i><div><small>{{ categoryTitle(item.category) }}</small><strong>{{ item.name }}</strong></div></header>
+                <p>{{ item.description }}</p>
+                <div class="progress-bar"><span :style="{ width: `${progressPercent(item)}%` }"></span></div>
+                <footer><em>{{ statusLabels[item.status] || 'Em progresso' }}</em><small>{{ item.progress_current }} de {{ item.progress_target || 0 }}</small></footer>
+              </article>
+            </div>
+            <div v-else class="empty-inline"><strong>{{ emptyStates.withoutProgressTitle }}</strong><p>{{ emptyStates.withoutProgressText }}</p></div>
+          </article>
+        </section>
+
+        <section v-if="activeFilter === 'categories'" class="categories-section" aria-label="Categorias reais">
+          <header><span>Categorias</span><h2>Categorias de {{ journeyLabel }}</h2><p>Áreas organizadas a partir do catálogo visível retornado pelo backend.</p></header>
+          <div v-if="categoryItems.length" class="categories-grid">
+            <article v-for="category in categoryItems" :key="category.key"><i>✦</i><strong>{{ category.title }}</strong><p>{{ category.count }} conquista(s) disponível(is).</p></article>
           </div>
-        </article>
+          <div v-else class="empty-inline"><strong>{{ emptyStates.withoutCatalogTitle }}</strong></div>
+        </section>
 
-        <article class="achievement-section">
-          <header><span>Em progresso</span><h2>Em progresso</h2><p>Conquistas próximas, em validação ou aguardando uma etapa futura.</p></header>
-          <div class="progress-grid">
-            <article v-for="achievement in progressAchievements" :key="achievement.id" class="progress-card" :class="`status-${achievement.status}`">
-              <header><i>{{ achievement.icon }}</i><div><small>{{ achievement.category }}</small><strong>{{ achievement.title }}</strong></div></header>
-              <p>{{ achievement.text }}</p>
-              <div class="progress-bar"><span :style="{ width: `${achievement.progress}%` }"></span></div>
-              <footer><em>{{ statusLabels[achievement.status] }}</em><small>{{ achievement.detail }}</small></footer>
-            </article>
+        <section v-else class="categories-section" aria-label="Catálogo visível">
+          <header><span>Catálogo</span><h2>Catálogo visível de {{ journeyLabel }}</h2><p>Conquistas disponíveis para esta jornada conforme permissões reais.</p></header>
+          <div v-if="currentCatalogList.length" class="categories-grid">
+            <article v-for="item in currentCatalogList" :key="`${item.id}-${item.status || 'catalog'}`"><i>{{ item.icon }}</i><strong>{{ item.name }}</strong><p>{{ item.description }}</p></article>
           </div>
-        </article>
-      </section>
-
-      <section class="categories-section" aria-label="Categorias gerais">
-        <header><span>Categorias gerais</span><h2>Categorias da Caminhada Geral</h2><p>Áreas que organizam os marcos sem transformar a caminhada em competição.</p></header>
-        <div class="categories-grid">
-          <article v-for="category in generalCategories" :key="category.title"><i>{{ category.icon }}</i><strong>{{ category.title }}</strong><p>{{ category.text }}</p></article>
-        </div>
-      </section>
+          <div v-else class="empty-inline"><strong>{{ emptyStates.withoutCatalogTitle }}</strong></div>
+        </section>
+      </template>
 
       <section class="explanation-grid">
         <article class="how-card">
@@ -198,7 +196,7 @@ const summaryCards = computed(() => [
 .achievements-page { min-height: 100vh; background: radial-gradient(circle at 10% 0%, rgba(217,164,65,.18), transparent 30%), linear-gradient(135deg, #fff8ea, #f3e7d2); }
 .achievements-main { margin-left: 80px; padding: 18px 22px 30px; }
 a { text-decoration: none; }
-.achievements-hero, .summary-strip, .filters, .achievement-groups, .categories-section, .explanation-grid, .achievement-actions { max-width: 1280px; margin-left: auto; margin-right: auto; }
+.achievements-hero, .summary-strip, .journey-tabs, .filters, .achievement-groups, .categories-section, .explanation-grid, .achievement-actions, .empty-state { max-width: 1280px; margin-left: auto; margin-right: auto; }
 .achievements-hero { display: flex; justify-content: space-between; gap: 18px; align-items: end; margin-bottom: 14px; padding: 22px; border: 1px solid rgba(246,200,95,.34); border-radius: 26px; background: radial-gradient(circle at 82% 18%, rgba(246,200,95,.2), transparent 34%), linear-gradient(135deg,#071b33,#0b2748); box-shadow: 0 22px 52px rgba(7,27,51,.2); }
 .achievements-hero p, .categories-section span, .achievement-section span, .how-card > span, .care-card > span { margin: 0; color: #f6c85f; font-size: .72rem; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; }
 .achievements-hero h1 { margin: 7px 0; color: #fff8ea; font: 950 clamp(2rem, 4vw, 2.8rem)/.95 Georgia, serif; letter-spacing: -.05em; }
@@ -209,9 +207,9 @@ a { text-decoration: none; }
 .summary-strip article { padding: 13px; border-radius: 18px; }
 .summary-strip span, .summary-strip small { color: #516070; font-size: .7rem; font-weight: 850; }
 .summary-strip strong { display: block; margin: 5px 0 3px; color: #071b33; font-size: 1.15rem; font-weight: 950; line-height: 1.1; }
-.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-.filters button { min-height: 34px; padding: 8px 12px; border: 1px solid rgba(217,164,65,.22); border-radius: 999px; background: rgba(255,248,234,.76); color: #071b33; font-size: .72rem; font-weight: 950; cursor: pointer; transition: transform .2s ease, background .2s ease, border-color .2s ease; }
-.filters button.active, .filters button:hover { border-color: rgba(217,164,65,.42); background: linear-gradient(135deg, #d9a441, #f6c85f); transform: translateY(-1px); }
+.journey-tabs, .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.journey-tabs button, .filters button { min-height: 34px; padding: 8px 12px; border: 1px solid rgba(217,164,65,.22); border-radius: 999px; background: rgba(255,248,234,.76); color: #071b33; font-size: .72rem; font-weight: 950; cursor: pointer; transition: transform .2s ease, background .2s ease, border-color .2s ease; }
+.journey-tabs button.active, .journey-tabs button:hover, .filters button.active, .filters button:hover { border-color: rgba(217,164,65,.42); background: linear-gradient(135deg, #d9a441, #f6c85f); transform: translateY(-1px); }
 .achievement-groups { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 12px; margin-bottom: 12px; }
 .achievement-section, .categories-section, .how-card, .care-card { padding: 16px; border-radius: 24px; }
 .achievement-section header, .categories-section header { margin-bottom: 12px; }
@@ -231,6 +229,11 @@ a { text-decoration: none; }
 .progress-card footer { display: grid; gap: 5px; }
 .progress-card.status-pending_validation em { background: rgba(96,165,250,.14); color: #1d4ed8; }
 .progress-card.status-locked em { background: rgba(100,116,139,.12); color: #475569; }
+.empty-state, .empty-inline { border: 1px dashed rgba(217,164,65,.38); border-radius: 20px; background: rgba(255,248,234,.72); color: #445164; }
+.empty-state { padding: 22px; margin-bottom: 14px; }
+.empty-inline { display: grid; gap: 5px; padding: 13px; }
+.empty-state strong, .empty-inline strong { display: block; color: #071b33; font-weight: 950; }
+.empty-state p, .empty-inline p { margin: 6px 0 0; color: #516070; font-size: .82rem; font-weight: 780; line-height: 1.35; }
 .categories-section { margin-bottom: 12px; }
 .categories-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
 .categories-grid article { display: grid; align-content: start; gap: 7px; min-height: 142px; padding: 12px; }
