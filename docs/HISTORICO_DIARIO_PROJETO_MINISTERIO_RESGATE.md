@@ -926,3 +926,20 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foram criados ou executados seeders, não foram criados dados fake no banco real e não foram alteradas `MinhaCaminhadaArea.vue`, `MinhaCaminhadaNivel.vue` ou outros módulos.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Integração real da aba Nível da Minha Caminhada
+
+- **Horário:** 23:20–23:55 aprox.
+- **Objetivo:** integrar somente `/familia-resgate/minha-caminhada/nivel` com dados reais de progresso e nível, mantendo demais abas internas e rotas de detalhe fora do escopo.
+- **Rota ajustada:** `/familia-resgate/minha-caminhada/nivel` deixou de renderizar `MinhaCaminhadaArea` por `Closure` e passou a apontar para `MinhaCaminhadaController@level`.
+- **Controller ajustado:** `MinhaCaminhadaController` recebeu o método `level`, usando `WalkingProgressService`, `WalkingLevelService` e `WalkingAuthorizationService` para montar payload seguro da aba.
+- **Prop real criada:** `walkingLevel`, com `usesRealData`, `generatedAt`, pessoa vinculada, `canSeeYouthJourney`, jornada padrão, dados da caminhada geral, caminhada jovem somente quando autorizada, pontos aprovados, nível atual, próximo nível, progresso, logs recentes e estados vazios.
+- **Payload seguro:** o controller retorna arrays simples, não retorna Models crus, não cria registros, não altera banco, considera somente logs aprovados e não expõe `metadata` dos logs.
+- **Página ajustada:** `resources/js/Pages/FamiliaResgate/MinhaCaminhadaArea.vue` passou a consumir `walkingLevel` somente quando `area === 'nivel'`, renderizando resumo real, cards por jornada autorizada, progresso, próximo nível, logs recentes e ações seguras.
+- **Mocks removidos da aba Nível principal:** a seção principal de Nível não usa mais `currentLevelMock`, pontos fixos, nível fixo, rotas calculadas por mock ou autorização jovem mockada para renderizar o conteúdo da aba.
+- **Estados vazios seguros:** adicionados estados para usuário sem pessoa vinculada, jornada indisponível e ausência de pontos aprovados.
+- **Teste criado:** `tests/Feature/MinhaCaminhada/MinhaCaminhadaNivelControllerTest.php`, cobrindo autenticação obrigatória, payload seguro, filtro de pontos aprovados, bloqueio da jornada jovem para usuário comum e payload jovem para pessoa vinculada aos Resgatados.
+- **Validações executadas:** `php -l` passou no controller e no teste; teste da aba Nível passou com 5 testes e 90 assertions; testes focados de Minha Caminhada passaram com 24 testes e 236 assertions; `php artisan test --compact` passou com 74 testes e 398 assertions; `npm run build` passou; `git diff --check` passou; rota `/nivel` confirmada via `route:list`.
+- **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foram criados ou executados seeders, não foram criados dados fake no banco real e não foram alteradas as rotas internas de níveis, mapa, histórico, mentor, regras, ranking ou outros módulos.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.

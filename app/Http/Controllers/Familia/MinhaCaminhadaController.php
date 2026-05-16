@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Services\MinhaCaminhada\WalkingAchievementReadService;
 use App\Services\MinhaCaminhada\WalkingAuthorizationService;
 use App\Services\MinhaCaminhada\WalkingDashboardReadService;
+use App\Services\MinhaCaminhada\WalkingLevelService;
+use App\Services\MinhaCaminhada\WalkingProgressService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -89,6 +91,58 @@ class MinhaCaminhadaController extends Controller
         ]);
     }
 
+    public function level(
+        Request $request,
+        WalkingProgressService $progressService,
+        WalkingLevelService $levelService
+    ): Response {
+        $user = $request->user();
+        $person = $user?->person;
+        $defaultJourneyType = $levelService->getJourneyByType('general')?->type ?? 'general';
+
+        if (!$person) {
+            return Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+                'area' => 'nivel',
+                'journey' => 'auto',
+                'walkingLevel' => $this->emptyLevelPayload(
+                    'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+                    false,
+                    $defaultJourneyType
+                ),
+            ]);
+        }
+
+        $canSeeYouthJourney = $this->authorizationService->userCanViewOwnYouthJourney($user);
+
+        return Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+            'area' => 'nivel',
+            'journey' => 'auto',
+            'walkingLevel' => [
+                'authorized' => true,
+                'usesRealData' => true,
+                'generatedAt' => now()->toISOString(),
+                'message' => null,
+                'person' => [
+                    'id' => $person->id,
+                    'name' => $person->preferred_name ?: $person->full_name,
+                ],
+                'canSeeYouthJourney' => $canSeeYouthJourney,
+                'defaultJourneyType' => $defaultJourneyType,
+                'general' => $this->formatLevelJourney(
+                    $progressService->getOwnProgress($user),
+                    $progressService->getRecentApprovedLogs($user, $person)
+                ),
+                'youth' => $canSeeYouthJourney
+                    ? $this->formatLevelJourney(
+                        $progressService->getOwnProgress($user, 'youth'),
+                        $progressService->getRecentApprovedLogs($user, $person, 'youth')
+                    )
+                    : $this->emptyLevelJourney('youth', false),
+                'emptyStates' => $this->levelEmptyStates(),
+            ],
+        ]);
+    }
+
     private function formatJourneyDashboard(array $dashboard, string $journeyType): array
     {
         if (!($dashboard['authorized'] ?? false)) {
@@ -115,6 +169,105 @@ class MinhaCaminhadaController extends Controller
             'achievements' => $dashboard['achievements'] ?? [],
             'mentor' => $dashboard['mentor'] ?? null,
             'highlights' => $dashboard['highlights'] ?? [],
+        ];
+    }
+
+    private function emptyLevelPayload(string $message, bool $authorized, string $defaultJourneyType = 'general'): array
+    {
+        return [
+            'authorized' => $authorized,
+            'usesRealData' => true,
+            'generatedAt' => now()->toISOString(),
+            'message' => $message,
+            'person' => null,
+            'canSeeYouthJourney' => false,
+            'defaultJourneyType' => $defaultJourneyType,
+            'general' => $this->emptyLevelJourney('general', false),
+            'youth' => $this->emptyLevelJourney('youth', false),
+            'emptyStates' => $this->levelEmptyStates(),
+        ];
+    }
+
+    private function emptyLevelJourney(string $journeyType, bool $authorized = true): array
+    {
+        return [
+            'authorized' => $authorized,
+            'journeyType' => $journeyType,
+            'journey' => null,
+            'points' => 0,
+            'approvedLogsCount' => 0,
+            'currentLevel' => null,
+            'nextLevel' => null,
+            'pointsToNextLevel' => 0,
+            'progressPercent' => 0,
+            'recentLogs' => [],
+            'summary' => [
+                'has_points' => false,
+                'has_current_level' => false,
+                'has_next_level' => false,
+                'is_final_level' => false,
+            ],
+        ];
+    }
+
+    private function formatLevelJourney(array $progress, array $recentLogs): array
+    {
+        if (!($progress['authorized'] ?? false)) {
+            return array_merge(
+                $this->emptyLevelJourney($progress['journey_type'] ?? 'general', false),
+                ['message' => $progress['message'] ?? 'Caminhada indisponível.']
+            );
+        }
+
+        $levelProgress = $progress['level_progress'] ?? [];
+        $points = (int) ($progress['total_points'] ?? 0);
+        $currentLevel = $this->formatLevelData($levelProgress['current_level'] ?? null);
+        $nextLevel = $this->formatLevelData($levelProgress['next_level'] ?? null);
+
+        return [
+            'authorized' => true,
+            'journeyType' => $progress['journey']['type'] ?? $progress['journey_type'] ?? 'general',
+            'journey' => $progress['journey'] ?? null,
+            'points' => $points,
+            'approvedLogsCount' => (int) ($progress['approved_logs_count'] ?? 0),
+            'currentLevel' => $currentLevel,
+            'nextLevel' => $nextLevel,
+            'pointsToNextLevel' => (int) ($levelProgress['points_to_next_level'] ?? 0),
+            'progressPercent' => (int) ($levelProgress['progress_percentage'] ?? 0),
+            'recentLogs' => $recentLogs,
+            'summary' => [
+                'has_points' => $points > 0,
+                'has_current_level' => $currentLevel !== null,
+                'has_next_level' => $nextLevel !== null,
+                'is_final_level' => $nextLevel === null && $currentLevel !== null,
+            ],
+        ];
+    }
+
+    private function formatLevelData(?array $level): ?array
+    {
+        if (!$level) {
+            return null;
+        }
+
+        return [
+            'id' => $level['id'] ?? null,
+            'number' => (int) ($level['number'] ?? 0),
+            'name' => $level['name'] ?? 'Nível',
+            'description' => $level['description'] ?? null,
+            'requiredPoints' => (int) ($level['required_points'] ?? 0),
+        ];
+    }
+
+    private function levelEmptyStates(): array
+    {
+        return [
+            'withoutPersonTitle' => 'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+            'withoutPersonText' => 'Assim que o cadastro for vinculado, seu nível real aparecerá aqui.',
+            'withoutPointsTitle' => 'Ainda não há pontos aprovados nesta caminhada.',
+            'withoutPointsText' => 'Quando houver registros aprovados, seu nível começará a avançar.',
+            'withoutJourneyTitle' => 'Caminhada indisponível no momento.',
+            'withoutJourneyText' => 'Assim que a jornada estiver disponível, o nível real aparecerá aqui.',
         ];
     }
 

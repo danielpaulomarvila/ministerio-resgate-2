@@ -6,11 +6,10 @@ import FamilySidebar from '@/Components/FamiliaResgate/FamilySidebar.vue'
 const props = defineProps({
   area: { type: String, default: 'mapa' },
   journey: { type: String, default: 'geral' },
+  walkingLevel: { type: Object, default: null },
 })
 
 const baseRoute = '/familia-resgate/minha-caminhada'
-
-// Mock temporário: usuário comum deve acessar somente caminhada geral; jovem/resgatado acessa caminhada geral + caminhada jovem. Backend futuro deve enviar permissões/jornada do usuário, hasYouthJourney e níveis atuais; a rota jovem deve ser protegida futuramente por backend/policy, pois frontend não é segurança final.
 
 const journeyConfigs = {
   geral: {
@@ -91,29 +90,6 @@ const statusNotes = {
   current: 'Você está aqui, siga firme.',
   future: 'Próxima estação visível.',
   locked: 'Será liberado mais à frente.',
-}
-
-const currentLevelMock = {
-  general: {
-    slug: 'geral',
-    title: 'Caminhada Geral da Igreja',
-    label: 'Jornada geral',
-    icon: '✚',
-    points: 380,
-    currentLevel: 2,
-    pointStep: 400,
-    description: 'Sua caminhada comum na família da igreja, marcada por presença, Palavra, comunhão e serviço fiel.',
-  },
-  youth: {
-    slug: 'jovem',
-    title: 'Caminhada Jovem dos Resgatados',
-    label: 'Jornada jovem',
-    icon: '🔥',
-    points: 920,
-    currentLevel: 6,
-    pointStep: 250,
-    description: 'Sua jornada nos Resgatados, com pontos, níveis e marcos próprios para acompanhar seu crescimento.',
-  },
 }
 
 const journeyDashboardMocks = {
@@ -532,30 +508,96 @@ const mapHeading = computed(() => journeySlug.value === 'jovem' ? '20 marcos jov
 const mapDescription = computed(() => journeySlug.value === 'jovem' ? 'Cada estação representa presença, Palavra, comunhão e propósito na geração jovem.' : 'Cada igreja representa uma estação de presença, Palavra, serviço, comunhão e constância.')
 const areaLevels = computed(() => journeySlug.value === 'jovem' ? youthLevels : generalLevels)
 const currentLevelName = computed(() => areaLevels.value.find((level) => level.number === journeyConfig.value.currentLevel)?.name || areaLevels.value[0].name)
-const buildLevelCard = (journey, levels) => {
-  const currentLevel = levels.find((level) => level.number === journey.currentLevel) || levels[0]
-  const nextLevel = levels.find((level) => level.number === journey.currentLevel + 1) || levels[levels.length - 1]
-  const requiredPoints = journey.currentLevel * journey.pointStep
-  const progress = Math.min(100, Math.round((journey.points / requiredPoints) * 100))
+const hasRealLevelData = computed(() => Boolean(props.walkingLevel?.usesRealData))
+const canSeeYouthJourney = computed(() => hasRealLevelData.value ? Boolean(props.walkingLevel?.canSeeYouthJourney) : viewerContext.canSeeYouthJourney)
+const activeLevelJourney = computed(() => props.walkingLevel?.defaultJourneyType === 'youth' && canSeeYouthJourney.value ? 'youth' : 'general')
+const formatNumber = (value) => Number(value || 0).toLocaleString('pt-BR')
+const buildRealLevelCard = (journey, type) => {
+  const currentLevel = journey?.currentLevel || null
+  const nextLevel = journey?.nextLevel || null
+  const points = Number(journey?.points || 0)
+  const hasPoints = points > 0
+  const slug = type === 'youth' ? 'jovem' : 'geral'
+  const label = type === 'youth' ? 'Jornada jovem' : 'Jornada geral'
 
   return {
-    ...journey,
-    currentLevelName: currentLevel.name,
-    nextLevelName: nextLevel.name,
-    requiredPoints,
-    progress,
-    levelRoute: `${baseRoute}/${journey.slug}/niveis/${journey.currentLevel}`,
-    mapRoute: `${baseRoute}/${journey.slug}/mapa`,
+    slug,
+    title: journey?.journey?.name || (type === 'youth' ? 'Caminhada Jovem' : 'Caminhada Geral'),
+    label,
+    icon: type === 'youth' ? '🔥' : '✚',
+    description: hasPoints
+      ? 'Nível calculado a partir dos pontos aprovados nesta caminhada.'
+      : 'Ponto de partida da caminhada enquanto ainda não há pontos aprovados.',
+    authorized: Boolean(journey?.authorized),
+    points,
+    approvedLogsCount: Number(journey?.approvedLogsCount || 0),
+    hasPoints,
+    currentLevelNumber: currentLevel?.number || null,
+    currentLevelName: currentLevel?.name || 'Ponto de partida',
+    currentLevelDescription: currentLevel?.description || null,
+    nextLevelName: nextLevel?.name || 'Marco final da jornada',
+    nextLevelRequiredPoints: Number(nextLevel?.requiredPoints || 0),
+    pointsToNextLevel: Number(journey?.pointsToNextLevel || 0),
+    progress: Number(journey?.progressPercent || 0),
+    recentLogs: Array.isArray(journey?.recentLogs) ? journey.recentLogs : [],
   }
 }
 const levelJourneyCards = computed(() => {
-  const cards = [buildLevelCard(currentLevelMock.general, generalLevels)]
+  if (!hasRealLevelData.value || !props.walkingLevel?.authorized) {
+    return []
+  }
 
-  if (viewerContext.canSeeYouthJourney) {
-    cards.push(buildLevelCard(currentLevelMock.youth, youthLevels))
+  const cards = []
+
+  if (props.walkingLevel?.general?.authorized) {
+    cards.push(buildRealLevelCard(props.walkingLevel.general, 'general'))
+  }
+
+  if (canSeeYouthJourney.value && props.walkingLevel?.youth?.authorized) {
+    cards.push(buildRealLevelCard(props.walkingLevel.youth, 'youth'))
   }
 
   return cards
+})
+const currentLevelData = computed(() => props.walkingLevel?.[activeLevelJourney.value] || props.walkingLevel?.general || null)
+const levelSummaryCards = computed(() => {
+  if (!hasRealLevelData.value || !props.walkingLevel?.authorized || !currentLevelData.value?.authorized) {
+    return []
+  }
+
+  return [
+    { label: 'Pontos aprovados', value: `${formatNumber(currentLevelData.value.points)} pts`, note: 'Somente registros aprovados entram neste total.' },
+    { label: 'Nível atual', value: currentLevelData.value.currentLevel?.name || 'Ponto de partida', note: currentLevelData.value.points > 0 ? `Nível ${currentLevelData.value.currentLevel?.number || 1}` : 'Ainda sem avanço por pontos aprovados.' },
+    { label: 'Próximo nível', value: currentLevelData.value.nextLevel?.name || 'Marco final', note: currentLevelData.value.nextLevel ? `Faltam ${formatNumber(currentLevelData.value.pointsToNextLevel)} pts` : 'Não há próximo nível cadastrado.' },
+    { label: 'Registros aprovados', value: formatNumber(currentLevelData.value.approvedLogsCount), note: 'Logs recentes aparecem sem metadata sensível.' },
+  ]
+})
+const recentLevelLogs = computed(() => Array.isArray(currentLevelData.value?.recentLogs) ? currentLevelData.value.recentLogs : [])
+const levelEmptyState = computed(() => {
+  const states = props.walkingLevel?.emptyStates || {}
+
+  if (!props.walkingLevel?.authorized) {
+    return {
+      title: states.withoutPersonTitle || 'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+      text: states.withoutPersonText || 'Assim que o cadastro for vinculado, seu nível real aparecerá aqui.',
+    }
+  }
+
+  if (!currentLevelData.value?.authorized) {
+    return {
+      title: states.withoutJourneyTitle || 'Caminhada indisponível no momento.',
+      text: states.withoutJourneyText || 'Assim que a jornada estiver disponível, o nível real aparecerá aqui.',
+    }
+  }
+
+  if (!currentLevelData.value?.summary?.has_points) {
+    return {
+      title: states.withoutPointsTitle || 'Ainda não há pontos aprovados nesta caminhada.',
+      text: states.withoutPointsText || 'Quando houver registros aprovados, seu nível começará a avançar.',
+    }
+  }
+
+  return null
 })
 const mapLevels = computed(() => areaLevels.value.map((level) => {
   const config = journeyConfig.value
@@ -598,7 +640,7 @@ const lockedCount = computed(() => mapLevels.value.filter((level) => level.statu
           <h1>{{ areaTitle }}</h1>
           <small>{{ areaSubtitle }}</small>
         </div>
-        <strong v-if="isLevelArea">{{ viewerContext.canSeeYouthJourney ? 'Jornadas separadas' : 'Jornada geral' }}</strong>
+        <strong v-if="isLevelArea">{{ canSeeYouthJourney ? 'Jornadas separadas' : 'Jornada geral' }}</strong>
         <strong v-else-if="isJourneyDetailArea">{{ journeyDashboard.label }}</strong>
         <strong v-else-if="isHistoryArea">Histórico completo</strong>
         <strong v-else-if="isMentorArea">Apoio pastoral</strong>
@@ -608,12 +650,25 @@ const lockedCount = computed(() => mapLevels.value.filter((level) => level.statu
       </header>
 
       <section v-if="isLevelArea" class="level-overview" aria-label="Meu nível atual">
-        <div v-if="viewerContext.canSeeYouthJourney" class="level-separation-note">
+        <div v-if="canSeeYouthJourney" class="level-separation-note">
           <span>Jornadas separadas</span>
           <strong>Você acompanha duas jornadas, com pontos gerais e jovens organizados separadamente.</strong>
         </div>
 
-        <div class="level-cards">
+        <div v-if="levelSummaryCards.length" class="level-summary-grid">
+          <article v-for="card in levelSummaryCards" :key="card.label">
+            <span>{{ card.label }}</span>
+            <strong>{{ card.value }}</strong>
+            <small>{{ card.note }}</small>
+          </article>
+        </div>
+
+        <article v-if="levelEmptyState" class="level-empty-state">
+          <strong>{{ levelEmptyState.title }}</strong>
+          <p>{{ levelEmptyState.text }}</p>
+        </article>
+
+        <div v-if="levelJourneyCards.length" class="level-cards">
           <article v-for="card in levelJourneyCards" :key="card.slug" class="level-current-card" :class="{ 'is-youth-card': card.slug === 'jovem' }">
             <header>
               <span>{{ card.label }}</span>
@@ -624,12 +679,12 @@ const lockedCount = computed(() => mapLevels.value.filter((level) => level.statu
             <div class="level-current-main">
               <div class="level-emblem">
                 <span>{{ card.icon }}</span>
-                <small>Nível {{ card.currentLevel }}</small>
+                <small>{{ card.currentLevelNumber ? `Nível ${card.currentLevelNumber}` : 'Início' }}</small>
               </div>
               <div>
                 <small>Nível atual</small>
                 <strong>{{ card.currentLevelName }}</strong>
-                <p>{{ card.points.toLocaleString('pt-BR') }} / {{ card.requiredPoints.toLocaleString('pt-BR') }} pontos necessários</p>
+                <p>{{ formatNumber(card.points) }} pontos aprovados nesta caminhada</p>
               </div>
             </div>
 
@@ -646,12 +701,26 @@ const lockedCount = computed(() => mapLevels.value.filter((level) => level.statu
               <strong>{{ card.nextLevelName }}</strong>
             </div>
 
-            <nav class="level-card-actions" :aria-label="`Ações da ${card.title}`">
-              <Link :href="card.levelRoute">{{ card.slug === 'jovem' ? 'Ver nível jovem' : 'Ver nível geral' }}</Link>
-              <Link :href="card.mapRoute">{{ card.slug === 'jovem' ? 'Ir ao mapa jovem' : 'Ir ao mapa geral' }}</Link>
-            </nav>
+            <footer class="level-real-details">
+              <span>{{ card.nextLevelRequiredPoints ? `${formatNumber(card.nextLevelRequiredPoints)} pts para o próximo nível` : 'Sem próximo nível cadastrado' }}</span>
+              <strong>{{ card.pointsToNextLevel ? `Faltam ${formatNumber(card.pointsToNextLevel)} pts` : 'Progresso completo no marco atual' }}</strong>
+            </footer>
           </article>
         </div>
+
+        <section v-if="recentLevelLogs.length" class="level-recent-logs">
+          <header>
+            <span>Registros recentes</span>
+            <h2>Pontos aprovados considerados no nível</h2>
+          </header>
+          <div>
+            <article v-for="log in recentLevelLogs" :key="log.id">
+              <strong>{{ log.category }}</strong>
+              <small>{{ formatNumber(log.points) }} pts</small>
+              <p>{{ log.notes || 'Registro aprovado sem observação pública.' }}</p>
+            </article>
+          </div>
+        </section>
 
         <nav class="level-extra-actions" aria-label="Ações do nível atual">
           <Link :href="baseRoute">Voltar para Minha Caminhada</Link>
@@ -1332,6 +1401,15 @@ a { text-decoration: none; }
 .level-separation-note { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid rgba(249,115,22,.22); border-radius: 20px; background: linear-gradient(135deg, rgba(255,248,234,.92), rgba(255,241,220,.86)); box-shadow: 0 14px 32px rgba(7,27,51,.07), inset 0 1px 0 rgba(255,255,255,.7); }
 .level-separation-note span { color: #9a4b12; font-size: .74rem; font-weight: 950; letter-spacing: .1em; text-transform: uppercase; }
 .level-separation-note strong { color: #071b33; font-size: .9rem; font-weight: 900; line-height: 1.3; }
+.level-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
+.level-summary-grid article, .level-empty-state, .level-recent-logs { border: 1px solid rgba(217,164,65,.16); background: rgba(255,248,234,.88); box-shadow: 0 12px 28px rgba(7,27,51,.07), inset 0 1px 0 rgba(255,255,255,.64); }
+.level-summary-grid article { padding: 13px; border-radius: 18px; }
+.level-summary-grid span { color: #8a5b13; font-size: .72rem; font-weight: 950; letter-spacing: .1em; text-transform: uppercase; }
+.level-summary-grid strong { display: block; margin: 5px 0 2px; color: #071b33; font-size: 1rem; font-weight: 950; line-height: 1.08; letter-spacing: -.025em; }
+.level-summary-grid small { color: #536174; font-size: .76rem; font-weight: 820; }
+.level-empty-state { padding: 16px; border-style: dashed; border-radius: 20px; }
+.level-empty-state strong { color: #071b33; font-size: .95rem; font-weight: 950; }
+.level-empty-state p { margin: 6px 0 0; color: #536174; font-size: .82rem; font-weight: 820; line-height: 1.34; }
 .level-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .level-current-card { position: relative; overflow: hidden; display: grid; gap: 15px; padding: 18px; border: 1px solid rgba(217,164,65,.24); border-radius: 26px; background: radial-gradient(circle at 86% 10%, rgba(246,200,95,.22), transparent 34%), linear-gradient(145deg, rgba(255,248,234,.96), rgba(246,238,221,.9)); box-shadow: 0 22px 48px rgba(7,27,51,.1), inset 0 1px 0 rgba(255,255,255,.72); }
 .level-current-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(7,27,51,.04), transparent 38%); pointer-events: none; }
@@ -1359,6 +1437,18 @@ a { text-decoration: none; }
 .level-next-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 11px 13px; border: 1px solid rgba(7,27,51,.08); border-radius: 18px; background: rgba(7,27,51,.04); }
 .level-next-row span { color: #64748b; font-size: .76rem; font-weight: 950; text-transform: uppercase; }
 .level-next-row strong { color: #071b33; font-size: .9rem; font-weight: 950; text-align: right; }
+.level-real-details { display: grid; gap: 5px; padding: 10px 12px; border-radius: 16px; background: rgba(217,164,65,.1); }
+.level-real-details span { color: #64748b; font-size: .72rem; font-weight: 900; }
+.level-real-details strong { color: #071b33; font-size: .82rem; font-weight: 950; }
+.level-recent-logs { padding: 14px; border-radius: 22px; }
+.level-recent-logs header { margin-bottom: 10px; }
+.level-recent-logs header span { color: #8a5b13; font-size: .72rem; font-weight: 950; letter-spacing: .1em; text-transform: uppercase; }
+.level-recent-logs h2 { margin: 3px 0 0; color: #071b33; font: 900 1.08rem/1.08 Georgia, serif; }
+.level-recent-logs > div { display: grid; gap: 7px; }
+.level-recent-logs article { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; padding: 9px 10px; border: 1px solid rgba(217,164,65,.12); border-radius: 13px; background: rgba(255,255,255,.52); }
+.level-recent-logs article strong { color: #071b33; font-size: .82rem; font-weight: 900; }
+.level-recent-logs article small { color: #8a5b13; font-size: .72rem; font-weight: 950; white-space: nowrap; }
+.level-recent-logs article p { grid-column: 1 / -1; margin: 0; color: #536174; font-size: .76rem; font-weight: 780; line-height: 1.28; }
 .level-card-actions, .level-extra-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .level-card-actions a, .level-extra-actions a { display: inline-flex; justify-content: center; align-items: center; min-height: 38px; padding: 10px 14px; border: 1px solid rgba(217,164,65,.24); border-radius: 999px; background: #071b33; color: #fff8ea; font-size: .82rem; font-weight: 950; box-shadow: 0 10px 22px rgba(7,27,51,.14); }
 .level-card-actions a:first-child { background: linear-gradient(135deg, #d9a441, #f6c85f); color: #071b33; border-color: rgba(217,164,65,.32); }
