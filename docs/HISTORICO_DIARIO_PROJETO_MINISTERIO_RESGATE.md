@@ -741,3 +741,56 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Campos e foreign keys:** documento definiu campos recomendados para cada tabela, referências para `people`, `users`, `families` e tabelas `walking_*`, além de preferência por preservar logs/históricos sem cascades destrutivos.
 - **Ordem futura das migrations:** definida sequência de criação começando por `walking_journeys` e encerrando com `walking_history_events`.
 - **Escopo preservado:** sem migrations criadas, sem alteração de banco, sem models, controllers, services, policies, rotas, Vue, seeders, commit ou push.
+
+### Etapa — Migrations base da Minha Caminhada criadas
+
+- **Horário:** 01:17–01:45 aprox.
+- **Objetivo:** criar somente as migrations base da primeira fase da Minha Caminhada, conforme a decisão técnica oficial registrada no documento `07_DECISAO_TECNICA_MIGRATIONS_MINHA_CAMINHADA.md`.
+- **Status inicial:** `git status --short` retornou limpo antes da criação; busca por migrations parecidas com `walking`, `journey`, `level`, `point`, `achievement`, `highlight`, `mentor`, `history`, `caminhada`, `conquista`, `pontuacao` e `destaque` não encontrou arquivos existentes.
+- **Migrations criadas:** `create_walking_journeys_table`, `create_walking_levels_table`, `create_walking_point_rules_table`, `create_walking_point_logs_table`, `create_walking_achievements_table`, `create_person_walking_achievements_table`, `create_walking_highlights_table`, `create_walking_mentor_response_templates_table`, `create_walking_mentor_response_logs_table` e `create_walking_history_events_table`.
+- **Ordem ajustada:** os timestamps dos arquivos recém-criados foram organizados para preservar a ordem oficial das dependências, evitando que logs fossem executados antes de rules/templates.
+- **Escopo das tabelas:** jornadas, níveis, regras de pontos, logs de pontos, catálogo de conquistas, conquistas por pessoa, destaques, templates do mentor, logs do mentor e histórico visível da caminhada.
+- **Tabelas não criadas:** não foram criadas `youth_teams`, `youth_team_members`, tabela de presença/eventos, tabela financeira, tabela própria de intercessão ou tabela de avaliações privadas de intercessão.
+- **Cuidados técnicos:** migrations incluem comentários didáticos por bloco, índices principais, uniques definidos no documento 07, foreign keys para `people`, `users`, `families` e tabelas `walking_*`, e uso de `restrictOnDelete`/`nullOnDelete` conforme preservação histórica.
+- **Ajuste preventivo:** a FK `walking_mentor_response_template_id` em `walking_mentor_response_logs` recebeu nome curto para evitar limite de identificador em bancos como MySQL.
+- **Validações executadas:** lint PHP em todas as migrations `walking` passou com `No syntax errors detected`; listagem confirmou exatamente 10 migrations `walking`; busca por tabelas/colunas proibidas (`youth_teams`, `youth_team_members`, `youth_team_id`, `team_points`, `counts_for_team`, presença, attendance, financeiro e intercessão própria) não encontrou resultados; `git diff --check` passou; `php artisan migrate:status --no-ansi` mostrou as 10 migrations novas como `Pending`.
+- **Importante:** as migrations foram criadas, mas ainda não foram executadas; nenhuma alteração de banco foi aplicada.
+- **Escopo preservado:** não foram criados models, controllers, services, policies, seeders, rotas ou arquivos Vue; mocks não foram substituídos; nenhum dado real foi alterado.
+- **Pendência próxima:** revisar as migrations criadas e só depois rodar `migrate` mediante aprovação explícita.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Revisão das migrations base da Minha Caminhada antes do migrate
+
+- **Horário:** 01:29–01:42 aprox.
+- **Objetivo:** revisar as 10 migrations base da Minha Caminhada antes de qualquer execução no banco, conferindo ordem, nomes, campos, enums, foreign keys, indexes, uniques, `down()`, comportamento de delete, constraints longas, ausência de tabelas proibidas e status `Pending`.
+- **Migrations revisadas:** `walking_journeys`, `walking_levels`, `walking_point_rules`, `walking_point_logs`, `walking_achievements`, `person_walking_achievements`, `walking_highlights`, `walking_mentor_response_templates`, `walking_mentor_response_logs` e `walking_history_events`.
+- **Ordem confirmada:** as migrations estão ordenadas de `walking_journeys` até `walking_history_events`, preservando dependências entre jornadas, regras, logs, conquistas, mentor e histórico.
+- **Campos confirmados:** os campos definidos seguem o documento 07, incluindo enums oficiais, flags de ativação, `metadata` JSON, timestamps, `source_type/source_id` nullable, períodos de destaque e visibilidade por policy futura.
+- **Foreign keys confirmadas:** `person_id` aponta para `people`, usuários de ação apontam para `users`, `family_id` aponta para `families`, e chaves `walking_*` apontam para as tabelas da Minha Caminhada; registros históricos/pontuação usam `restrictOnDelete` ou `nullOnDelete`, sem cascade destrutivo perigoso.
+- **Correção técnica realizada:** em `person_walking_achievements`, o unique com `walking_journey_id` nullable foi ajustado para usar a coluna gerada `walking_journey_unique_id`, preservando unicidade em MySQL quando a jornada for nula.
+- **Constraint longa conferida:** `walking_mentor_response_template_id` em `walking_mentor_response_logs` usa foreign key nomeada `wmrl_template_fk`, evitando limite de identificador em MySQL.
+- **Tabelas/colunas proibidas:** busca por `youth_teams`, `youth_team_members`, `team_points`, `counts_for_team`, `attendance`, `presence`, `intercession_evaluation` e `financial_` não retornou ocorrências nas migrations `walking`.
+- **Validações executadas:** lint PHP em todas as migrations `walking` passou; `git diff --check` passou; `php artisan migrate:status --no-ansi` mostrou as 10 migrations da Minha Caminhada como `Pending`.
+- **Importante:** `migrate` não foi executado; nenhuma tabela foi criada no banco nesta etapa.
+- **Escopo preservado:** não foram criados models, controllers, services, policies, seeders, rotas ou arquivos Vue; nenhum dado real foi alterado.
+- **Pendência próxima:** se aprovado, rodar `php artisan migrate` em etapa separada e explícita.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Execução das migrations base da Minha Caminhada
+
+- **Horário:** 01:42–01:50 aprox.
+- **Objetivo:** executar `php artisan migrate` após a revisão das migrations base da Minha Caminhada.
+- **Primeira execução:** `php artisan migrate` aplicou com sucesso as cinco primeiras migrations (`walking_journeys`, `walking_levels`, `walking_point_rules`, `walking_point_logs` e `walking_achievements`), mas falhou em `person_walking_achievements`.
+- **Erro encontrado:** MySQL retornou `SQLSTATE[HY000]: General error: 1215 Cannot add foreign key constraint` ao tentar criar a FK de `walking_journey_id` com `on delete set null` em uma tabela que também usava coluna gerada baseada em `walking_journey_id`.
+- **Diagnóstico:** `migrate:status` mostrou as cinco primeiras migrations como `Ran` e as demais como `Pending`; a tabela `person_walking_achievements` havia sido criada parcialmente pelo MySQL, mas ainda sem migration registrada.
+- **Conferência da tabela parcial:** a tabela parcial `person_walking_achievements` estava vazia, com `0` registros.
+- **Correção técnica autorizada:** a migration `create_person_walking_achievements_table` foi ajustada para usar `restrictOnDelete()` em `walking_journey_id`, evitando o erro de FK com coluna gerada no MySQL.
+- **Ação corretiva autorizada:** foi removida somente a tabela parcial e vazia `person_walking_achievements`; nenhuma outra tabela foi dropada.
+- **Reexecução:** após remover a tabela parcial vazia, foi executado apenas `php artisan migrate`, aplicando com sucesso as cinco migrations restantes (`person_walking_achievements`, `walking_highlights`, `walking_mentor_response_templates`, `walking_mentor_response_logs` e `walking_history_events`).
+- **Resultado final:** `php artisan migrate:status --no-ansi` mostrou as 10 migrations da Minha Caminhada como `Ran`; as cinco primeiras ficaram no batch 15 e as cinco restantes no batch 16.
+- **Tabelas conferidas:** consulta `SHOW TABLES LIKE '%walking%'` confirmou 10 tabelas: `person_walking_achievements`, `walking_achievements`, `walking_highlights`, `walking_history_events`, `walking_journeys`, `walking_levels`, `walking_mentor_response_logs`, `walking_mentor_response_templates`, `walking_point_logs` e `walking_point_rules`.
+- **Escopo preservado:** não foram executados `migrate:fresh`, `migrate:refresh`, `db:wipe` ou seeders; não foram criados models, controllers, services, policies, seeders, rotas ou Vue.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.
