@@ -1022,3 +1022,25 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foi executado migrate:fresh, não foi executado db:wipe, não foram criados ou executados seeders no banco real, não foram criados dados fake no banco real e não foram alterados regras, ranking/destaques, geral/jovem detalhado, pontuação, presenças, destaques mensal, regras de pontos, Central da Família, Meu Perfil ou Meu Financeiro.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Integração real de Regras e Pontuação da Minha Caminhada
+
+- **Horário:** 16:15–16:45 aprox.
+- **Objetivo:** integrar somente `/familia-resgate/minha-caminhada/regras`, `/familia-resgate/minha-caminhada/regras-de-pontos` e `/familia-resgate/minha-caminhada/pontuacao` com regras reais/seguras, mantendo fora do escopo ranking/destaques, geral/jovem detalhado, presenças, destaques mensal, Central da Família, Meu Perfil e Meu Financeiro.
+- **Rotas ajustadas:** `/regras`, `/regras-de-pontos` e `/pontuacao` passaram a apontar para `MinhaCaminhadaController@rules`, `MinhaCaminhadaController@pointRules` e `MinhaCaminhadaController@points`.
+- **Placeholders removidos:** `/regras-de-pontos` e `/pontuacao` foram removidas do array genérico de placeholders para evitar rota duplicada.
+- **Service criado:** `WalkingRulesReadService`, somente leitura, busca jornadas ativas, regras ativas de `WalkingPointRule`, agrupa por categoria e retorna arrays simples.
+- **Controller ajustado:** `MinhaCaminhadaController` recebeu métodos `rules`, `pointRules`, `points` e helper privado para renderizar payload compartilhado.
+- **Prop real criada:** `walkingRules`, com `usesRealData`, `generatedAt`, variante da rota, pessoa vinculada ou `null`, autorização jovem, regras gerais reais, regras jovens somente quando autorizadas, grupos, resumos, explicações e estados vazios.
+- **Regras reais exibidas:** a leitura usa somente `WalkingPointRule` ativo; regras inativas não aparecem, incluindo a regra futura/inativa de intercessão.
+- **Regras jovens protegidas:** usuário comum recebe `walkingRules.youth.authorized = false` e regras jovens vazias; jovens/resgatados autorizados recebem regras jovens reais ativas.
+- **Aliases reais:** `/regras-de-pontos` e `/pontuacao` usam o mesmo payload real de regras, mudando apenas `walkingRules.variant`.
+- **Página ajustada:** `resources/js/Pages/FamiliaResgate/MinhaCaminhadaArea.vue` passou a receber `walkingRules` e, somente no branch `area === 'regras'`, consumir regras reais, grupos, resumos, jornada selecionada, validação e estados vazios.
+- **Mocks removidos/neutralizados de Regras/Pontuação:** removidos critérios visuais inventados, trilho jovem fake, equipes jovens, status fake de validação e textos de pontuação sem fonte no banco.
+- **Estados vazios seguros:** adicionados estados para ausência de pessoa vinculada, nenhuma regra ativa disponível e regras jovens não autorizadas.
+- **Teste criado:** `tests/Feature/MinhaCaminhada/MinhaCaminhadaRegrasControllerTest.php`, cobrindo autenticação obrigatória, regras gerais reais, bloqueio jovem, liberação jovem, aliases `/regras-de-pontos` e `/pontuacao`, regra inativa não retornada e intercessão inativa não retornada.
+- **Validações executadas:** `php -l` passou no controller, service e teste; teste novo passou com 8 testes e 111 assertions; `route:list --json` confirmou `/regras`, `/regras-de-pontos` e `/pontuacao` em controller; testes focados de mentor, histórico, visão geral, conquistas, nível, mapa, detalhe de nível e services passaram; `php artisan test --compact` passou com 107 testes e 970 assertions; `npm run build` passou; `git diff --check` passou.
+- **Busca de mocks:** busca por termos sensíveis/fake encontrou `Sem ranking espiritual` no branch de regras como negação segura e `equipe jovem` somente no branch de ranking/destaques, fora do escopo desta etapa.
+- **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foi executado migrate:fresh, não foi executado db:wipe, não foram criados ou executados seeders no banco real, não foram criados dados fake no banco real e não foram alterados ranking/destaques, geral/jovem detalhado, presenças, destaques mensal, Central da Família, Meu Perfil ou Meu Financeiro.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.

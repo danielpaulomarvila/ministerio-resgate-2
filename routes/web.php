@@ -151,10 +151,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/familia-resgate/minha-caminhada/mentor', [MinhaCaminhadaController::class, 'mentor'])
         ->name('familia-resgate.minha_caminhada.mentor');
 
-    Route::get('/familia-resgate/minha-caminhada/regras', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
-        'area' => 'regras',
-        'journey' => 'all',
-    ]))->name('familia-resgate.minha_caminhada.regras');
+    Route::get('/familia-resgate/minha-caminhada/regras', [MinhaCaminhadaController::class, 'rules'])
+        ->name('familia-resgate.minha_caminhada.regras');
+
+    Route::get('/familia-resgate/minha-caminhada/regras-de-pontos', [MinhaCaminhadaController::class, 'pointRules'])
+        ->name('familia-resgate.minha_caminhada.regras_de_pontos');
+
+    Route::get('/familia-resgate/minha-caminhada/pontuacao', [MinhaCaminhadaController::class, 'points'])
+        ->name('familia-resgate.minha_caminhada.pontuacao');
 
     Route::get('/familia-resgate/minha-caminhada/ranking', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
         'area' => 'ranking',
@@ -245,9 +249,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'codigo-conduta' => ['Código de Conduta', 'Princípios que orientam convivência, serviço e cuidado.', '✦'],
         'fale-com-lideranca' => ['Fale com a Liderança', 'Canal preparado para contato com liderança e cuidado pastoral.', '♡'],
         'ajuda' => ['Ajuda e Suporte', 'Orientações e suporte para uso da Central da Família.', '?'],
-        'minha-caminhada/pontuacao' => ['Sistema de Pontuação', 'Explicação dos critérios de XP, frequência, serviço e leitura bíblica.', '▤'],
         'minha-caminhada/destaques/mensal' => ['Membro Destaque do Mês', 'Reconhecimento mensal de frutos, constância, serviço, devoção e comunhão saudável.', '♕'],
-        'minha-caminhada/regras-de-pontos' => ['Regras de Pontuação', 'Critérios, pesos e camadas de pontuação da caminhada espiritual.', '▤'],
         'centro-sabedoria' => ['Centro da Sabedoria', 'Bíblia, devocionais, planos de leitura e perguntas da jornada bíblica.', '▣'],
         'centro-sabedoria/biblia' => ['Bíblia Online', 'Área preparada para leitura bíblica em diferentes versões.', '▣'],
         'centro-sabedoria/devocionais' => ['Devocionais', 'Devocionais guiados para fortalecer sua vida com Deus.', '◌'],

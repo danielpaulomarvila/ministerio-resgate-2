@@ -10,6 +10,7 @@ const props = defineProps({
   walkingMap: { type: Object, default: null },
   walkingHistory: { type: Object, default: null },
   walkingMentor: { type: Object, default: null },
+  walkingRules: { type: Object, default: null },
 })
 
 const baseRoute = '/familia-resgate/minha-caminhada'
@@ -193,65 +194,9 @@ const journeyDashboardMocks = {
 const historyFilters = ['Todos', 'Caminhada Geral', 'Caminhada Jovem', 'Presença', 'Palavra', 'Devocional', 'Serviço', 'Evangelismo', 'Conquistas']
 const selectedHistoryFilter = ref('Todos')
 const selectedMentorJourney = ref('general')
+const selectedRulesJourney = ref('general')
 
 const rulesPrinciplePillars = ['Encorajar, não comparar', 'Acompanhar, não expor', 'Crescer, não competir']
-const rulesJourneyCards = [
-  {
-    scope: 'general',
-    icon: '⛪',
-    title: 'Caminhada Geral da Igreja',
-    text: 'Esta jornada acompanha a constância geral da pessoa na vida da igreja.',
-    criteriaTitle: 'Critérios gerais',
-    criteria: [
-      { icon: '⛪', name: 'Presença', text: 'Cultos e atividades confirmadas.' },
-      { icon: '📖', name: 'Palavra', text: 'Leitura bíblica e registros.' },
-      { icon: '🕯️', name: 'Devocional', text: 'Constância de reflexão.' },
-      { icon: '🤝', name: 'Serviço', text: 'Escalas e ministérios.' },
-      { icon: '👥', name: 'Comunhão', text: 'Vida com a família da fé.' },
-      { icon: '🕊️', name: 'Evangelismo', text: 'Visitantes confirmados.' },
-      { icon: '🎓', name: 'Formação', text: 'Estudos e discipulado.' },
-      { icon: '🙏', name: 'Intercessão', text: 'Quando aplicável, com cuidado pastoral.' },
-    ],
-    notes: ['Pontos gerais', 'Níveis gerais', 'Conquistas gerais', 'Não depende dos desafios dos Resgatados'],
-  },
-  {
-    scope: 'youth',
-    icon: '🔥',
-    title: 'Caminhada Jovem dos Resgatados',
-    text: 'Esta jornada acompanha a participação dos jovens/resgatados nos encontros, desafios, Palavra, missões e ações próprias dos Resgatados.',
-    criteriaTitle: 'Critérios jovens',
-    criteria: [
-      { icon: '🔥', name: 'Presença', text: 'Encontros dos Resgatados.' },
-      { icon: '📖', name: 'Bíblia na mão', text: 'Palavra na jornada jovem.' },
-      { icon: '🧠', name: 'Desafios bíblicos', text: 'Aprendizado em movimento.' },
-      { icon: '🤝', name: 'Serviço jovem', text: 'Ações dos Resgatados.' },
-      { icon: '👥', name: 'Comunhão jovem', text: 'Crescimento em grupo.' },
-      { icon: '🕊️', name: 'Evangelismo jovem', text: 'Alcance da geração.' },
-      { icon: '🌍', name: 'Missões', text: 'Propósito em ação.' },
-    ],
-    notes: ['Pontos jovens', 'Níveis jovens', 'Conquistas jovens', 'Não mistura com a Caminhada Geral'],
-  },
-]
-const rulesYouthTrackNote = {
-  icon: '🔥',
-  title: 'Trilho jovem próprio',
-  text: 'Os Resgatados possuem regras específicas no módulo jovem, com desafios, Palavra, missões e crescimento acompanhados separadamente.',
-  notes: ['Não mistura com a Caminhada Geral', 'Visível apenas para perfis autorizados', 'Jovens e responsáveis conforme permissão'],
-}
-const rulesDefaultSeparationNote = 'A Caminhada Geral possui pontos, níveis e conquistas próprias. Trilhos jovens e equipes dos Resgatados pertencem ao módulo jovem e aparecem somente para perfis autorizados.'
-const rulesFullSeparationNote = 'Os pontos gerais e jovens são separados. Um jovem pode caminhar nas duas jornadas, mas cada uma tem seus próprios critérios, níveis, marcos e conquistas.'
-const rulesSeparationTracks = [
-  { icon: '⛪', label: 'Caminhada Geral', value: 'pontos gerais', scope: 'general' },
-  { icon: '🔥', label: 'Resgatados', value: 'trilho próprio no módulo jovem, conforme permissão', scope: 'youth-note' },
-  { icon: '🔥', label: 'Caminhada Jovem', value: 'pontos jovens', scope: 'youth' },
-  { icon: '🤝', label: 'Equipes dos Resgatados', value: 'pontos coletivos', scope: 'team' },
-]
-const rulesGuideCards = [
-  { icon: '🗺️', title: 'Marcos da caminhada', text: 'Cada nível geral representa um marco simbólico, não superioridade.', actions: [{ label: 'Mapa geral', route: `${baseRoute}/geral/mapa`, scope: 'general' }, { label: 'Mapa do trilho jovem', route: `${baseRoute}/jovem/mapa`, scope: 'youth' }] },
-  { icon: '🏅', title: 'Conquistas', text: 'Badges reconhecem constância e serviço sem envergonhar.', actions: [{ label: 'Ver conquistas', route: `${baseRoute}/conquistas` }] },
-  { icon: '✅', title: 'Validação', text: 'Alguns registros podem ser automáticos; outros precisam de confirmação da Secretaria ou liderança.', statuses: ['Confirmado', 'Em validação', 'Ajustado'] },
-]
-const rulesValidationStatuses = ['Confirmado', 'Em validação', 'Ajustado', 'Cancelado', 'Conquista desbloqueada']
 const rulesNotList = [
   'ranking de espiritualidade',
   'comparação entre pessoas',
@@ -267,18 +212,6 @@ const rulesForList = [
   'cuidar melhor',
 ]
 
-// Futuro backend:
-// Este contexto deve vir das permissões reais.
-// Membro comum vê apenas Caminhada Geral e Destaques Gerais.
-// Jovem/Resgatado vê Caminhada Geral + Caminhada Jovem.
-// Equipes jovens aparecem apenas no módulo jovem ou para autorizados.
-// Responsáveis veem dados jovens apenas dos filhos vinculados.
-// Administração/liderança vê conforme policy.
-// O Mentor não substitui pastor, liderança, discipulado ou aconselhamento pastoral.
-// Pontos gerais, jovens e de equipe jovem são separados.
-// Intercessores podem ter pontuação fixa mensal e pontuação por atendimento,
-// com avaliação privada convertida em no máximo 3 pontos.
-// Destaques não medem espiritualidade.
 const viewerContext = {
   profileType: 'member',
   canSeeGeneralJourney: true,
@@ -367,28 +300,69 @@ const journeyDashboard = computed(() => journeyDashboardMocks[journeyDetailSlug.
 const areaTitle = computed(() => isLevelArea.value ? 'Meu Nível Atual' : isRankingArea.value ? 'Destaques da Caminhada' : isRulesArea.value ? 'Regras da Caminhada' : isMentorArea.value ? 'Mentor da Caminhada' : isHistoryArea.value ? 'Histórico da Caminhada' : isJourneyDetailArea.value ? journeyDashboard.value.title : journeyConfig.value.title)
 const areaBreadcrumb = computed(() => isLevelArea.value ? 'Meu Nível Atual' : isRankingArea.value ? 'Destaques' : isRulesArea.value ? 'Regras' : isMentorArea.value ? 'Mentor' : isHistoryArea.value ? 'Histórico' : isJourneyDetailArea.value ? journeyDashboard.value.breadcrumb : journeyConfig.value.breadcrumb)
 const areaSubtitle = computed(() => isLevelArea.value ? 'Veja onde você está na sua caminhada e qual é o próximo marco da sua jornada.' : isRankingArea.value ? 'Reconheça constância, serviço, participação e crescimento sem transformar a fé em competição.' : isRulesArea.value ? 'Entenda como a pontuação, os níveis, as conquistas e os marcos espirituais ajudam a acompanhar sua constância com equilíbrio e cuidado.' : isMentorArea.value ? 'Receba uma orientação simples e pastoral com base na sua caminhada geral, seus registros e seus próximos passos.' : isHistoryArea.value ? 'Acompanhe as ações, pontos, conquistas e registros que formam sua jornada espiritual.' : isJourneyDetailArea.value ? journeyDashboard.value.subtitle : journeyConfig.value.subtitle)
-const visibleRulesJourneyCards = computed(() => rulesJourneyCards.filter((card) => card.scope === 'general' || viewerContext.canSeeYouthJourney))
-const showRulesYouthTrackNote = computed(() => !viewerContext.canSeeYouthJourney)
-const rulesSeparationNote = computed(() => viewerContext.canSeeYouthJourney ? rulesFullSeparationNote : rulesDefaultSeparationNote)
-const visibleRulesSeparationTracks = computed(() => rulesSeparationTracks.filter((track) => {
-  if (track.scope === 'general') {
-    return viewerContext.canSeeGeneralJourney
+const hasRealRulesData = computed(() => Boolean(props.walkingRules?.usesRealData))
+const canSeeYouthJourneyFromRules = computed(() => hasRealRulesData.value ? Boolean(props.walkingRules?.canSeeYouthJourney) : viewerContext.canSeeYouthJourney)
+const activeRulesJourney = computed(() => selectedRulesJourney.value === 'youth' && canSeeYouthJourneyFromRules.value ? 'youth' : 'general')
+const currentRulesData = computed(() => props.walkingRules?.[activeRulesJourney.value] || props.walkingRules?.general || null)
+const rulesItems = computed(() => Array.isArray(currentRulesData.value?.rules) ? currentRulesData.value.rules : [])
+const ruleGroups = computed(() => Array.isArray(currentRulesData.value?.groups) ? currentRulesData.value.groups : [])
+const rulesExplanation = computed(() => props.walkingRules?.explanation || {
+  title: 'Regras reais da caminhada',
+  text: 'As regras exibidas vêm do cadastro ativo da Minha Caminhada. Pontos só contam quando forem registrados e aprovados/validados conforme cada regra.',
+  personalProgressText: 'Você pode consultar as regras gerais. Seu progresso pessoal aparecerá quando seu usuário estiver vinculado a uma pessoa cadastrada.',
+  approvalText: 'Regras manuais, pastorais, da liderança ou secretaria podem precisar de validação/aprovação antes de gerar pontos.',
+  automaticText: 'Regras automáticas podem ser contabilizadas automaticamente quando houver integração disponível.',
+})
+const rulesSummaryCards = computed(() => {
+  const summary = currentRulesData.value?.summary || {}
+
+  return [
+    { label: 'Regras ativas', value: formatNumber(summary.activeRulesCount || 0), note: activeRulesJourney.value === 'youth' ? 'Jornada jovem autorizada' : 'Jornada geral' },
+    { label: 'Categorias', value: formatNumber(summary.categoriesCount || 0), note: 'Agrupadas por tipo real' },
+    { label: 'Contam para nível', value: formatNumber(summary.levelRulesCount || 0), note: 'Conforme cadastro ativo' },
+    { label: 'Contam para destaque', value: formatNumber(summary.highlightRulesCount || 0), note: 'Sem ranking espiritual' },
+  ]
+})
+const rulesEmptyState = computed(() => {
+  const states = props.walkingRules?.emptyStates || {}
+
+  if (!hasRealRulesData.value) {
+    return null
   }
 
-  if (track.scope === 'youth-note') {
-    return !viewerContext.canSeeYouthJourney
+  if (!currentRulesData.value?.authorized) {
+    return {
+      title: states.unauthorizedYouthTitle || 'Regras jovens indisponíveis para este perfil.',
+      text: currentRulesData.value?.message || states.unauthorizedYouthText || 'A caminhada jovem aparece somente para jovens/resgatados autorizados.',
+    }
   }
 
-  if (track.scope === 'youth') {
-    return viewerContext.canSeeYouthJourney
+  if (rulesItems.value.length === 0) {
+    return {
+      title: states.withoutRulesTitle || 'Nenhuma regra ativa disponível.',
+      text: states.withoutRulesText || 'Quando a secretaria ativar regras de pontuação, elas aparecerão aqui.',
+    }
   }
 
-  return viewerContext.canSeeYouthTeams
-}))
-const visibleRulesGuideCards = computed(() => rulesGuideCards.map((card) => ({
-  ...card,
-  actions: card.actions?.filter((action) => !action.scope || action.scope === 'general' || viewerContext.canSeeYouthJourney),
-})))
+  return null
+})
+const rulesPersonNotice = computed(() => {
+  if (!hasRealRulesData.value || props.walkingRules?.person) {
+    return null
+  }
+
+  const states = props.walkingRules?.emptyStates || {}
+
+  return {
+    title: states.withoutPersonTitle || 'Você pode consultar as regras gerais.',
+    text: states.withoutPersonText || 'Seu progresso pessoal aparecerá quando seu usuário estiver vinculado a uma pessoa cadastrada.',
+  }
+})
+const ruleLimitItems = (rule) => [
+  rule.maxPerDay ? `Máximo por dia: ${rule.maxPerDay}` : null,
+  rule.maxPerWeek ? `Máximo por semana: ${rule.maxPerWeek}` : null,
+  rule.maxPerMonth ? `Máximo por mês: ${rule.maxPerMonth}` : null,
+].filter(Boolean)
 const rankingFilters = computed(() => [
   ...baseRankingFilters,
   ...(viewerContext.canSeeYouthHighlights ? youthRankingFilters : []),
@@ -1222,94 +1196,98 @@ const mapHeroBadge = computed(() => {
       <section v-else-if="isRulesArea" class="rules-dashboard" aria-label="Regras da Caminhada">
         <article class="rules-principle-card">
           <div>
-            <span>Princípio da Caminhada</span>
-            <h2>Princípio da Caminhada</h2>
-            <p>A caminhada não mede espiritualidade nem valor diante de Deus. Ela serve para incentivar constância, participação, serviço, Palavra, comunhão e crescimento saudável.</p>
+            <span>{{ rulesExplanation.title }}</span>
+            <h2>{{ rulesExplanation.title }}</h2>
+            <p>{{ rulesExplanation.text }}</p>
+            <p>{{ rulesExplanation.personalProgressText }}</p>
           </div>
           <div class="rules-pillars">
             <strong v-for="pillar in rulesPrinciplePillars" :key="pillar">{{ pillar }}</strong>
           </div>
         </article>
 
-        <section class="rules-journey-grid" :class="{ 'member-view': showRulesYouthTrackNote }" aria-label="Regras por jornada">
-          <article v-for="card in visibleRulesJourneyCards" :key="card.title">
-            <header>
-              <i>{{ card.icon }}</i>
-              <div>
-                <span>{{ card.title }}</span>
-                <h2>{{ card.title }}</h2>
-                <p>{{ card.text }}</p>
-              </div>
-            </header>
-            <div class="rules-journey-badges">
-              <strong v-for="note in card.notes" :key="note">{{ note }}</strong>
-            </div>
-            <div class="rules-criteria-columns">
-              <strong>{{ card.criteriaTitle }}</strong>
-              <div class="rules-criteria-grid">
-                <article v-for="item in card.criteria" :key="item.name">
-                  <i>{{ item.icon }}</i>
-                  <div>
-                    <strong>{{ item.name }}</strong>
-                    <small>{{ item.text }}</small>
-                  </div>
-                </article>
-              </div>
-            </div>
-          </article>
-          <article v-if="showRulesYouthTrackNote" class="rules-youth-note-card">
-            <header>
-              <i>{{ rulesYouthTrackNote.icon }}</i>
-              <div>
-                <span>{{ rulesYouthTrackNote.title }}</span>
-                <h2>{{ rulesYouthTrackNote.title }}</h2>
-                <p>{{ rulesYouthTrackNote.text }}</p>
-              </div>
-            </header>
-            <div class="rules-journey-badges">
-              <strong v-for="note in rulesYouthTrackNote.notes" :key="note">{{ note }}</strong>
-            </div>
+        <section class="history-filter-card" aria-label="Selecionar jornada das regras">
+          <div>
+            <span>Jornada das regras</span>
+            <strong>{{ activeRulesJourney === 'youth' ? 'Caminhada Jovem' : 'Caminhada Geral' }}</strong>
+          </div>
+          <nav aria-label="Selecionar jornada das regras">
+            <button
+              type="button"
+              :class="{ active: selectedRulesJourney === 'general' }"
+              @click="selectedRulesJourney = 'general'"
+            >
+              Caminhada Geral
+            </button>
+            <button
+              v-if="canSeeYouthJourneyFromRules"
+              type="button"
+              :class="{ active: selectedRulesJourney === 'youth' }"
+              @click="selectedRulesJourney = 'youth'"
+            >
+              Caminhada Jovem
+            </button>
+          </nav>
+        </section>
+
+        <article v-if="rulesPersonNotice" class="rules-separation-card">
+          <div>
+            <span>{{ rulesPersonNotice.title }}</span>
+            <strong>{{ rulesPersonNotice.text }}</strong>
+          </div>
+        </article>
+
+        <section class="history-summary-grid" aria-label="Resumo das regras ativas">
+          <article v-for="card in rulesSummaryCards" :key="card.label">
+            <span>{{ card.label }}</span>
+            <strong>{{ card.value }}</strong>
+            <small>{{ card.note }}</small>
           </article>
         </section>
 
         <article class="rules-separation-card">
           <div>
-            <span>Jornadas separadas</span>
-            <strong>{{ rulesSeparationNote }}</strong>
+            <span>Validação e aprovação</span>
+            <strong>{{ rulesExplanation.approvalText }}</strong>
           </div>
-          <div class="rules-separation-tracks">
-            <article v-for="track in visibleRulesSeparationTracks" :key="track.label">
-              <i>{{ track.icon }}</i>
-              <span>{{ track.label }}</span>
-              <strong>{{ track.value }}</strong>
-            </article>
+          <div class="rules-journey-badges">
+            <strong>{{ rulesExplanation.automaticText }}</strong>
+            <strong>Somente regras ativas são exibidas.</strong>
+            <strong>Pontos dependem de registro aprovado/validado.</strong>
           </div>
         </article>
 
-        <section class="rules-info-grid" aria-label="Marcos, conquistas e validação">
-          <article v-for="card in visibleRulesGuideCards" :key="card.title" class="rules-info-card">
-            <i>{{ card.icon }}</i>
-            <span>{{ card.title }}</span>
-            <h2>{{ card.title }}</h2>
-            <p>{{ card.text }}</p>
-            <nav v-if="card.actions" :aria-label="card.title">
-              <Link v-for="action in card.actions" :key="action.label" :href="action.route">{{ action.label }}</Link>
-            </nav>
-            <div v-if="card.statuses" class="rules-status-mini">
-              <strong v-for="status in card.statuses" :key="status">{{ status }}</strong>
-            </div>
+        <section v-if="!rulesEmptyState" class="rules-info-grid" aria-label="Categorias de regras ativas">
+          <article v-for="group in ruleGroups" :key="group.category" class="rules-info-card">
+            <i>{{ activeRulesJourney === 'youth' ? '🔥' : '⛪' }}</i>
+            <span>{{ group.categoryLabel }}</span>
+            <h2>{{ group.categoryLabel }}</h2>
+            <p>{{ group.rulesCount }} regra(s) ativa(s), somando {{ group.totalPossiblePoints }} ponto(s) base por ocorrência válida.</p>
           </article>
         </section>
 
         <section class="rules-bottom-grid">
-          <article class="rules-validation-card" aria-label="Validação dos registros">
+          <article v-if="rulesEmptyState" class="rules-validation-card" aria-label="Estado das regras">
             <div>
-              <span>Validação dos registros</span>
-              <h2>Validação dos registros</h2>
-              <p>Registros podem nascer automáticos, enviados por líderes ou confirmados pela Secretaria/Administração.</p>
+              <span>{{ rulesEmptyState.title }}</span>
+              <h2>{{ rulesEmptyState.title }}</h2>
+              <p>{{ rulesEmptyState.text }}</p>
+            </div>
+          </article>
+
+          <article v-for="rule in rulesItems" v-else :key="rule.key" class="rules-validation-card" aria-label="Regra ativa">
+            <div>
+              <span>{{ rule.categoryLabel }}</span>
+              <h2>{{ rule.name }}</h2>
+              <p>{{ rule.description }}</p>
             </div>
             <div>
-              <strong v-for="status in rulesValidationStatuses" :key="status">{{ status }}</strong>
+              <strong>{{ rule.points }} ponto(s)</strong>
+              <strong>{{ rule.validationLabel }}</strong>
+              <strong>{{ rule.validationHint }}</strong>
+              <strong v-if="rule.countsForLevel">Conta para nível</strong>
+              <strong v-if="rule.countsForHighlight">Conta para destaque</strong>
+              <strong v-for="limit in ruleLimitItems(rule)" :key="`${rule.key}-${limit}`">{{ limit }}</strong>
             </div>
           </article>
 

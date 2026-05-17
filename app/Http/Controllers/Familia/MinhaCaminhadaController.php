@@ -11,6 +11,7 @@ use App\Services\MinhaCaminhada\WalkingDashboardReadService;
 use App\Services\MinhaCaminhada\WalkingLevelService;
 use App\Services\MinhaCaminhada\WalkingMentorReadService;
 use App\Services\MinhaCaminhada\WalkingProgressService;
+use App\Services\MinhaCaminhada\WalkingRulesReadService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -246,6 +247,21 @@ class MinhaCaminhadaController extends Controller
                 'pastoralDisclaimer' => $this->mentorPastoralDisclaimer(),
             ],
         ]);
+    }
+
+    public function rules(Request $request, WalkingRulesReadService $rulesReadService): Response
+    {
+        return $this->renderRulesPage($request, $rulesReadService, 'rules');
+    }
+
+    public function pointRules(Request $request, WalkingRulesReadService $rulesReadService): Response
+    {
+        return $this->renderRulesPage($request, $rulesReadService, 'point_rules');
+    }
+
+    public function points(Request $request, WalkingRulesReadService $rulesReadService): Response
+    {
+        return $this->renderRulesPage($request, $rulesReadService, 'points');
     }
 
     public function map(
@@ -674,6 +690,85 @@ class MinhaCaminhadaController extends Controller
             'unauthorizedYouthText' => 'A caminhada jovem aparece somente para jovens/resgatados autorizados.',
             'withoutJourneyTitle' => 'Mentor indisponível no momento.',
             'withoutJourneyText' => 'Assim que a jornada estiver disponível, mensagens pré-aprovadas poderão aparecer aqui.',
+        ];
+    }
+
+    private function renderRulesPage(
+        Request $request,
+        WalkingRulesReadService $rulesReadService,
+        string $variant
+    ): Response {
+        $user = $request->user();
+        $person = $user?->person;
+        $canSeeYouthJourney = $person ? $this->authorizationService->userCanViewOwnYouthJourney($user) : false;
+
+        return Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+            'area' => 'regras',
+            'journey' => 'all',
+            'walkingRules' => [
+                'authorized' => true,
+                'usesRealData' => true,
+                'generatedAt' => now()->toISOString(),
+                'variant' => $variant,
+                'person' => $person ? [
+                    'id' => $person->id,
+                    'name' => $person->preferred_name ?: $person->full_name,
+                ] : null,
+                'canSeeYouthJourney' => $canSeeYouthJourney,
+                'general' => $rulesReadService->getActiveRulesForJourney('general'),
+                'youth' => $canSeeYouthJourney
+                    ? $rulesReadService->getActiveRulesForJourney('youth')
+                    : $this->emptyRulesJourney('youth', false, 'Você não tem permissão para visualizar regras da caminhada jovem.'),
+                'emptyStates' => $this->rulesEmptyStates(),
+                'explanation' => $this->rulesExplanation($variant, $person !== null),
+            ],
+        ]);
+    }
+
+    private function emptyRulesJourney(string $journeyType, bool $authorized = true, ?string $message = null): array
+    {
+        return [
+            'authorized' => $authorized,
+            'journeyType' => $journeyType,
+            'message' => $message,
+            'rules' => [],
+            'groups' => [],
+            'summary' => [
+                'journeyType' => $journeyType,
+                'activeRulesCount' => 0,
+                'categoriesCount' => 0,
+                'levelRulesCount' => 0,
+                'highlightRulesCount' => 0,
+            ],
+        ];
+    }
+
+    private function rulesExplanation(string $variant, bool $hasPerson): array
+    {
+        return [
+            'title' => match ($variant) {
+                'point_rules' => 'Regras reais de pontuação',
+                'points' => 'Como a pontuação é validada',
+                default => 'Regras reais da caminhada',
+            },
+            'text' => 'As regras exibidas vêm do cadastro ativo da Minha Caminhada. Pontos só contam quando forem registrados e aprovados/validados conforme cada regra.',
+            'personalProgressText' => $hasPerson
+                ? 'Seu progresso pessoal aparece nas áreas de nível, mapa e histórico conforme registros aprovados.'
+                : 'Você pode consultar as regras gerais. Seu progresso pessoal aparecerá quando seu usuário estiver vinculado a uma pessoa cadastrada.',
+            'approvalText' => 'Regras manuais, pastorais, da liderança ou secretaria podem precisar de validação/aprovação antes de gerar pontos.',
+            'automaticText' => 'Regras automáticas podem ser contabilizadas automaticamente quando houver integração disponível.',
+        ];
+    }
+
+    private function rulesEmptyStates(): array
+    {
+        return [
+            'withoutPersonTitle' => 'Você pode consultar as regras gerais.',
+            'withoutPersonText' => 'Seu progresso pessoal aparecerá quando seu usuário estiver vinculado a uma pessoa cadastrada.',
+            'withoutRulesTitle' => 'Nenhuma regra ativa disponível.',
+            'withoutRulesText' => 'Quando a secretaria ativar regras de pontuação, elas aparecerão aqui.',
+            'unauthorizedYouthTitle' => 'Regras jovens indisponíveis para este perfil.',
+            'unauthorizedYouthText' => 'A caminhada jovem aparece somente para jovens/resgatados autorizados.',
         ];
     }
 
