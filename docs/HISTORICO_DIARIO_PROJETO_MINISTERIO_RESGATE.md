@@ -1100,3 +1100,21 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foi executado migrate:fresh, não foi executado db:wipe, não foram criados ou executados seeders no banco real, não foram criados dados fake e não foram alterados Central da Família, Meu Perfil, Meu Financeiro, Cantina, Secretaria ou Centro Financeiro.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Auditoria final de fechamento da Minha Caminhada
+
+- **Horário:** 19:10–19:50 aprox.
+- **Objetivo:** auditar o módulo Minha Caminhada completo após o push de presenças, verificando rotas, actions, placeholders, links mortos, mocks/fakes remanescentes, estados vazios, proteção jovem e cobertura final de smoke.
+- **Estado inicial:** `git diff --name-only` e `git diff --cached --name-only` sem saída; branch `main`; `origin/main...HEAD` em `0 0`.
+- **Rotas revisadas:** `/familia-resgate/minha-caminhada`, `/conquistas`, `/nivel`, `/geral`, `/jovem`, `/historico`, `/mentor`, `/regras`, `/regras-de-pontos`, `/pontuacao`, `/ranking`, `/destaques/mensal`, `/presencas`, `/mapa`, `/geral/mapa`, `/jovem/mapa`, `/geral/niveis/{level}`, `/jovem/niveis/{level}` e `/niveis/{level}`.
+- **Actions revisadas:** todas as rotas de Minha Caminhada listadas apontam para `MinhaCaminhadaController`; não foi encontrada rota do módulo em Closure, placeholder genérico, sem name ou duplicada de forma insegura.
+- **Placeholders:** não foi encontrado placeholder ativo dentro das rotas da Minha Caminhada; estados futuros/preparados permanecem honestos, especialmente presenças sem fonte oficial.
+- **Links mortos:** não foram encontrados `href="#"`, `to="#"`, `javascript:void` ou rotas `#` nos arquivos da Minha Caminhada.
+- **Mocks/fakes:** não foram encontrados pontos antigos `380 pts`/`920 pts`, nomes antigos de ranking fake nem presenças/cultos/porcentagens fake dentro da Minha Caminhada; ocorrências em Central da Família, Meu Perfil e Meu Financeiro foram classificadas como fora do escopo desta etapa.
+- **Textos seguros mantidos:** `Sem ranking espiritual`, `ranking de espiritualidade` e negações semelhantes permanecem como avisos pastorais seguros, não como dados fake.
+- **Proteção jovem:** rotas jovem detalhada, mapa jovem e nível jovem continuam retornando estado seguro para usuário comum, sem expor payload jovem autorizado.
+- **Teste final criado:** `tests/Feature/MinhaCaminhada/MinhaCaminhadaAuditoriaFinalTest.php`, cobrindo autenticação obrigatória das 19 rotas principais, component esperado para usuário comum, ausência de 500, proteção jovem, estado honesto de presenças e ausência de criação de registros operacionais em leituras.
+- **Validação inicial do teste:** `php -l` do teste passou; teste isolado passou com 5 testes e 320 assertions.
+- **Escopo preservado:** não foram criadas migrations, não foi executado migrate, não foi executado migrate:fresh, não foi executado db:wipe, não foram criados ou executados seeders no banco real e não foram criados dados fake.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.
