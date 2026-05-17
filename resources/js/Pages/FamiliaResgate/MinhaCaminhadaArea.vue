@@ -13,6 +13,7 @@ const props = defineProps({
   walkingRules: { type: Object, default: null },
   walkingJourneyDetail: { type: Object, default: null },
   walkingRecognition: { type: Object, default: null },
+  walkingAttendances: { type: Object, default: null },
 })
 
 const baseRoute = '/familia-resgate/minha-caminhada'
@@ -104,6 +105,7 @@ const historyFilters = ['Todos', 'Caminhada Geral', 'Caminhada Jovem', 'Presenç
 const selectedHistoryFilter = ref('Todos')
 const selectedMentorJourney = ref('general')
 const selectedRulesJourney = ref('general')
+const selectedAttendanceJourney = ref('general')
 
 const rulesPrinciplePillars = ['Encorajar, não comparar', 'Acompanhar, não expor', 'Crescer, não competir']
 const rulesNotList = [
@@ -170,6 +172,7 @@ const isHistoryArea = computed(() => props.area === 'historico')
 const isMentorArea = computed(() => props.area === 'mentor')
 const isRulesArea = computed(() => props.area === 'regras')
 const isRankingArea = computed(() => props.area === 'ranking')
+const isAttendancesArea = computed(() => props.area === 'presencas')
 const journeySlug = computed(() => props.journey === 'jovem' ? 'jovem' : 'geral')
 const journeyConfig = computed(() => journeyConfigs[journeySlug.value])
 const hasRealJourneyDetailData = computed(() => Boolean(props.walkingJourneyDetail?.usesRealData))
@@ -194,9 +197,9 @@ const formatShortDate = (value) => {
 
   return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date(value))
 }
-const areaTitle = computed(() => isLevelArea.value ? 'Meu Nível Atual' : isRankingArea.value ? 'Destaques da Caminhada' : isRulesArea.value ? 'Regras da Caminhada' : isMentorArea.value ? 'Mentor da Caminhada' : isHistoryArea.value ? 'Histórico da Caminhada' : isJourneyDetailArea.value ? journeyDetailMeta.value.title : journeyConfig.value.title)
-const areaBreadcrumb = computed(() => isLevelArea.value ? 'Meu Nível Atual' : isRankingArea.value ? 'Destaques' : isRulesArea.value ? 'Regras' : isMentorArea.value ? 'Mentor' : isHistoryArea.value ? 'Histórico' : isJourneyDetailArea.value ? journeyDetailMeta.value.breadcrumb : journeyConfig.value.breadcrumb)
-const areaSubtitle = computed(() => isLevelArea.value ? 'Veja onde você está na sua caminhada e qual é o próximo marco da sua jornada.' : isRankingArea.value ? 'Reconheça constância, serviço, participação e crescimento sem transformar a fé em competição.' : isRulesArea.value ? 'Entenda como a pontuação, os níveis, as conquistas e os marcos espirituais ajudam a acompanhar sua constância com equilíbrio e cuidado.' : isMentorArea.value ? 'Receba uma orientação simples e pastoral com base na sua caminhada geral, seus registros e seus próximos passos.' : isHistoryArea.value ? 'Acompanhe as ações, pontos, conquistas e registros que formam sua jornada espiritual.' : isJourneyDetailArea.value ? journeyDetailMeta.value.subtitle : journeyConfig.value.subtitle)
+const areaTitle = computed(() => isLevelArea.value ? 'Meu Nível Atual' : isAttendancesArea.value ? 'Minhas Presenças' : isRankingArea.value ? 'Destaques da Caminhada' : isRulesArea.value ? 'Regras da Caminhada' : isMentorArea.value ? 'Mentor da Caminhada' : isHistoryArea.value ? 'Histórico da Caminhada' : isJourneyDetailArea.value ? journeyDetailMeta.value.title : journeyConfig.value.title)
+const areaBreadcrumb = computed(() => isLevelArea.value ? 'Meu Nível Atual' : isAttendancesArea.value ? 'Presenças' : isRankingArea.value ? 'Destaques' : isRulesArea.value ? 'Regras' : isMentorArea.value ? 'Mentor' : isHistoryArea.value ? 'Histórico' : isJourneyDetailArea.value ? journeyDetailMeta.value.breadcrumb : journeyConfig.value.breadcrumb)
+const areaSubtitle = computed(() => isLevelArea.value ? 'Veja onde você está na sua caminhada e qual é o próximo marco da sua jornada.' : isAttendancesArea.value ? 'Acompanhe presenças somente quando houver registro oficial confirmado, sem simulações ou exposição indevida.' : isRankingArea.value ? 'Reconheça constância, serviço, participação e crescimento sem transformar a fé em competição.' : isRulesArea.value ? 'Entenda como a pontuação, os níveis, as conquistas e os marcos espirituais ajudam a acompanhar sua constância com equilíbrio e cuidado.' : isMentorArea.value ? 'Receba uma orientação simples e pastoral com base na sua caminhada geral, seus registros e seus próximos passos.' : isHistoryArea.value ? 'Acompanhe as ações, pontos, conquistas e registros que formam sua jornada espiritual.' : isJourneyDetailArea.value ? journeyDetailMeta.value.subtitle : journeyConfig.value.subtitle)
 const journeyDetailProgress = computed(() => currentJourneyDetail.value?.progress || {})
 const journeyDetailCurrentLevel = computed(() => currentJourneyDetail.value?.currentLevel || null)
 const journeyDetailNextLevel = computed(() => currentJourneyDetail.value?.nextLevel || null)
@@ -445,6 +448,57 @@ const recognitionPastoralNotice = computed(() => props.walkingRecognition?.pasto
   approvalText: 'Os reconhecimentos dependem de critérios, validação e aprovação da igreja.',
 })
 const recognitionSectionTitle = computed(() => recognitionDisplayMode.value === 'monthly' ? 'Destaques mensais aprovados' : 'Destaques aprovados da caminhada')
+const hasAttendancePayload = computed(() => Boolean(props.walkingAttendances))
+const canSeeYouthJourneyFromAttendances = computed(() => hasAttendancePayload.value ? Boolean(props.walkingAttendances?.canSeeYouthJourney) : false)
+const activeAttendanceJourney = computed(() => selectedAttendanceJourney.value === 'youth' && canSeeYouthJourneyFromAttendances.value ? 'youth' : 'general')
+const currentAttendanceData = computed(() => props.walkingAttendances?.[activeAttendanceJourney.value] || props.walkingAttendances?.general || null)
+const attendanceItems = computed(() => Array.isArray(currentAttendanceData.value?.items) ? currentAttendanceData.value.items : [])
+const attendanceNotice = computed(() => props.walkingAttendances?.notice || {
+  title: 'Registro oficial ainda não conectado',
+  text: 'Presenças ainda não estão conectadas a um registro oficial.',
+  nextStepText: 'Quando a igreja ativar o registro de presenças, elas aparecerão aqui.',
+  privacyText: 'A futura integração exibirá somente presenças confirmadas/autorizadas, sem dados pastorais, financeiros ou administrativos sensíveis.',
+})
+const attendanceSummaryCards = computed(() => {
+  const summary = currentAttendanceData.value?.summary || {}
+
+  return [
+    { label: 'Fonte oficial', value: currentAttendanceData.value?.sourceAvailable ? 'Conectada' : 'Pendente', note: 'Sem registros simulados' },
+    { label: 'Presenças exibidas', value: formatNumber(summary.confirmedAttendances || 0), note: 'Somente confirmadas quando houver fonte oficial' },
+    { label: 'Última presença', value: summary.lastAttendanceAt ? formatHistoryDate(summary.lastAttendanceAt) : 'Indisponível', note: 'Sem data inventada' },
+    { label: 'Frequência', value: summary.attendanceRate === null || summary.attendanceRate === undefined ? 'Indisponível' : `${summary.attendanceRate}%`, note: 'Sem porcentagem simulada' },
+  ]
+})
+const attendanceEmptyState = computed(() => {
+  const states = props.walkingAttendances?.emptyStates || {}
+
+  if (!hasAttendancePayload.value) {
+    return null
+  }
+
+  if (!props.walkingAttendances?.authorized) {
+    return states.withoutPerson || {
+      title: 'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+      text: 'Quando o cadastro estiver vinculado e houver registro oficial de presenças, elas aparecerão aqui.',
+    }
+  }
+
+  if (!currentAttendanceData.value?.authorized) {
+    return currentAttendanceData.value?.emptyState || states.unauthorizedYouth || {
+      title: 'Presenças jovens protegidas.',
+      text: 'A caminhada jovem aparece somente para jovens/resgatados autorizados.',
+    }
+  }
+
+  if (!currentAttendanceData.value?.sourceAvailable || attendanceItems.value.length === 0) {
+    return currentAttendanceData.value?.emptyState || states.withoutOfficialSource || {
+      title: 'Presenças ainda não estão conectadas a um registro oficial.',
+      text: 'Quando a igreja ativar o registro de presenças, elas aparecerão aqui.',
+    }
+  }
+
+  return null
+})
 const hasRealMentorData = computed(() => Boolean(props.walkingMentor?.usesRealData))
 const mentorAuthorized = computed(() => Boolean(hasRealMentorData.value && props.walkingMentor?.authorized))
 const canSeeYouthJourneyFromMentor = computed(() => hasRealMentorData.value ? Boolean(props.walkingMentor?.canSeeYouthJourney) : viewerContext.canSeeYouthJourney)
@@ -842,9 +896,9 @@ const mapHeroBadge = computed(() => {
     <FamilySidebar active-href="/familia-resgate/minha-caminhada" />
 
     <main class="journey-area-main">
-      <header class="area-hero" :class="{ 'is-detail-hero': isJourneyDetailArea || isHistoryArea || isMentorArea || isRulesArea || isRankingArea }">
+      <header class="area-hero" :class="{ 'is-detail-hero': isJourneyDetailArea || isHistoryArea || isMentorArea || isRulesArea || isRankingArea || isAttendancesArea }">
         <div>
-          <p>Central da Família <span>&gt;</span> Minha Caminhada <span>&gt;</span> {{ areaBreadcrumb }}<template v-if="!isLevelArea && !isJourneyDetailArea && !isHistoryArea && !isMentorArea && !isRulesArea && !isRankingArea"> <span>&gt;</span> Mapa</template></p>
+          <p>Central da Família <span>&gt;</span> Minha Caminhada <span>&gt;</span> {{ areaBreadcrumb }}<template v-if="!isLevelArea && !isJourneyDetailArea && !isHistoryArea && !isMentorArea && !isRulesArea && !isRankingArea && !isAttendancesArea"> <span>&gt;</span> Mapa</template></p>
           <h1>{{ areaTitle }}</h1>
           <small>{{ areaSubtitle }}</small>
         </div>
@@ -854,6 +908,7 @@ const mapHeroBadge = computed(() => {
         <strong v-else-if="isMentorArea">Apoio pastoral</strong>
         <strong v-else-if="isRulesArea">Caminhada saudável</strong>
         <strong v-else-if="isRankingArea">Reconhecimento saudável</strong>
+        <strong v-else-if="isAttendancesArea">Fonte oficial</strong>
         <strong v-else>{{ mapHeroBadge }}</strong>
       </header>
 
@@ -1552,6 +1607,111 @@ const mapHeroBadge = computed(() => {
           <Link :href="`${baseRoute}/regras`">Ver regras</Link>
           <Link :href="`${baseRoute}/historico`">Ver histórico</Link>
           <Link :href="`${baseRoute}/conquistas`">Ver conquistas</Link>
+        </nav>
+      </section>
+
+      <section v-else-if="isAttendancesArea" class="rules-dashboard" aria-label="Minhas Presenças">
+        <article class="rules-principle-card">
+          <div>
+            <span>{{ attendanceNotice.title }}</span>
+            <h2>{{ attendanceNotice.text }}</h2>
+            <p>{{ attendanceNotice.nextStepText }}</p>
+            <p>{{ attendanceNotice.privacyText }}</p>
+          </div>
+          <div class="rules-pillars">
+            <strong>Sem presença simulada</strong>
+            <strong>Somente registro oficial</strong>
+            <strong>Jovem protegido</strong>
+          </div>
+        </article>
+
+        <section class="history-filter-card" aria-label="Selecionar jornada das presenças">
+          <div>
+            <span>Jornada das presenças</span>
+            <strong>{{ activeAttendanceJourney === 'youth' ? 'Caminhada Jovem' : 'Caminhada Geral' }}</strong>
+          </div>
+          <nav aria-label="Selecionar jornada das presenças">
+            <button
+              type="button"
+              :class="{ active: selectedAttendanceJourney === 'general' }"
+              @click="selectedAttendanceJourney = 'general'"
+            >
+              Caminhada Geral
+            </button>
+            <button
+              v-if="canSeeYouthJourneyFromAttendances"
+              type="button"
+              :class="{ active: selectedAttendanceJourney === 'youth' }"
+              @click="selectedAttendanceJourney = 'youth'"
+            >
+              Caminhada Jovem
+            </button>
+          </nav>
+        </section>
+
+        <section class="history-summary-grid" aria-label="Resumo seguro de presenças">
+          <article v-for="card in attendanceSummaryCards" :key="card.label">
+            <span>{{ card.label }}</span>
+            <strong>{{ card.value }}</strong>
+            <small>{{ card.note }}</small>
+          </article>
+        </section>
+
+        <section class="rules-bottom-grid">
+          <article v-if="attendanceEmptyState" class="rules-validation-card" aria-label="Estado das presenças">
+            <div>
+              <span>{{ attendanceEmptyState.title }}</span>
+              <h2>{{ attendanceEmptyState.title }}</h2>
+              <p>{{ attendanceEmptyState.text }}</p>
+            </div>
+          </article>
+
+          <article class="rules-validation-card" aria-label="Como as presenças serão exibidas">
+            <div>
+              <span>Integração futura</span>
+              <h2>Lista preparada para registros confirmados</h2>
+              <p>Quando existir fonte oficial, esta área poderá listar somente presenças confirmadas ou aprovadas, respeitando permissões e privacidade.</p>
+            </div>
+            <div>
+              <strong>Sem datas inventadas</strong>
+              <strong>Sem cultos simulados</strong>
+              <strong>Sem frequência fictícia</strong>
+            </div>
+          </article>
+
+          <article class="rules-not-card" aria-label="Cuidado com dados de presença">
+            <header>
+              <span>Cuidado e privacidade</span>
+              <h2>O que esta tela não faz</h2>
+            </header>
+            <div class="rules-care-columns">
+              <div>
+                <strong>Não exibe</strong>
+                <ul>
+                  <li>presenças sem fonte oficial</li>
+                  <li>porcentagens calculadas sem registro</li>
+                  <li>dados jovens sem autorização</li>
+                  <li>dados sensíveis pastorais ou administrativos</li>
+                </ul>
+              </div>
+              <div>
+                <strong>Está pronta para</strong>
+                <ul>
+                  <li>presenças confirmadas</li>
+                  <li>registros aprovados</li>
+                  <li>trilhos geral e jovem separados</li>
+                  <li>integração oficial futura</li>
+                </ul>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <nav class="rules-actions" aria-label="Atalhos das presenças">
+          <Link :href="baseRoute">Voltar para Minha Caminhada</Link>
+          <Link :href="`${baseRoute}/regras`">Ver regras</Link>
+          <Link :href="`${baseRoute}/historico`">Ver histórico</Link>
+          <Link :href="`${baseRoute}/geral`">Ver caminhada geral</Link>
         </nav>
       </section>
 

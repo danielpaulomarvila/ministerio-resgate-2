@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\WalkingJourney;
 use App\Models\WalkingLevel;
 use App\Services\MinhaCaminhada\WalkingAchievementReadService;
+use App\Services\MinhaCaminhada\WalkingAttendanceReadService;
 use App\Services\MinhaCaminhada\WalkingAuthorizationService;
 use App\Services\MinhaCaminhada\WalkingDashboardReadService;
 use App\Services\MinhaCaminhada\WalkingLevelService;
@@ -273,6 +274,15 @@ class MinhaCaminhadaController extends Controller
     public function monthlyHighlights(Request $request, WalkingRecognitionReadService $recognitionReadService): Response
     {
         return $this->renderRecognitionPage($request, $recognitionReadService, 'monthly_highlights');
+    }
+
+    public function attendances(Request $request, WalkingAttendanceReadService $attendanceReadService): Response
+    {
+        return Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+            'area' => 'presencas',
+            'journey' => 'all',
+            'walkingAttendances' => $attendanceReadService->getOwnAttendances($request->user()),
+        ]);
     }
 
     public function generalJourney(Request $request): Response

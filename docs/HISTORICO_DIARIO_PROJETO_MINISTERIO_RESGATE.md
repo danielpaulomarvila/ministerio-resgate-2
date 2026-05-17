@@ -1082,3 +1082,21 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Busca de mocks:** busca final limpa para o branch de ranking/destaques, restando apenas `Sem ranking espiritual` como negação segura no branch de regras.
 - **Escopo preservado:** não foram criadas migrations, não foi executado migrate, não foram criados ou executados seeders no banco real e não foram criados dados fake.
 - **Commit/push antes desta etapa final:** nenhum commit ou push foi feito antes desta etapa final.
+
+### Etapa — Preparação segura de Presenças da Minha Caminhada
+
+- **Horário:** 18:45–19:20 aprox.
+- **Objetivo:** finalizar `/familia-resgate/minha-caminhada/presencas` sem inventar presenças, datas, cultos, frequências ou porcentagens enquanto não existir fonte oficial conectada.
+- **Inspeção da base atual:** não foi encontrada model/tabela/service real de presença; os achados atuais apontam apenas regras da caminhada com `source_origin` de integração futura de presenças e check-in jovem.
+- **Rota ajustada:** `/familia-resgate/minha-caminhada/presencas` deixou o array genérico de placeholders e passou a apontar para `MinhaCaminhadaController@attendances`.
+- **Service criado:** `WalkingAttendanceReadService`, somente leitura, sem banco de presenças, retornando payload preparado com `usesRealData = false`, `sourceAvailable = false`, itens vazios e estados honestos.
+- **Prop criada:** `walkingAttendances`, com pessoa vinculada quando existir, autorização jovem, trilhos `general`/`youth`, resumos zerados/null, estados vazios, aviso honesto e proteção de jornada jovem.
+- **Estado honesto:** a tela informa “Presenças ainda não estão conectadas a um registro oficial.” e “Quando a igreja ativar o registro de presenças, elas aparecerão aqui.”
+- **Vue ajustado:** `MinhaCaminhadaArea.vue` recebeu a prop `walkingAttendances` e branch `area === 'presencas'`, consumindo apenas o payload seguro, sem lista falsa, sem datas falsas, sem cultos falsos e sem frequência simulada.
+- **Jornada jovem protegida:** usuário comum recebe `youth.authorized = false`; jovem/resgatado autorizado recebe trilho jovem preparado, ainda vazio e sem dados inventados.
+- **Teste criado:** `tests/Feature/MinhaCaminhada/MinhaCaminhadaPresencasControllerTest.php`, cobrindo autenticação, component correto, prop segura, ausência de fonte oficial, listas vazias, bloqueio jovem, liberação jovem autorizada sem fake, ausência de dados sensíveis, leitura sem criação operacional e usuário sem pessoa vinculada.
+- **Busca de mocks:** busca por presença fake, cultos fake, porcentagens fake, sequência/streak, href morto e mocks temporários não retornou ocorrências no arquivo da área.
+- **Validações executadas:** `php -l` passou no controller, service e teste; teste novo passou com 8 testes e 154 assertions; testes relacionados da Minha Caminhada passaram; `php artisan test --compact` passou com 133 testes e 1425 assertions; `npm run build` passou; `git diff --check` passou.
+- **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foi executado migrate:fresh, não foi executado db:wipe, não foram criados ou executados seeders no banco real, não foram criados dados fake e não foram alterados Central da Família, Meu Perfil, Meu Financeiro, Cantina, Secretaria ou Centro Financeiro.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.

@@ -162,6 +162,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/familia-resgate/minha-caminhada/destaques/mensal', [MinhaCaminhadaController::class, 'monthlyHighlights'])
         ->name('familia-resgate.minha_caminhada.destaques_mensal');
 
+    Route::get('/familia-resgate/minha-caminhada/presencas', [MinhaCaminhadaController::class, 'attendances'])
+        ->name('familia-resgate.minha_caminhada.presencas');
+
     Route::get('/familia-resgate/minha-caminhada/mapa', [MinhaCaminhadaController::class, 'map'])
         ->name('familia-resgate.minha_caminhada.mapa');
 
@@ -239,7 +242,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'meu-perfil/cartao-resgate/pdf' => ['Cartão Resgate em PDF', 'Área preparada para geração futura do cartão digital em PDF.', '▣'],
         'meu-perfil/cartao-resgate/png' => ['Cartão Resgate em PNG', 'Área preparada para geração futura do cartão digital em PNG.', '▣'],
         'meu-perfil/cartao-resgate/qrcode' => ['QR Code do Cartão Resgate', 'Área preparada para validação segura por QR Code.', '▣'],
-        'minha-caminhada/presencas' => ['Minhas Presenças', 'Histórico pessoal de presenças em cultos, encontros e eventos.', '▤'],
         'escalas/meus-servicos' => ['Meus Serviços', 'Escalas e serviços pessoais em ministérios e equipes.', '✦'],
         'documentos/manual-do-membro' => ['Manual do Membro', 'Direitos, deveres e orientações da Família Resgate.', '☷'],
         'privacidade' => ['Política de Privacidade', 'Como seus dados são tratados e protegidos no ecossistema.', '▥'],
