@@ -963,3 +963,22 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foram criados ou executados seeders no banco real, não foram criados dados fake no banco real e não foram alterados níveis individuais, histórico, mentor, ranking, regras, geral/jovem detalhado, placeholders, Central da Família, Meu Perfil ou Meu Financeiro.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Integração real das páginas individuais de Nível da Minha Caminhada
+
+- **Horário:** 14:50–15:20 aprox.
+- **Objetivo:** integrar somente as páginas individuais de níveis da Minha Caminhada com dados reais, mantendo fora do escopo histórico, mentor, ranking/destaques, regras, geral/jovem detalhado, placeholders e demais módulos.
+- **Rotas ajustadas:** `/familia-resgate/minha-caminhada/geral/niveis/{level}`, `/familia-resgate/minha-caminhada/jovem/niveis/{level}` e `/familia-resgate/minha-caminhada/niveis/{level}` deixaram de renderizar `MinhaCaminhadaNivel` por `Closure` e passaram a apontar para `MinhaCaminhadaController@generalLevel`, `MinhaCaminhadaController@youthLevel` e `MinhaCaminhadaController@legacyGeneralLevel`.
+- **Controller ajustado:** `MinhaCaminhadaController` recebeu métodos para detalhe de nível e helpers privados para montar payload seguro usando `WalkingProgressService`, `WalkingLevelService` e `WalkingAuthorizationService`.
+- **Prop real criada:** `walkingLevelDetail`, com `usesRealData`, `generatedAt`, jornada solicitada, flag de rota legada, pessoa vinculada, autorização jovem, jornada real, progresso aprovado, nível solicitado, níveis vizinhos, motivo de bloqueio/estado vazio e mensagens seguras.
+- **Payload seguro:** o controller retorna arrays simples, não retorna Models crus, não cria registros, não altera banco, considera somente logs aprovados e não expõe `metadata` dos logs.
+- **Rota jovem protegida:** `/jovem/niveis/{level}` carrega a página com estado seguro quando o usuário não é jovem/resgatado autorizado, sem enviar nível jovem real.
+- **Rota legada preservada:** `/niveis/{level}` continua funcionando como compatibilidade geral com `legacyRoute = true`.
+- **Página ajustada:** `resources/js/Pages/FamiliaResgate/MinhaCaminhadaNivel.vue` passou a consumir `walkingLevelDetail` como fonte real, mostrando nome real do nível, jornada real, pontos aprovados, status real, pontos necessários, progresso, níveis vizinhos e logs recentes aprovados.
+- **Mocks removidos:** removidos da fonte da página os níveis locais gerais/jovens, pontos fake `380/920`, nível fake `2/6`, `unlockedAt`, badges fake, atividades fake, datas fake e textos de desbloqueio/conquista sem dado real.
+- **Estados vazios seguros:** adicionados estados para usuário sem pessoa vinculada, nível não encontrado, jornada indisponível e nível jovem não autorizado.
+- **Teste criado:** `tests/Feature/MinhaCaminhada/MinhaCaminhadaNivelDetalheControllerTest.php`, cobrindo autenticação obrigatória, payload seguro do nível geral, filtro por pontos aprovados, bloqueio jovem para usuário comum, liberação jovem para jovem/resgatado, rota legada como geral e nível inexistente sem 500.
+- **Validações executadas:** `php -l` passou no controller e no teste; teste novo passou com 7 testes e 140 assertions; `route:list --json` confirmou as três rotas de nível no controller; busca focada em `MinhaCaminhadaNivel.vue` não encontrou dados fake/mocks; testes focados de mapa, nível, conquistas, visão geral e services passaram; `php artisan test --compact` passou com 87 testes e 656 assertions; `npm run build` passou; `git diff --check` passou.
+- **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foi executado migrate:fresh, não foi executado db:wipe, não foram criados ou executados seeders no banco real, não foram criados dados fake no banco real e não foram alterados histórico, mentor, ranking/destaques, regras, geral/jovem detalhado, placeholders, Central da Família, Meu Perfil ou Meu Financeiro.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.

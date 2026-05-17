@@ -172,6 +172,36 @@ class MinhaCaminhadaController extends Controller
         return $this->renderMap($request, $progressService, $levelService, $authorizationService, 'youth', 'jovem');
     }
 
+    public function generalLevel(
+        Request $request,
+        WalkingProgressService $progressService,
+        WalkingLevelService $levelService,
+        WalkingAuthorizationService $authorizationService,
+        string $level
+    ): Response {
+        return $this->renderLevelDetail($request, $progressService, $levelService, $authorizationService, $level, 'general', 'geral');
+    }
+
+    public function youthLevel(
+        Request $request,
+        WalkingProgressService $progressService,
+        WalkingLevelService $levelService,
+        WalkingAuthorizationService $authorizationService,
+        string $level
+    ): Response {
+        return $this->renderLevelDetail($request, $progressService, $levelService, $authorizationService, $level, 'youth', 'jovem');
+    }
+
+    public function legacyGeneralLevel(
+        Request $request,
+        WalkingProgressService $progressService,
+        WalkingLevelService $levelService,
+        WalkingAuthorizationService $authorizationService,
+        string $level
+    ): Response {
+        return $this->renderLevelDetail($request, $progressService, $levelService, $authorizationService, $level, 'general', 'geral', true);
+    }
+
     private function formatJourneyDashboard(array $dashboard, string $journeyType): array
     {
         if (!($dashboard['authorized'] ?? false)) {
@@ -444,6 +474,233 @@ class MinhaCaminhadaController extends Controller
     {
         return (bool) ($dashboard['authorized'] ?? false)
             && (bool) ($dashboard['progress']['authorized'] ?? false);
+    }
+
+    private function renderLevelDetail(
+        Request $request,
+        WalkingProgressService $progressService,
+        WalkingLevelService $levelService,
+        WalkingAuthorizationService $authorizationService,
+        string $level,
+        string $requestedJourneyType,
+        string $journeySlug,
+        bool $legacyRoute = false
+    ): Response {
+        $user = $request->user();
+        $person = $user?->person;
+        $levelNumber = max(1, (int) $level);
+        $canSeeYouthJourney = $person ? $authorizationService->userCanViewOwnYouthJourney($user) : false;
+
+        if (!$person) {
+            return Inertia::render('FamiliaResgate/MinhaCaminhadaNivel', [
+                'journey' => $journeySlug,
+                'level' => $levelNumber,
+                'walkingLevelDetail' => $this->emptyLevelDetailPayload(
+                    'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+                    $requestedJourneyType,
+                    $legacyRoute,
+                    false,
+                    $canSeeYouthJourney,
+                    'without_person'
+                ),
+            ]);
+        }
+
+        if ($requestedJourneyType === 'youth' && !$canSeeYouthJourney) {
+            return Inertia::render('FamiliaResgate/MinhaCaminhadaNivel', [
+                'journey' => $journeySlug,
+                'level' => $levelNumber,
+                'walkingLevelDetail' => $this->emptyLevelDetailPayload(
+                    'Você não tem permissão para visualizar este nível jovem.',
+                    'youth',
+                    $legacyRoute,
+                    false,
+                    false,
+                    'unauthorized_youth',
+                    [
+                        'id' => $person->id,
+                        'name' => $person->preferred_name ?: $person->full_name,
+                    ]
+                ),
+            ]);
+        }
+
+        $progress = $progressService->getOwnProgress($user, $requestedJourneyType);
+        $recentLogs = $progressService->getRecentApprovedLogs($user, $person, $requestedJourneyType);
+        $journey = $levelService->getJourneyByType($requestedJourneyType);
+
+        if (!$journey || !($progress['authorized'] ?? false)) {
+            return Inertia::render('FamiliaResgate/MinhaCaminhadaNivel', [
+                'journey' => $journeySlug,
+                'level' => $levelNumber,
+                'walkingLevelDetail' => $this->emptyLevelDetailPayload(
+                    $progress['message'] ?? 'Jornada não encontrada ou inativa.',
+                    $requestedJourneyType,
+                    $legacyRoute,
+                    false,
+                    $canSeeYouthJourney,
+                    'without_journey',
+                    [
+                        'id' => $person->id,
+                        'name' => $person->preferred_name ?: $person->full_name,
+                    ]
+                ),
+            ]);
+        }
+
+        $requestedLevel = $journey->levels()
+            ->where('is_active', true)
+            ->where('level_number', $levelNumber)
+            ->first();
+
+        if (!$requestedLevel) {
+            return Inertia::render('FamiliaResgate/MinhaCaminhadaNivel', [
+                'journey' => $journeySlug,
+                'level' => $levelNumber,
+                'walkingLevelDetail' => array_merge(
+                    $this->emptyLevelDetailPayload(
+                        'Nível não encontrado.',
+                        $requestedJourneyType,
+                        $legacyRoute,
+                        true,
+                        $canSeeYouthJourney,
+                        'missing_level',
+                        [
+                            'id' => $person->id,
+                            'name' => $person->preferred_name ?: $person->full_name,
+                        ]
+                    ),
+                    [
+                        'journey' => $this->formatMapJourneyData($journey),
+                        'levelFound' => false,
+                    ]
+                ),
+            ]);
+        }
+
+        $levelProgress = $progress['level_progress'] ?? [];
+        $points = (int) ($progress['total_points'] ?? 0);
+        $currentLevel = $this->formatLevelData($levelProgress['current_level'] ?? null);
+        $nextLevel = $this->formatLevelData($levelProgress['next_level'] ?? null);
+
+        return Inertia::render('FamiliaResgate/MinhaCaminhadaNivel', [
+            'journey' => $journeySlug,
+            'level' => $levelNumber,
+            'walkingLevelDetail' => [
+                'authorized' => true,
+                'usesRealData' => true,
+                'generatedAt' => now()->toISOString(),
+                'requestedJourneyType' => $requestedJourneyType,
+                'legacyRoute' => $legacyRoute,
+                'levelFound' => true,
+                'person' => [
+                    'id' => $person->id,
+                    'name' => $person->preferred_name ?: $person->full_name,
+                ],
+                'canSeeYouthJourney' => $canSeeYouthJourney,
+                'message' => null,
+                'journey' => $this->formatMapJourneyData($journey),
+                'progress' => [
+                    'points' => $points,
+                    'approvedLogsCount' => (int) ($progress['approved_logs_count'] ?? 0),
+                    'currentLevel' => $currentLevel,
+                    'nextLevel' => $nextLevel,
+                    'pointsToNextLevel' => (int) ($levelProgress['points_to_next_level'] ?? 0),
+                    'progressPercent' => (int) ($levelProgress['progress_percentage'] ?? 0),
+                    'recentLogs' => $recentLogs,
+                ],
+                'level' => $this->formatMapLevel($requestedLevel, $points, $currentLevel, $nextLevel),
+                'neighborLevels' => $this->levelDetailNeighbors($journey, $requestedLevel, $journeySlug),
+                'emptyStates' => $this->levelDetailEmptyStates(),
+            ],
+        ]);
+    }
+
+    private function emptyLevelDetailPayload(
+        string $message,
+        string $requestedJourneyType,
+        bool $legacyRoute,
+        bool $authorized,
+        bool $canSeeYouthJourney,
+        string $reason,
+        ?array $person = null
+    ): array {
+        return [
+            'authorized' => $authorized,
+            'usesRealData' => true,
+            'generatedAt' => now()->toISOString(),
+            'requestedJourneyType' => $requestedJourneyType,
+            'legacyRoute' => $legacyRoute,
+            'levelFound' => false,
+            'person' => $person,
+            'canSeeYouthJourney' => $canSeeYouthJourney,
+            'message' => $message,
+            'reason' => $reason,
+            'journey' => null,
+            'progress' => [
+                'points' => 0,
+                'approvedLogsCount' => 0,
+                'currentLevel' => null,
+                'nextLevel' => null,
+                'pointsToNextLevel' => 0,
+                'progressPercent' => 0,
+                'recentLogs' => [],
+            ],
+            'level' => null,
+            'neighborLevels' => [
+                'previous' => null,
+                'next' => null,
+            ],
+            'emptyStates' => $this->levelDetailEmptyStates(),
+        ];
+    }
+
+    private function levelDetailNeighbors(WalkingJourney $journey, WalkingLevel $level, string $journeySlug): array
+    {
+        $previous = $journey->levels()
+            ->where('is_active', true)
+            ->where('level_number', '<', $level->level_number)
+            ->orderByDesc('level_number')
+            ->first();
+        $next = $journey->levels()
+            ->where('is_active', true)
+            ->where('level_number', '>', $level->level_number)
+            ->orderBy('level_number')
+            ->first();
+
+        return [
+            'previous' => $this->formatLevelNeighbor($previous, $journeySlug),
+            'next' => $this->formatLevelNeighbor($next, $journeySlug),
+        ];
+    }
+
+    private function formatLevelNeighbor(?WalkingLevel $level, string $journeySlug): ?array
+    {
+        if (!$level) {
+            return null;
+        }
+
+        return [
+            'id' => $level->id,
+            'number' => $level->level_number,
+            'name' => $level->name,
+            'requiredPoints' => $level->required_points,
+            'route' => "/familia-resgate/minha-caminhada/{$journeySlug}/niveis/{$level->level_number}",
+        ];
+    }
+
+    private function levelDetailEmptyStates(): array
+    {
+        return [
+            'withoutPersonTitle' => 'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+            'withoutPersonText' => 'Assim que o cadastro for vinculado, os detalhes reais deste nível aparecerão aqui.',
+            'missingLevelTitle' => 'Nível não encontrado.',
+            'missingLevelText' => 'Verifique o endereço acessado ou volte ao mapa da caminhada.',
+            'unauthorizedYouthTitle' => 'Nível jovem indisponível para este perfil.',
+            'unauthorizedYouthText' => 'A caminhada jovem aparece somente para jovens/resgatados autorizados.',
+            'withoutJourneyTitle' => 'Jornada indisponível no momento.',
+            'withoutJourneyText' => 'Assim que a jornada estiver disponível, os detalhes reais deste nível aparecerão aqui.',
+        ];
     }
 
     private function renderMap(

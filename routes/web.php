@@ -175,20 +175,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/familia-resgate/minha-caminhada/jovem/mapa', [MinhaCaminhadaController::class, 'youthMap'])
         ->name('familia-resgate.minha_caminhada.jovem.mapa');
 
-    Route::get('/familia-resgate/minha-caminhada/geral/niveis/{level}', fn (string $level) => Inertia::render('FamiliaResgate/MinhaCaminhadaNivel', [
-        'journey' => 'geral',
-        'level' => $level,
-    ]))->where('level', '[1-9]|1[0-9]|20')->name('familia-resgate.minha_caminhada.geral.niveis.show');
+    Route::get('/familia-resgate/minha-caminhada/geral/niveis/{level}', [MinhaCaminhadaController::class, 'generalLevel'])
+        ->where('level', '[0-9]+')
+        ->name('familia-resgate.minha_caminhada.geral.niveis.show');
 
-    Route::get('/familia-resgate/minha-caminhada/jovem/niveis/{level}', fn (string $level) => Inertia::render('FamiliaResgate/MinhaCaminhadaNivel', [
-        'journey' => 'jovem',
-        'level' => $level,
-    ]))->where('level', '[1-9]|1[0-9]|20')->name('familia-resgate.minha_caminhada.jovem.niveis.show');
+    Route::get('/familia-resgate/minha-caminhada/jovem/niveis/{level}', [MinhaCaminhadaController::class, 'youthLevel'])
+        ->where('level', '[0-9]+')
+        ->name('familia-resgate.minha_caminhada.jovem.niveis.show');
 
-    Route::get('/familia-resgate/minha-caminhada/niveis/{level}', fn (string $level) => Inertia::render('FamiliaResgate/MinhaCaminhadaNivel', [
-        'journey' => 'geral',
-        'level' => $level,
-    ]))->where('level', '[1-9]|1[0-9]|20')->name('familia-resgate.minha_caminhada.niveis.show');
+    Route::get('/familia-resgate/minha-caminhada/niveis/{level}', [MinhaCaminhadaController::class, 'legacyGeneralLevel'])
+        ->where('level', '[0-9]+')
+        ->name('familia-resgate.minha_caminhada.niveis.show');
 
     $financialFamilyAreas = [
         'historico' => 'historico',
