@@ -11,6 +11,7 @@ use App\Services\MinhaCaminhada\WalkingDashboardReadService;
 use App\Services\MinhaCaminhada\WalkingLevelService;
 use App\Services\MinhaCaminhada\WalkingMentorReadService;
 use App\Services\MinhaCaminhada\WalkingProgressService;
+use App\Services\MinhaCaminhada\WalkingRecognitionReadService;
 use App\Services\MinhaCaminhada\WalkingRulesReadService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -262,6 +263,16 @@ class MinhaCaminhadaController extends Controller
     public function points(Request $request, WalkingRulesReadService $rulesReadService): Response
     {
         return $this->renderRulesPage($request, $rulesReadService, 'points');
+    }
+
+    public function ranking(Request $request, WalkingRecognitionReadService $recognitionReadService): Response
+    {
+        return $this->renderRecognitionPage($request, $recognitionReadService, 'ranking');
+    }
+
+    public function monthlyHighlights(Request $request, WalkingRecognitionReadService $recognitionReadService): Response
+    {
+        return $this->renderRecognitionPage($request, $recognitionReadService, 'monthly_highlights');
     }
 
     public function generalJourney(Request $request): Response
@@ -966,6 +977,18 @@ class MinhaCaminhadaController extends Controller
                 'emptyStates' => $this->rulesEmptyStates(),
                 'explanation' => $this->rulesExplanation($variant, $person !== null),
             ],
+        ]);
+    }
+
+    private function renderRecognitionPage(
+        Request $request,
+        WalkingRecognitionReadService $recognitionReadService,
+        string $variant
+    ): Response {
+        return Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+            'area' => 'ranking',
+            'journey' => 'all',
+            'walkingRecognition' => $recognitionReadService->getRecognition($request->user(), $variant),
         ]);
     }
 

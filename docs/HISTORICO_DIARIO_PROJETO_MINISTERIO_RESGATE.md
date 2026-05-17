@@ -1064,3 +1064,21 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foi executado migrate:fresh, não foi executado db:wipe, não foram criados ou executados seeders no banco real, não foram criados dados fake no banco real e não foram alterados ranking/destaques, presenças, destaques mensal, placeholders finais, Central da Família, Meu Perfil ou Meu Financeiro.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Integração real de Ranking/Destaques da Minha Caminhada
+
+- **Horário:** 17:10–18:30 aprox.
+- **Objetivo:** integrar com dados reais somente Ranking/Destaques e Destaque Mensal da Minha Caminhada, mantendo reconhecimento pastoral sem competição, comparação espiritual ou exposição indevida.
+- **Rotas ajustadas:** `/familia-resgate/minha-caminhada/ranking` e `/familia-resgate/minha-caminhada/destaques/mensal` ficaram ligadas ao `MinhaCaminhadaController`.
+- **Prop real criada:** `walkingRecognition`, usada para carregar reconhecimentos gerais e jovens autorizados, resumo, estado vazio, variante de visualização e aviso pastoral.
+- **Service criado:** `WalkingRecognitionReadService`, service somente leitura para buscar e formatar reconhecimentos reais sem retornar Models crus.
+- **Fonte dos dados:** uso de `WalkingHighlight` aprovado, visível e público, com pontos aprovados reais de apoio quando aplicável.
+- **Mocks removidos/neutralizados:** removidos `Presença Fiel`, `Servo Disponível`, `Palavra Viva`, ranking fake, nomes fake, pontos fake, posições fake e equipe jovem fake.
+- **Segurança pastoral aplicada:** reconhecimento não mede espiritualidade, valor pessoal ou intimidade com Deus; serve para encorajar com cuidado e validação da igreja.
+- **Jornada jovem protegida:** dados jovens permanecem protegidos no backend e só aparecem para usuários autorizados/resgatados.
+- **Estados vazios seguros:** adicionados estados para ausência de destaques aprovados, usuário sem pessoa vinculada e jornada jovem não autorizada.
+- **Teste criado:** `tests/Feature/MinhaCaminhada/MinhaCaminhadaReconhecimentoControllerTest.php`, cobrindo autenticação, payload real seguro, destaque mensal, proteção jovem, ausência de metadata sensível, leitura sem criação operacional e filtros de highlights inválidos/sensíveis.
+- **Validações executadas:** teste novo passou com 10 testes e 160 assertions; testes relacionados passaram; `php artisan test --compact` passou com 125 testes e 1271 assertions; `npm run build` passou; `git diff --check` passou.
+- **Busca de mocks:** busca final limpa para o branch de ranking/destaques, restando apenas `Sem ranking espiritual` como negação segura no branch de regras.
+- **Escopo preservado:** não foram criadas migrations, não foi executado migrate, não foram criados ou executados seeders no banco real e não foram criados dados fake.
+- **Commit/push antes desta etapa final:** nenhum commit ou push foi feito antes desta etapa final.

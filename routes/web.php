@@ -156,10 +156,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/familia-resgate/minha-caminhada/pontuacao', [MinhaCaminhadaController::class, 'points'])
         ->name('familia-resgate.minha_caminhada.pontuacao');
 
-    Route::get('/familia-resgate/minha-caminhada/ranking', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
-        'area' => 'ranking',
-        'journey' => 'all',
-    ]))->name('familia-resgate.minha_caminhada.ranking');
+    Route::get('/familia-resgate/minha-caminhada/ranking', [MinhaCaminhadaController::class, 'ranking'])
+        ->name('familia-resgate.minha_caminhada.ranking');
+
+    Route::get('/familia-resgate/minha-caminhada/destaques/mensal', [MinhaCaminhadaController::class, 'monthlyHighlights'])
+        ->name('familia-resgate.minha_caminhada.destaques_mensal');
 
     Route::get('/familia-resgate/minha-caminhada/mapa', [MinhaCaminhadaController::class, 'map'])
         ->name('familia-resgate.minha_caminhada.mapa');
@@ -245,7 +246,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'codigo-conduta' => ['Código de Conduta', 'Princípios que orientam convivência, serviço e cuidado.', '✦'],
         'fale-com-lideranca' => ['Fale com a Liderança', 'Canal preparado para contato com liderança e cuidado pastoral.', '♡'],
         'ajuda' => ['Ajuda e Suporte', 'Orientações e suporte para uso da Central da Família.', '?'],
-        'minha-caminhada/destaques/mensal' => ['Membro Destaque do Mês', 'Reconhecimento mensal de frutos, constância, serviço, devoção e comunhão saudável.', '♕'],
         'centro-sabedoria' => ['Centro da Sabedoria', 'Bíblia, devocionais, planos de leitura e perguntas da jornada bíblica.', '▣'],
         'centro-sabedoria/biblia' => ['Bíblia Online', 'Área preparada para leitura bíblica em diferentes versões.', '▣'],
         'centro-sabedoria/devocionais' => ['Devocionais', 'Devocionais guiados para fortalecer sua vida com Deus.', '◌'],

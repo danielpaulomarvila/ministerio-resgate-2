@@ -12,6 +12,7 @@ const props = defineProps({
   walkingMentor: { type: Object, default: null },
   walkingRules: { type: Object, default: null },
   walkingJourneyDetail: { type: Object, default: null },
+  walkingRecognition: { type: Object, default: null },
 })
 
 const baseRoute = '/familia-resgate/minha-caminhada'
@@ -136,39 +137,14 @@ const viewerContext = {
 const rankingPrinciples = ['Honrar sem comparar', 'Reconhecer sem expor', 'Encorajar sem competir']
 const baseRankingFilters = ['Todos', 'Gerais', 'Presença', 'Palavra', 'Serviço', 'Evangelismo', 'Conquistas']
 const youthRankingFilters = ['Resgatados']
-const teamRankingFilters = ['Equipes']
 const selectedRankingFilter = ref('Todos')
 const rankingSeparationTracks = [
   { title: 'Caminhada Geral', result: 'destaques gerais', text: 'Membro comum visualiza reconhecimentos gerais da igreja.' },
-  { title: 'Permissões futuras', result: 'jovens e equipes', text: 'Destaques jovens e equipes aparecem somente para perfis autorizados.' },
-  { title: 'Sem mistura', result: 'trilhos separados', text: 'Pontos gerais, jovens e coletivos não se misturam.' },
+  { title: 'Jornada Jovem', result: 'destaques protegidos', text: 'Destaques jovens aparecem somente para jovens/resgatados autorizados.' },
+  { title: 'Sem mistura', result: 'trilhos separados', text: 'Pontos gerais e jovens não se misturam.' },
 ]
-const rankingGeneralHighlights = [
-  { icon: '⛪', title: 'Constância em Presença', name: 'Ana Ribeiro', reason: 'Participação constante nos cultos e encontros.', journey: 'Caminhada Geral', category: 'Presença', seal: 'Presença Fiel' },
-  { icon: '🤝', title: 'Serviço Disponível', name: 'Marcos Silva', reason: 'Apoio em escalas e ministérios.', journey: 'Caminhada Geral', category: 'Serviço', seal: 'Servo Disponível' },
-  { icon: '📖', title: 'Palavra em Crescimento', name: 'Júlia Santos', reason: 'Constância em leitura bíblica e devocionais.', journey: 'Caminhada Geral', category: 'Palavra', seal: 'Palavra Viva' },
-  { icon: '🕊️', title: 'Esperança Compartilhada', name: 'Beatriz Costa', reason: 'Cuidado com visitantes e convites feitos com amor.', journey: 'Caminhada Geral', category: 'Evangelismo', seal: 'Voz de Esperança' },
-  { icon: '✅', title: 'Marco Celebrado', name: 'Pedro Martins', reason: 'Conquista desbloqueada por constância e pequenos passos.', journey: 'Caminhada Geral', category: 'Conquistas', seal: 'Caminho Firme' },
-]
-const rankingYouthHighlights = [
-  { icon: '🔥', title: 'Jovem em Movimento', name: 'Lucas Almeida', reason: 'Participação nos Resgatados, desafios bíblicos e comunhão.', journey: 'Caminhada Jovem', category: 'Resgatados', seal: 'Chama Jovem' },
-  { icon: '📖', title: 'Bíblia na Mão', name: 'Daniel Paulo', reason: 'Constância nos desafios e leitura bíblica jovem.', journey: 'Caminhada Jovem', category: 'Palavra', seal: 'Bíblia na Mão' },
-  { icon: '🌍', title: 'Missão em Movimento', name: 'Lara Costa', reason: 'Participação em missões e ações dos Resgatados.', journey: 'Caminhada Jovem', category: 'Evangelismo', seal: 'Missão em Movimento' },
-]
-const rankingGeneralCriteria = ['Presença', 'Palavra', 'Devocional', 'Serviço', 'Comunhão', 'Evangelismo', 'Formação', 'Intercessão, quando aplicável']
+const rankingGeneralCriteria = ['Presença', 'Palavra', 'Devocional', 'Serviço', 'Comunhão', 'Evangelismo', 'Formação']
 const rankingYouthCriteria = ['Presença nos Resgatados', 'Bíblia na mão', 'Desafios bíblicos', 'Serviço jovem', 'Comunhão jovem', 'Evangelismo jovem', 'Missões']
-const rankingTeamBadges = [
-  { icon: '🌍', title: 'Missão em equipe', text: 'Ações coletivas dos Resgatados com propósito.' },
-  { icon: '🧠', title: 'Desafio coletivo', text: 'Desafios bíblicos cumpridos em equipe.' },
-  { icon: '🤲', title: 'Acolhimento jovem', text: 'Cuidado coletivo com novos jovens.' },
-  { icon: '🤝', title: 'Serviço coletivo', text: 'Serviço jovem acompanhado como equipe.' },
-]
-const rankingSummaryCards = [
-  { label: 'Pessoas reconhecidas', value: '12', note: 'Com cuidado e sem exposição' },
-  { label: 'Selos entregues', value: '18', note: 'Reconhecimentos saudáveis' },
-  { label: 'Trilho visível', value: 'Geral', note: 'Padrão de membro comum' },
-  { label: 'Permissões futuras', value: 'Policies', note: 'Jovens e equipes por autorização' },
-]
 const rankingRecognitionAreas = [
   { icon: '⛪', title: 'Presença', text: 'Constância em cultos, encontros e atividades confirmadas.' },
   { icon: '📖', title: 'Palavra', text: 'Leitura bíblica e crescimento no fundamento.' },
@@ -177,13 +153,6 @@ const rankingRecognitionAreas = [
   { icon: '👥', title: 'Comunhão', text: 'Caminhada junto da família da fé.' },
   { icon: '🕊️', title: 'Evangelismo', text: 'Cuidado com visitantes e alcance saudável.' },
   { icon: '🎓', title: 'Formação', text: 'Estudos, discipulado e maturidade.' },
-  { icon: '🙏', title: 'Intercessão', text: 'Categoria geral futura com avaliação privada e cuidado pastoral.' },
-]
-const rankingYouthBadges = [
-  { icon: '📖', title: 'Bíblia na Mão', text: 'Palavra presente nos encontros e desafios.' },
-  { icon: '🧠', title: 'Desafio Cumprido', text: 'Resposta bíblica acompanhada com cuidado.' },
-  { icon: '🔥', title: 'Chama Jovem', text: 'Constância e comunhão nos Resgatados.' },
-  { icon: '🌍', title: 'Missão em Movimento', text: 'Ações jovens com propósito e responsabilidade.' },
 ]
 const rankingCareItems = [
   'Não é ranking de espiritualidade.',
@@ -392,38 +361,90 @@ const ruleLimitItems = (rule) => [
   rule.maxPerWeek ? `Máximo por semana: ${rule.maxPerWeek}` : null,
   rule.maxPerMonth ? `Máximo por mês: ${rule.maxPerMonth}` : null,
 ].filter(Boolean)
+const hasRealRecognitionData = computed(() => Boolean(props.walkingRecognition?.usesRealData))
+const canSeeYouthJourneyFromRecognition = computed(() => hasRealRecognitionData.value ? Boolean(props.walkingRecognition?.canSeeYouthJourney) : viewerContext.canSeeYouthHighlights)
 const rankingFilters = computed(() => [
   ...baseRankingFilters,
-  ...(viewerContext.canSeeYouthHighlights ? youthRankingFilters : []),
-  ...(viewerContext.canSeeYouthTeams ? teamRankingFilters : []),
+  ...(canSeeYouthJourneyFromRecognition.value ? youthRankingFilters : []),
 ])
-const visibleRankingGeneralHighlights = computed(() => {
-  if (!viewerContext.canSeeGeneralHighlights) {
+const recognitionVariant = computed(() => props.walkingRecognition?.variant || 'ranking')
+const recognitionDisplayMode = computed(() => recognitionVariant.value === 'monthly_highlights' ? 'monthly' : 'all')
+const recognitionSourceItems = (journey) => {
+  if (!journey?.authorized) {
     return []
   }
 
-  if (selectedRankingFilter.value === 'Todos' || selectedRankingFilter.value === 'Gerais') {
-    return rankingGeneralHighlights
+  if (recognitionDisplayMode.value === 'monthly') {
+    return Array.isArray(journey.monthlyHighlights) ? journey.monthlyHighlights : []
   }
 
-  return rankingGeneralHighlights.filter((highlight) => highlight.category === selectedRankingFilter.value || highlight.seal === selectedRankingFilter.value)
-})
-const visibleRankingYouthHighlights = computed(() => {
-  if (!viewerContext.canSeeYouthHighlights) {
+  return Array.isArray(journey.items) ? journey.items : []
+}
+const filterRecognitionItems = (items, journeyFilterName) => {
+  if (selectedRankingFilter.value === 'Todos' || selectedRankingFilter.value === journeyFilterName) {
+    return items
+  }
+
+  if (selectedRankingFilter.value === 'Resgatados') {
     return []
   }
 
-  if (selectedRankingFilter.value === 'Todos' || selectedRankingFilter.value === 'Resgatados') {
-    return rankingYouthHighlights
-  }
+  return items.filter((highlight) => highlight.category === selectedRankingFilter.value || highlight.highlightLabel === selectedRankingFilter.value)
+}
+const currentRecognitionGeneralData = computed(() => props.walkingRecognition?.general || null)
+const currentRecognitionYouthData = computed(() => props.walkingRecognition?.youth || null)
+const visibleRankingGeneralHighlights = computed(() => filterRecognitionItems(recognitionSourceItems(currentRecognitionGeneralData.value), 'Gerais'))
+const visibleRankingYouthHighlights = computed(() => canSeeYouthJourneyFromRecognition.value ? filterRecognitionItems(recognitionSourceItems(currentRecognitionYouthData.value), 'Resgatados') : [])
+const recognitionItems = computed(() => [
+  ...visibleRankingGeneralHighlights.value,
+  ...visibleRankingYouthHighlights.value,
+])
+const recognitionSummaryCards = computed(() => {
+  const generalSummary = currentRecognitionGeneralData.value?.summary || {}
+  const youthSummary = currentRecognitionYouthData.value?.summary || {}
+  const approvedHighlightsCount = Number(generalSummary.approvedHighlightsCount || 0) + (canSeeYouthJourneyFromRecognition.value ? Number(youthSummary.approvedHighlightsCount || 0) : 0)
+  const monthlyHighlightsCount = Number(generalSummary.monthlyHighlightsCount || 0) + (canSeeYouthJourneyFromRecognition.value ? Number(youthSummary.monthlyHighlightsCount || 0) : 0)
 
-  return rankingYouthHighlights.filter((highlight) => highlight.category === selectedRankingFilter.value || highlight.seal === selectedRankingFilter.value)
+  return [
+    { label: 'Destaques aprovados', value: formatNumber(approvedHighlightsCount), note: 'Somente reconhecimentos validados' },
+    { label: 'Destaques mensais', value: formatNumber(monthlyHighlightsCount), note: 'Período mensal aprovado' },
+    { label: 'Trilho visível', value: canSeeYouthJourneyFromRecognition.value ? 'Geral + Jovem' : 'Geral', note: 'Jovem protegido por autorização' },
+    { label: 'Modo', value: recognitionDisplayMode.value === 'monthly' ? 'Mensal' : 'Geral', note: 'Sem comparação espiritual' },
+  ]
 })
 const hasVisibleRankingGeneralHighlights = computed(() => visibleRankingGeneralHighlights.value.length > 0)
 const hasVisibleRankingYouthHighlights = computed(() => visibleRankingYouthHighlights.value.length > 0)
-const showRankingGeneralSection = computed(() => viewerContext.canSeeGeneralHighlights && (selectedRankingFilter.value === 'Todos' || selectedRankingFilter.value === 'Gerais' || (selectedRankingFilter.value !== 'Resgatados' && selectedRankingFilter.value !== 'Equipes' && hasVisibleRankingGeneralHighlights.value)))
-const showRankingYouthSection = computed(() => viewerContext.canSeeYouthHighlights && (selectedRankingFilter.value === 'Todos' || selectedRankingFilter.value === 'Resgatados' || (selectedRankingFilter.value !== 'Gerais' && selectedRankingFilter.value !== 'Equipes' && hasVisibleRankingYouthHighlights.value)))
-const showRankingTeamsSection = computed(() => viewerContext.canSeeYouthTeams && (selectedRankingFilter.value === 'Todos' || selectedRankingFilter.value === 'Equipes'))
+const showRankingGeneralSection = computed(() => selectedRankingFilter.value !== 'Resgatados')
+const showRankingYouthSection = computed(() => canSeeYouthJourneyFromRecognition.value && (selectedRankingFilter.value === 'Todos' || selectedRankingFilter.value === 'Resgatados' || hasVisibleRankingYouthHighlights.value))
+const recognitionEmptyState = computed(() => {
+  const states = props.walkingRecognition?.emptyStates || {}
+
+  if (!hasRealRecognitionData.value) {
+    return null
+  }
+
+  if (!props.walkingRecognition?.authorized) {
+    return states.withoutPerson || {
+      title: 'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+      text: 'Você pode consultar orientações gerais. Reconhecimentos pessoais aparecerão após o vínculo cadastral.',
+    }
+  }
+
+  if (recognitionItems.value.length === 0) {
+    return states.withoutHighlights || {
+      title: 'Nenhum destaque aprovado ainda.',
+      text: 'Quando houver reconhecimentos validados pela liderança, eles aparecerão aqui.',
+    }
+  }
+
+  return null
+})
+const recognitionPastoralNotice = computed(() => props.walkingRecognition?.pastoralNotice || {
+  title: 'Reconhecimento saudável',
+  text: 'Este espaço reconhece constância, serviço e participação de forma saudável. Ele não mede espiritualidade, valor pessoal ou intimidade com Deus.',
+  approvalText: 'Os reconhecimentos dependem de critérios, validação e aprovação da igreja.',
+})
+const recognitionSectionTitle = computed(() => recognitionDisplayMode.value === 'monthly' ? 'Destaques mensais aprovados' : 'Destaques aprovados da caminhada')
 const hasRealMentorData = computed(() => Boolean(props.walkingMentor?.usesRealData))
 const mentorAuthorized = computed(() => Boolean(hasRealMentorData.value && props.walkingMentor?.authorized))
 const canSeeYouthJourneyFromMentor = computed(() => hasRealMentorData.value ? Boolean(props.walkingMentor?.canSeeYouthJourney) : viewerContext.canSeeYouthJourney)
@@ -1383,7 +1404,7 @@ const mapHeroBadge = computed(() => {
           <div>
             <span>Como os destaques funcionam</span>
             <h2>Como os destaques funcionam</h2>
-            <p>Os destaques não medem espiritualidade nem valor diante de Deus. Eles ajudam a reconhecer constância, participação, serviço, Palavra, comunhão e crescimento saudável.</p>
+            <p>{{ recognitionPastoralNotice.text }}</p>
           </div>
           <div class="ranking-principles">
             <strong v-for="principle in rankingPrinciples" :key="principle">{{ principle }}</strong>
@@ -1409,18 +1430,23 @@ const mapHeroBadge = computed(() => {
         </section>
 
         <section class="ranking-summary-grid" aria-label="Visão geral saudável">
-          <article v-for="card in rankingSummaryCards" :key="card.label">
+          <article v-for="card in recognitionSummaryCards" :key="card.label">
             <span>{{ card.label }}</span>
             <strong>{{ card.value }}</strong>
             <small>{{ card.note }}</small>
           </article>
         </section>
 
+        <article v-if="recognitionEmptyState" class="ranking-empty-state">
+          <strong>{{ recognitionEmptyState.title }}</strong>
+          <p>{{ recognitionEmptyState.text }}</p>
+        </article>
+
         <section class="ranking-separation-card" aria-label="Reconhecimentos separados">
           <div>
             <span>Reconhecimentos separados</span>
             <h2>Trilhos separados, cuidado preservado</h2>
-            <p>Nesta visualização de membro comum aparecem apenas os destaques gerais da igreja. Destaques jovens e reconhecimentos de equipe pertencem a trilhos próprios e dependem de permissões futuras.</p>
+            <p>Esta visualização usa somente reconhecimentos aprovados. Destaques jovens pertencem a trilho próprio e aparecem apenas para jovens/resgatados autorizados.</p>
           </div>
           <div class="ranking-separation-tracks">
             <article v-for="track in rankingSeparationTracks" :key="track.title">
@@ -1434,24 +1460,25 @@ const mapHeroBadge = computed(() => {
         <section v-if="showRankingGeneralSection" class="ranking-highlights-section" aria-label="Destaques Gerais da Igreja">
           <header>
             <span>Destaques Gerais da Igreja</span>
-            <h2>Destaques Gerais da Igreja</h2>
+            <h2>{{ recognitionSectionTitle }}</h2>
           </header>
           <div v-if="hasVisibleRankingGeneralHighlights" class="ranking-highlight-grid">
-            <article v-for="highlight in visibleRankingGeneralHighlights" :key="highlight.title">
-              <i>{{ highlight.icon }}</i>
+            <article v-for="highlight in visibleRankingGeneralHighlights" :key="highlight.id">
+              <i>{{ highlight.initials }}</i>
               <div>
-                <span>{{ highlight.seal }}</span>
-                <h3>{{ highlight.title }}</h3>
-                <strong>{{ highlight.name }}</strong>
-                <p>{{ highlight.reason }}</p>
+                <span>{{ highlight.highlightLabel }}</span>
+                <h3>{{ highlight.displayName }}</h3>
+                <strong>{{ highlight.levelName || 'Caminhada em acompanhamento' }}</strong>
+                <p>{{ highlight.description || 'Reconhecimento aprovado pela liderança conforme critérios da caminhada.' }}</p>
                 <footer>
-                  <small>{{ highlight.journey }}</small>
+                  <small>{{ highlight.periodLabel }}</small>
                   <small>{{ highlight.category }}</small>
+                  <small>{{ formatNumber(highlight.points) }} pts aprovados</small>
                 </footer>
               </div>
             </article>
           </div>
-          <p v-else class="ranking-empty-note">Nenhum destaque geral neste filtro. Os trilhos continuam separados.</p>
+          <p v-else class="ranking-empty-note">Nenhum destaque geral aprovado neste filtro. Quando houver reconhecimentos validados pela liderança, eles aparecerão aqui.</p>
           <div class="ranking-criteria-list">
             <strong>Critérios gerais</strong>
             <span v-for="criterion in rankingGeneralCriteria" :key="criterion">{{ criterion }}</span>
@@ -1461,24 +1488,25 @@ const mapHeroBadge = computed(() => {
         <section v-if="showRankingYouthSection" class="ranking-highlights-section ranking-youth-section" aria-label="Destaques Jovens dos Resgatados">
           <header>
             <span>Destaques Jovens dos Resgatados</span>
-            <h2>Destaques Jovens dos Resgatados</h2>
+            <h2>{{ recognitionDisplayMode === 'monthly' ? 'Destaques mensais dos Resgatados' : 'Destaques aprovados dos Resgatados' }}</h2>
           </header>
           <div v-if="hasVisibleRankingYouthHighlights" class="ranking-highlight-grid">
-            <article v-for="highlight in visibleRankingYouthHighlights" :key="highlight.title" class="is-youth-highlight">
-              <i>{{ highlight.icon }}</i>
+            <article v-for="highlight in visibleRankingYouthHighlights" :key="highlight.id" class="is-youth-highlight">
+              <i>{{ highlight.initials }}</i>
               <div>
-                <span>{{ highlight.seal }}</span>
-                <h3>{{ highlight.title }}</h3>
-                <strong>{{ highlight.name }}</strong>
-                <p>{{ highlight.reason }}</p>
+                <span>{{ highlight.highlightLabel }}</span>
+                <h3>{{ highlight.displayName }}</h3>
+                <strong>{{ highlight.levelName || 'Caminhada jovem em acompanhamento' }}</strong>
+                <p>{{ highlight.description || 'Reconhecimento jovem aprovado pela liderança conforme critérios dos Resgatados.' }}</p>
                 <footer>
-                  <small>{{ highlight.journey }}</small>
+                  <small>{{ highlight.periodLabel }}</small>
                   <small>{{ highlight.category }}</small>
+                  <small>{{ formatNumber(highlight.points) }} pts aprovados</small>
                 </footer>
               </div>
             </article>
           </div>
-          <p v-else class="ranking-empty-note">Nenhum destaque jovem neste filtro. Jovens não competem com membros comuns.</p>
+          <p v-else class="ranking-empty-note">Nenhum destaque jovem aprovado neste filtro. Jovens não competem com membros comuns.</p>
           <div class="ranking-criteria-list">
             <strong>Critérios jovens</strong>
             <span v-for="criterion in rankingYouthCriteria" :key="criterion">{{ criterion }}</span>
@@ -1499,22 +1527,6 @@ const mapHeroBadge = computed(() => {
           </div>
         </section>
 
-        <section v-if="showRankingTeamsSection" class="ranking-youth-card" aria-label="Equipes dos Resgatados">
-          <div>
-            <span>Equipes dos Resgatados</span>
-            <h2>Equipes dos Resgatados</h2>
-            <p>As equipes jovens poderão ter reconhecimentos coletivos próprios, como presença coletiva, missões em equipe, desafios bíblicos e acolhimento de novos jovens. Esses pontos são coletivos e não se misturam com os pontos individuais.</p>
-            <strong>Trilho futuro separado: equipe jovem não soma nos pontos gerais nem nos pontos jovens individuais.</strong>
-          </div>
-          <div class="ranking-youth-grid">
-            <article v-for="badge in rankingTeamBadges" :key="badge.title">
-              <i>{{ badge.icon }}</i>
-              <strong>{{ badge.title }}</strong>
-              <p>{{ badge.text }}</p>
-            </article>
-          </div>
-        </section>
-
         <section v-if="showRankingYouthSection" class="ranking-youth-card ranking-resgatados-note" aria-label="Destaques dos Resgatados">
           <div>
             <span>Destaques dos Resgatados</span>
@@ -1522,20 +1534,13 @@ const mapHeroBadge = computed(() => {
             <p>Os jovens podem ter reconhecimentos próprios ligados à presença nos encontros, desafios bíblicos, serviço jovem, comunhão, missões e crescimento com responsabilidade.</p>
             <strong>Esses reconhecimentos jovens não se misturam com os destaques gerais.</strong>
           </div>
-          <div class="ranking-youth-grid">
-            <article v-for="badge in rankingYouthBadges" :key="badge.title">
-              <i>{{ badge.icon }}</i>
-              <strong>{{ badge.title }}</strong>
-              <p>{{ badge.text }}</p>
-            </article>
-          </div>
         </section>
 
         <article class="ranking-care-card" aria-label="Reconhecimento com cuidado">
           <div>
             <span>Reconhecimento com cuidado</span>
-            <h2>Reconhecimento com cuidado</h2>
-            <p>Os destaques existem para encorajar, não para comparar pessoas. A caminhada não mede fé, valor espiritual ou importância diante de Deus.</p>
+            <h2>{{ recognitionPastoralNotice.title }}</h2>
+            <p>{{ recognitionPastoralNotice.approvalText }}</p>
           </div>
           <ul>
             <li v-for="item in rankingCareItems" :key="item">{{ item }}</li>
