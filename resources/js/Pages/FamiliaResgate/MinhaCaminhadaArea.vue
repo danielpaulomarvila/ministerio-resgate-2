@@ -8,6 +8,7 @@ const props = defineProps({
   journey: { type: String, default: 'geral' },
   walkingLevel: { type: Object, default: null },
   walkingMap: { type: Object, default: null },
+  walkingHistory: { type: Object, default: null },
 })
 
 const baseRoute = '/familia-resgate/minha-caminhada'
@@ -188,32 +189,8 @@ const journeyDashboardMocks = {
   },
 }
 
-// Mock temporário do histórico: backend futuro deve enviar registros reais vindos de presença, leitura, devocional, serviço, visitantes, jovens, conquistas e ajustes administrativos. Jovens/resgatados possuem histórico jovem separado do histórico geral; frontend não é segurança final.
 const historyFilters = ['Todos', 'Caminhada Geral', 'Caminhada Jovem', 'Presença', 'Palavra', 'Devocional', 'Serviço', 'Evangelismo', 'Conquistas']
 const selectedHistoryFilter = ref('Todos')
-const historySummaryCards = [
-  { label: 'Pontos gerais', value: '380 pts', note: 'Confirmados na caminhada geral', scope: 'general' },
-  { label: 'Pontos jovens', value: '920 pts', note: 'Separados para Resgatados', scope: 'youth' },
-  { label: 'Ações registradas', value: '18', note: 'Entre presença, Palavra e serviço' },
-  { label: 'Conquistas', value: '9', note: 'Badges e marcos desbloqueados' },
-]
-const historySupportStats = [
-  { label: 'Pontos confirmados', value: '380 pts', scope: 'general' },
-  { label: 'Pontos em validação', value: '80 pts', scope: 'general' },
-  { label: 'Conquistas desbloqueadas', value: '9' },
-]
-const historyEvents = [
-  { date: '15 mai', title: 'Presença no culto de domingo', journey: 'Geral', category: 'Presença', points: 40, status: 'Confirmado', statusKey: 'confirmed', description: 'Registro confirmado de participação no culto principal da família espiritual.' },
-  { date: '14 mai', title: 'Encontro dos Resgatados', journey: 'Jovem', category: 'Presença', points: 55, status: 'Confirmado', statusKey: 'confirmed', description: 'Participação no encontro jovem com comunhão, Palavra e acompanhamento.' },
-  { date: '13 mai', title: 'Desafio bíblico respondido', journey: 'Jovem', category: 'Palavra', points: 35, status: 'Em validação', statusKey: 'pending', description: 'Resposta enviada para validação da liderança dos Resgatados.' },
-  { date: '12 mai', title: 'Leitura bíblica do dia', journey: 'Geral', category: 'Palavra', points: 18, status: 'Confirmado', statusKey: 'confirmed', description: 'Leitura diária registrada como avanço na área da Palavra.' },
-  { date: '11 mai', title: 'Badge Palavra Viva desbloqueada', journey: 'Geral', category: 'Conquistas', points: 80, status: 'Conquista', statusKey: 'achievement', description: 'Conquista liberada por constância em leitura e reflexão bíblica.' },
-  { date: '10 mai', title: 'Versículo memorizado', journey: 'Jovem', category: 'Devocional', points: 28, status: 'Confirmado', statusKey: 'confirmed', description: 'Versículo apresentado no desafio jovem da semana.' },
-  { date: '09 mai', title: 'Serviço em escala', journey: 'Geral', category: 'Serviço', points: 35, status: 'Confirmado', statusKey: 'confirmed', description: 'Serviço registrado em escala ministerial da casa.' },
-  { date: '08 mai', title: 'Visitante confirmado', journey: 'Geral', category: 'Evangelismo', points: 45, status: 'Ajustado', statusKey: 'adjusted', description: 'Registro revisado pela administração após confirmação do visitante.' },
-  { date: '07 mai', title: 'Missão jovem concluída', journey: 'Jovem', category: 'Evangelismo', points: 45, status: 'Em validação', statusKey: 'pending', description: 'Missão enviada para conferência da liderança jovem.' },
-  { date: '06 mai', title: 'Nível Coração Desperto alcançado', journey: 'Geral', category: 'Conquistas', points: 120, status: 'Conquista', statusKey: 'achievement', description: 'Marco espiritual alcançado na caminhada geral.' },
-]
 
 // Futuro backend:
 // O Mentor da Caminhada deve começar como inteligência gratuita por regras,
@@ -487,25 +464,126 @@ const hasVisibleRankingYouthHighlights = computed(() => visibleRankingYouthHighl
 const showRankingGeneralSection = computed(() => viewerContext.canSeeGeneralHighlights && (selectedRankingFilter.value === 'Todos' || selectedRankingFilter.value === 'Gerais' || (selectedRankingFilter.value !== 'Resgatados' && selectedRankingFilter.value !== 'Equipes' && hasVisibleRankingGeneralHighlights.value)))
 const showRankingYouthSection = computed(() => viewerContext.canSeeYouthHighlights && (selectedRankingFilter.value === 'Todos' || selectedRankingFilter.value === 'Resgatados' || (selectedRankingFilter.value !== 'Gerais' && selectedRankingFilter.value !== 'Equipes' && hasVisibleRankingYouthHighlights.value)))
 const showRankingTeamsSection = computed(() => viewerContext.canSeeYouthTeams && (selectedRankingFilter.value === 'Todos' || selectedRankingFilter.value === 'Equipes'))
-const visibleHistoryFilters = computed(() => historyFilters.filter((filter) => filter !== 'Caminhada Jovem' || viewerContext.canSeeYouthJourney))
-const visibleHistorySummaryCards = computed(() => historySummaryCards.filter((card) => card.scope !== 'youth' || viewerContext.canSeeYouthJourney))
-const visibleHistorySupportStats = computed(() => historySupportStats.filter((stat) => stat.scope !== 'youth' || viewerContext.canSeeYouthJourney))
-const visibleHistoryEvents = computed(() => {
-  const allowedEvents = historyEvents.filter((event) => event.journey !== 'Jovem' || viewerContext.canSeeYouthJourney)
+const hasRealHistoryData = computed(() => Boolean(props.walkingHistory?.usesRealData))
+const historyAuthorized = computed(() => Boolean(hasRealHistoryData.value && props.walkingHistory?.authorized))
+const canSeeYouthJourneyFromHistory = computed(() => hasRealHistoryData.value ? Boolean(props.walkingHistory?.canSeeYouthJourney) : viewerContext.canSeeYouthJourney)
+const activeHistoryJourney = computed(() => selectedHistoryFilter.value === 'Caminhada Jovem' && canSeeYouthJourneyFromHistory.value ? 'youth' : 'general')
+const currentHistoryData = computed(() => props.walkingHistory?.[activeHistoryJourney.value] || props.walkingHistory?.general || null)
+const formatHistoryDate = (value) => {
+  if (!value) {
+    return 'Data não informada'
+  }
+
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(value))
+}
+const normalizeHistoryEvent = (event) => ({
+  id: event.id,
+  date: formatHistoryDate(event.occurredAt || event.createdAt),
+  title: event.title,
+  journey: event.journeyLabel || (event.journeyType === 'youth' ? 'Caminhada Jovem' : 'Caminhada Geral'),
+  journeyType: event.journeyType,
+  category: event.categoryLabel || event.category || 'Registro',
+  points: Number(event.points || 0),
+  status: event.statusLabel || 'Aprovado',
+  statusKey: event.status || 'approved',
+  description: event.description || 'Registro aprovado sem observação pública.',
+})
+const visibleHistoryFilters = computed(() => historyFilters.filter((filter) => {
+  if (filter === 'Caminhada Jovem') {
+    return canSeeYouthJourneyFromHistory.value
+  }
+
+  if (filter === 'Conquistas') {
+    return !hasRealHistoryData.value
+  }
+
+  return true
+}))
+const realTimelineSummaryCards = computed(() => {
+  if (!hasRealHistoryData.value || !historyAuthorized.value) {
+    return []
+  }
+
+  const generalSummary = props.walkingHistory?.general?.summary || {}
+  const youthSummary = props.walkingHistory?.youth?.summary || {}
+  const totalEvents = Number(generalSummary.totalEvents || 0) + (canSeeYouthJourneyFromHistory.value ? Number(youthSummary.totalEvents || 0) : 0)
+  const totalPoints = Number(generalSummary.totalPoints || 0) + (canSeeYouthJourneyFromHistory.value ? Number(youthSummary.totalPoints || 0) : 0)
+  const approvedLogsCount = Number(generalSummary.approvedLogsCount || 0) + (canSeeYouthJourneyFromHistory.value ? Number(youthSummary.approvedLogsCount || 0) : 0)
+  const categoriesCount = Number(generalSummary.categoriesCount || 0) + (canSeeYouthJourneyFromHistory.value ? Number(youthSummary.categoriesCount || 0) : 0)
+
+  return [
+    { label: 'Pontos aprovados', value: `${formatNumber(totalPoints)} pts`, note: 'Somente logs aprovados entram neste total.' },
+    { label: 'Eventos reais', value: formatNumber(totalEvents), note: 'Registros aprovados exibidos no histórico.' },
+    { label: 'Logs aprovados', value: formatNumber(approvedLogsCount), note: 'Sem pendentes, rejeitados ou metadata sensível.' },
+    { label: 'Categorias', value: formatNumber(categoriesCount), note: 'Categorias distintas presentes nos registros.' },
+  ]
+})
+const realTimelineSupportStats = computed(() => {
+  if (!hasRealHistoryData.value || !historyAuthorized.value || !currentHistoryData.value?.authorized) {
+    return []
+  }
+
+  const summary = currentHistoryData.value.summary || {}
+
+  return [
+    { label: 'Jornada atual', value: activeHistoryJourney.value === 'youth' ? 'Jovem' : 'Geral' },
+    { label: 'Eventos exibidos', value: formatNumber(summary.totalEvents || 0) },
+    { label: 'Último registro', value: summary.latestEventAt ? formatHistoryDate(summary.latestEventAt) : 'Sem registros' },
+  ]
+})
+const realTimelineItems = computed(() => {
+  if (!hasRealHistoryData.value || !historyAuthorized.value) {
+    return []
+  }
+
+  const events = [
+    ...(Array.isArray(props.walkingHistory?.general?.events) ? props.walkingHistory.general.events : []),
+    ...(canSeeYouthJourneyFromHistory.value && Array.isArray(props.walkingHistory?.youth?.events) ? props.walkingHistory.youth.events : []),
+  ].map(normalizeHistoryEvent)
 
   if (selectedHistoryFilter.value === 'Todos') {
-    return allowedEvents
+    return events
   }
 
   if (selectedHistoryFilter.value === 'Caminhada Geral') {
-    return allowedEvents.filter((event) => event.journey === 'Geral')
+    return events.filter((event) => event.journeyType === 'general')
   }
 
   if (selectedHistoryFilter.value === 'Caminhada Jovem') {
-    return allowedEvents.filter((event) => event.journey === 'Jovem')
+    return events.filter((event) => event.journeyType === 'youth')
   }
 
-  return allowedEvents.filter((event) => event.category === selectedHistoryFilter.value)
+  return events.filter((event) => event.category === selectedHistoryFilter.value)
+})
+const historyEmptyState = computed(() => {
+  const states = props.walkingHistory?.emptyStates || {}
+
+  if (!hasRealHistoryData.value) {
+    return null
+  }
+
+  if (!props.walkingHistory?.authorized) {
+    return {
+      title: states.withoutPersonTitle || 'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+      text: states.withoutPersonText || 'Assim que o cadastro for vinculado, seu histórico real aparecerá aqui.',
+    }
+  }
+
+  if (!currentHistoryData.value?.authorized) {
+    return {
+      title: states.unauthorizedYouthTitle || states.withoutJourneyTitle || 'Histórico indisponível no momento.',
+      text: currentHistoryData.value?.message || states.unauthorizedYouthText || states.withoutJourneyText || 'Assim que a jornada estiver disponível, seu histórico real aparecerá aqui.',
+    }
+  }
+
+  if (!realTimelineItems.value.length) {
+    return {
+      title: states.withoutEventsTitle || 'Ainda não há registros aprovados no histórico.',
+      text: states.withoutEventsText || 'Quando houver registros aprovados, eles aparecerão aqui com segurança.',
+    }
+  }
+
+  return null
 })
 const hasRealMapData = computed(() => Boolean(props.walkingMap?.usesRealData))
 const requestedMapJourneyType = computed(() => props.walkingMap?.requestedJourneyType === 'youth' || props.journey === 'jovem' ? 'youth' : 'general')
@@ -932,7 +1010,7 @@ const mapHeroBadge = computed(() => {
       <section v-else-if="isHistoryArea" class="history-dashboard" aria-label="Histórico da Caminhada">
         <section class="history-filter-card" aria-label="Filtros do histórico">
           <div>
-            <span>Filtros visuais</span>
+            <span>Filtros seguros</span>
             <strong>{{ selectedHistoryFilter }}</strong>
           </div>
           <nav aria-label="Selecionar filtro do histórico">
@@ -949,7 +1027,7 @@ const mapHeroBadge = computed(() => {
         </section>
 
         <section class="history-summary-grid" aria-label="Resumo rápido do histórico">
-          <article v-for="card in visibleHistorySummaryCards" :key="card.label">
+          <article v-for="card in realTimelineSummaryCards" :key="card.label">
             <span>{{ card.label }}</span>
             <strong>{{ card.value }}</strong>
             <small>{{ card.note }}</small>
@@ -964,11 +1042,27 @@ const mapHeroBadge = computed(() => {
             </header>
 
             <div class="history-timeline">
+              <article v-if="historyEmptyState" class="history-event status-approved">
+                <time>--</time>
+                <div>
+                  <header>
+                    <strong>{{ historyEmptyState.title }}</strong>
+                    <span>Seguro</span>
+                  </header>
+                  <p>{{ historyEmptyState.text }}</p>
+                  <footer>
+                    <small>Histórico real</small>
+                    <small>Sem registros aprovados</small>
+                    <b>+0 pts</b>
+                  </footer>
+                </div>
+              </article>
+
               <article
-                v-for="event in visibleHistoryEvents"
-                :key="`${event.date}-${event.title}`"
+                v-for="event in realTimelineItems"
+                :key="event.id || `${event.date}-${event.title}`"
                 class="history-event"
-                :class="[`status-${event.statusKey}`, { 'is-youth-event': event.journey === 'Jovem' }]"
+                :class="[`status-${event.statusKey}`, { 'is-youth-event': event.journeyType === 'youth' }]"
               >
                 <time>{{ event.date }}</time>
                 <div>
@@ -990,9 +1084,9 @@ const mapHeroBadge = computed(() => {
           <aside class="history-support-card">
             <span>Guia do histórico</span>
             <h2>Como o histórico funciona</h2>
-            <p>Cada registro pode ser automático, enviado por líderes ou validado pela Secretaria/Administração. Alguns pontos podem aparecer como “em validação” antes de serem confirmados.</p>
+            <p>Este histórico exibe somente registros aprovados. Dados pendentes, rejeitados e metadata administrativa não aparecem aqui.</p>
             <div>
-              <article v-for="stat in visibleHistorySupportStats" :key="stat.label">
+              <article v-for="stat in realTimelineSupportStats" :key="stat.label">
                 <small>{{ stat.label }}</small>
                 <strong>{{ stat.value }}</strong>
               </article>
@@ -1003,7 +1097,7 @@ const mapHeroBadge = computed(() => {
         <nav class="history-actions" aria-label="Atalhos do histórico">
           <Link :href="baseRoute">Voltar para Minha Caminhada</Link>
           <Link :href="`${baseRoute}/geral`">Ver caminhada geral</Link>
-          <Link v-if="viewerContext.canSeeYouthJourney" :href="`${baseRoute}/jovem`">Ver caminhada jovem</Link>
+          <Link v-if="canSeeYouthJourneyFromHistory" :href="`${baseRoute}/jovem`">Ver caminhada jovem</Link>
           <Link :href="`${baseRoute}/conquistas`">Ver conquistas</Link>
         </nav>
       </section>

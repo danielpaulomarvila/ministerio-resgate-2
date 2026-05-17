@@ -982,3 +982,23 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foi executado migrate:fresh, não foi executado db:wipe, não foram criados ou executados seeders no banco real, não foram criados dados fake no banco real e não foram alterados histórico, mentor, ranking/destaques, regras, geral/jovem detalhado, placeholders, Central da Família, Meu Perfil ou Meu Financeiro.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Integração real do Histórico da Minha Caminhada
+
+- **Horário:** 15:15–15:45 aprox.
+- **Objetivo:** integrar somente `/familia-resgate/minha-caminhada/historico` com dados reais, mantendo fora do escopo mentor, regras, ranking/destaques, geral/jovem detalhado, pontuação, presenças, destaques mensal, regras de pontos e demais módulos.
+- **Rota ajustada:** `/familia-resgate/minha-caminhada/historico` deixou de renderizar `MinhaCaminhadaArea` por `Closure` e passou a apontar para `MinhaCaminhadaController@history`.
+- **Controller ajustado:** `MinhaCaminhadaController` recebeu método `history` e helpers privados para montar payload seguro de histórico usando `WalkingProgressService` e `WalkingAuthorizationService`.
+- **Prop real criada:** `walkingHistory`, com `usesRealData`, `generatedAt`, pessoa vinculada, autorização jovem, eventos gerais, eventos jovens somente quando autorizados, resumos reais por jornada e estados vazios seguros.
+- **Eventos reais:** a primeira integração usa somente logs aprovados de pontos, formatados como arrays simples do tipo `point_log`, sem inventar conquistas, presença, subida de nível ou datas.
+- **Payload seguro:** não retorna Models crus, não cria registros, não altera banco, considera somente `status = approved`, não envia `metadata`, `user_id`, `approved_by`, `rejected_by` ou dados administrativos sensíveis.
+- **Histórico jovem protegido:** usuário comum recebe `walkingHistory.youth.authorized = false` e lista jovem vazia; jovens/resgatados autorizados recebem eventos jovens reais aprovados.
+- **Página ajustada:** `resources/js/Pages/FamiliaResgate/MinhaCaminhadaArea.vue` passou a receber `walkingHistory` e, somente no branch `area === 'historico'`, consumir eventos, filtros, cards de resumo e guia com dados reais.
+- **Mocks removidos do Histórico:** removidos/neutralizados do branch histórico os arrays fake `historySummaryCards`, `historySupportStats`, `historyEvents`, pontos fake `380/920`, datas fake, status pendente/ajustado fake, conquistas visuais fake e eventos jovens sem autorização backend.
+- **Mocks remanescentes por escopo futuro:** a busca ainda encontra `Leitura bíblica do dia`, `Encontro dos Resgatados` e `Desafio bíblico respondido` em `journeyDashboardMocks`, pertencentes às abas futuras `geral/jovem`, não ao branch histórico real.
+- **Estados vazios seguros:** adicionados estados para usuário sem pessoa vinculada, ausência de registros aprovados, jornada indisponível e histórico jovem não autorizado.
+- **Teste criado:** `tests/Feature/MinhaCaminhada/MinhaCaminhadaHistoricoControllerTest.php`, cobrindo autenticação obrigatória, payload vazio seguro, filtro por pontos aprovados, não exposição de metadata/dados administrativos, bloqueio jovem para usuário comum e liberação jovem para jovem/resgatado.
+- **Validações executadas:** `php -l` passou no controller e no teste; teste novo passou com 6 testes e 114 assertions; `route:list --json` confirmou `/historico` em `MinhaCaminhadaController@history`; testes focados de visão geral, conquistas, nível, mapa, detalhe de nível e services passaram; `php artisan test --compact` passou com 93 testes e 770 assertions; `npm run build` passou; `git diff --check` passou.
+- **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foi executado migrate:fresh, não foi executado db:wipe, não foram criados ou executados seeders no banco real, não foram criados dados fake no banco real e não foram alterados mentor, regras, ranking/destaques, geral/jovem detalhado, pontuação, presenças, destaques mensal, regras de pontos, Central da Família, Meu Perfil ou Meu Financeiro.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.

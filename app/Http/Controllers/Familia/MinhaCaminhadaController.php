@@ -145,6 +145,57 @@ class MinhaCaminhadaController extends Controller
         ]);
     }
 
+    public function history(
+        Request $request,
+        WalkingProgressService $progressService,
+        WalkingAuthorizationService $authorizationService
+    ): Response {
+        $user = $request->user();
+        $person = $user?->person;
+
+        if (!$person) {
+            return Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+                'area' => 'historico',
+                'journey' => 'all',
+                'walkingHistory' => $this->emptyHistoryPayload(
+                    'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+                    false
+                ),
+            ]);
+        }
+
+        $canSeeYouthJourney = $authorizationService->userCanViewOwnYouthJourney($user);
+
+        return Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+            'area' => 'historico',
+            'journey' => 'all',
+            'walkingHistory' => [
+                'authorized' => true,
+                'usesRealData' => true,
+                'generatedAt' => now()->toISOString(),
+                'message' => null,
+                'person' => [
+                    'id' => $person->id,
+                    'name' => $person->preferred_name ?: $person->full_name,
+                ],
+                'canSeeYouthJourney' => $canSeeYouthJourney,
+                'general' => $this->formatHistoryJourney(
+                    $progressService->getOwnProgress($user),
+                    $progressService->getRecentApprovedLogs($user, $person, 'general', 20),
+                    'general'
+                ),
+                'youth' => $canSeeYouthJourney
+                    ? $this->formatHistoryJourney(
+                        $progressService->getOwnProgress($user, 'youth'),
+                        $progressService->getRecentApprovedLogs($user, $person, 'youth', 20),
+                        'youth'
+                    )
+                    : $this->emptyHistoryJourney('youth', false, 'Você não tem permissão para visualizar o histórico jovem.'),
+                'emptyStates' => $this->historyEmptyStates(),
+            ],
+        ]);
+    }
+
     public function map(
         Request $request,
         WalkingProgressService $progressService,
@@ -327,6 +378,130 @@ class MinhaCaminhadaController extends Controller
             'withoutPointsText' => 'Quando houver registros aprovados, seu nível começará a avançar.',
             'withoutJourneyTitle' => 'Caminhada indisponível no momento.',
             'withoutJourneyText' => 'Assim que a jornada estiver disponível, o nível real aparecerá aqui.',
+        ];
+    }
+
+    private function emptyHistoryPayload(string $message, bool $authorized): array
+    {
+        return [
+            'authorized' => $authorized,
+            'usesRealData' => true,
+            'generatedAt' => now()->toISOString(),
+            'message' => $message,
+            'person' => null,
+            'canSeeYouthJourney' => false,
+            'general' => $this->emptyHistoryJourney('general', false),
+            'youth' => $this->emptyHistoryJourney('youth', false),
+            'emptyStates' => $this->historyEmptyStates(),
+        ];
+    }
+
+    private function emptyHistoryJourney(string $journeyType, bool $authorized = true, ?string $message = null): array
+    {
+        return [
+            'authorized' => $authorized,
+            'journeyType' => $journeyType,
+            'message' => $message,
+            'events' => [],
+            'summary' => [
+                'totalEvents' => 0,
+                'totalPoints' => 0,
+                'approvedLogsCount' => 0,
+                'latestEventAt' => null,
+                'categoriesCount' => 0,
+            ],
+        ];
+    }
+
+    private function formatHistoryJourney(array $progress, array $recentLogs, string $journeyType): array
+    {
+        if (!($progress['authorized'] ?? false)) {
+            return array_merge(
+                $this->emptyHistoryJourney($progress['journey_type'] ?? $journeyType, false),
+                ['message' => $progress['message'] ?? 'Histórico indisponível.']
+            );
+        }
+
+        $events = collect($recentLogs)
+            ->map(fn (array $log) => $this->formatHistoryEvent($log, $journeyType))
+            ->values()
+            ->all();
+
+        return [
+            'authorized' => true,
+            'journeyType' => $progress['journey']['type'] ?? $journeyType,
+            'message' => null,
+            'events' => $events,
+            'summary' => [
+                'totalEvents' => count($events),
+                'totalPoints' => (int) ($progress['total_points'] ?? 0),
+                'approvedLogsCount' => (int) ($progress['approved_logs_count'] ?? 0),
+                'latestEventAt' => $events[0]['occurredAt'] ?? null,
+                'categoriesCount' => collect($events)->pluck('category')->filter()->unique()->count(),
+            ],
+        ];
+    }
+
+    private function formatHistoryEvent(array $log, string $journeyType): array
+    {
+        $category = $log['category'] ?? 'registro';
+        $createdAt = $log['created_at'] ?? null;
+
+        return [
+            'id' => $log['id'] ?? null,
+            'type' => 'point_log',
+            'title' => $this->historyEventTitle($category),
+            'description' => $log['notes'] ?: 'Registro aprovado sem observação pública.',
+            'points' => (int) ($log['points'] ?? 0),
+            'status' => 'approved',
+            'statusLabel' => 'Aprovado',
+            'category' => $category,
+            'categoryLabel' => $this->historyCategoryLabel($category),
+            'journeyType' => $journeyType,
+            'journeyLabel' => $journeyType === 'youth' ? 'Caminhada Jovem' : 'Caminhada Geral',
+            'occurredAt' => $createdAt,
+            'createdAt' => $createdAt,
+            'source' => $log['source_type'] ?? null,
+        ];
+    }
+
+    private function historyEventTitle(?string $category): string
+    {
+        return match ($category) {
+            'presence' => 'Registro aprovado de presença',
+            'word', 'bible', 'reading' => 'Registro aprovado de Palavra',
+            'devotional' => 'Registro aprovado de devocional',
+            'service' => 'Registro aprovado de serviço',
+            'communion' => 'Registro aprovado de comunhão',
+            'evangelism' => 'Registro aprovado de evangelismo',
+            default => 'Registro aprovado na caminhada',
+        };
+    }
+
+    private function historyCategoryLabel(?string $category): string
+    {
+        return match ($category) {
+            'presence' => 'Presença',
+            'word', 'bible', 'reading' => 'Palavra',
+            'devotional' => 'Devocional',
+            'service' => 'Serviço',
+            'communion' => 'Comunhão',
+            'evangelism' => 'Evangelismo',
+            default => 'Registro',
+        };
+    }
+
+    private function historyEmptyStates(): array
+    {
+        return [
+            'withoutPersonTitle' => 'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+            'withoutPersonText' => 'Assim que o cadastro for vinculado, seu histórico real aparecerá aqui.',
+            'withoutEventsTitle' => 'Ainda não há registros aprovados no histórico.',
+            'withoutEventsText' => 'Quando houver registros aprovados, eles aparecerão aqui com segurança.',
+            'unauthorizedYouthTitle' => 'Histórico jovem indisponível para este perfil.',
+            'unauthorizedYouthText' => 'A caminhada jovem aparece somente para jovens/resgatados autorizados.',
+            'withoutJourneyTitle' => 'Histórico indisponível no momento.',
+            'withoutJourneyText' => 'Assim que a jornada estiver disponível, seu histórico real aparecerá aqui.',
         ];
     }
 
