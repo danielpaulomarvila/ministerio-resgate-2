@@ -9,6 +9,7 @@ use App\Services\MinhaCaminhada\WalkingAchievementReadService;
 use App\Services\MinhaCaminhada\WalkingAuthorizationService;
 use App\Services\MinhaCaminhada\WalkingDashboardReadService;
 use App\Services\MinhaCaminhada\WalkingLevelService;
+use App\Services\MinhaCaminhada\WalkingMentorReadService;
 use App\Services\MinhaCaminhada\WalkingProgressService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -192,6 +193,57 @@ class MinhaCaminhadaController extends Controller
                     )
                     : $this->emptyHistoryJourney('youth', false, 'Você não tem permissão para visualizar o histórico jovem.'),
                 'emptyStates' => $this->historyEmptyStates(),
+            ],
+        ]);
+    }
+
+    public function mentor(
+        Request $request,
+        WalkingMentorReadService $mentorReadService,
+        WalkingAuthorizationService $authorizationService
+    ): Response {
+        $user = $request->user();
+        $person = $user?->person;
+
+        if (!$person) {
+            return Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+                'area' => 'mentor',
+                'journey' => 'all',
+                'walkingMentor' => $this->emptyMentorPayload(
+                    'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+                    false
+                ),
+            ]);
+        }
+
+        $canSeeYouthJourney = $authorizationService->userCanViewOwnYouthJourney($user);
+
+        return Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+            'area' => 'mentor',
+            'journey' => 'all',
+            'walkingMentor' => [
+                'authorized' => true,
+                'usesRealData' => true,
+                'usesExternalAi' => false,
+                'generatedAt' => now()->toISOString(),
+                'message' => null,
+                'person' => [
+                    'id' => $person->id,
+                    'name' => $person->preferred_name ?: $person->full_name,
+                ],
+                'canSeeYouthJourney' => $canSeeYouthJourney,
+                'general' => $this->formatMentorJourney(
+                    $mentorReadService->getOwnSuggestedMessage($user),
+                    'general'
+                ),
+                'youth' => $canSeeYouthJourney
+                    ? $this->formatMentorJourney(
+                        $mentorReadService->getOwnSuggestedMessage($user, 'youth'),
+                        'youth'
+                    )
+                    : $this->emptyMentorJourney('youth', false, 'Você não tem permissão para visualizar o mentor jovem.'),
+                'emptyStates' => $this->mentorEmptyStates(),
+                'pastoralDisclaimer' => $this->mentorPastoralDisclaimer(),
             ],
         ]);
     }
@@ -502,6 +554,126 @@ class MinhaCaminhadaController extends Controller
             'unauthorizedYouthText' => 'A caminhada jovem aparece somente para jovens/resgatados autorizados.',
             'withoutJourneyTitle' => 'Histórico indisponível no momento.',
             'withoutJourneyText' => 'Assim que a jornada estiver disponível, seu histórico real aparecerá aqui.',
+        ];
+    }
+
+    private function emptyMentorPayload(string $message, bool $authorized): array
+    {
+        return [
+            'authorized' => $authorized,
+            'usesRealData' => true,
+            'usesExternalAi' => false,
+            'generatedAt' => now()->toISOString(),
+            'message' => $message,
+            'person' => null,
+            'canSeeYouthJourney' => false,
+            'general' => $this->emptyMentorJourney('general', false),
+            'youth' => $this->emptyMentorJourney('youth', false),
+            'emptyStates' => $this->mentorEmptyStates(),
+            'pastoralDisclaimer' => $this->mentorPastoralDisclaimer(),
+        ];
+    }
+
+    private function emptyMentorJourney(string $journeyType, bool $authorized = true, ?string $message = null): array
+    {
+        return [
+            'authorized' => $authorized,
+            'journeyType' => $journeyType,
+            'message' => null,
+            'unavailableMessage' => $message,
+            'suggestedSteps' => [],
+            'limits' => $this->mentorPastoralLimits(),
+        ];
+    }
+
+    private function formatMentorJourney(array $message, string $journeyType): array
+    {
+        if (!($message['authorized'] ?? false)) {
+            return $this->emptyMentorJourney(
+                $message['journey_type'] ?? $journeyType,
+                false,
+                $message['message'] ?? 'Mentor indisponível para esta jornada.'
+            );
+        }
+
+        return [
+            'authorized' => true,
+            'journeyType' => $message['journey_type'] ?? $journeyType,
+            'message' => [
+                'title' => $message['title'] ?? 'Continue caminhando com constância',
+                'body' => $message['body'] ?? 'Valorize pequenos passos seguros e simples nesta semana.',
+                'analysisType' => $message['analysis_type'] ?? null,
+                'responseKey' => $message['response_key'] ?? $message['analysis_type'] ?? null,
+                'tone' => $message['tone'] ?? 'pastoral',
+                'source' => $message['source'] ?? 'pre_approved_template',
+                'generatedBy' => 'rules',
+            ],
+            'unavailableMessage' => null,
+            'suggestedSteps' => $this->mentorSuggestedSteps($journeyType),
+            'limits' => $this->mentorPastoralLimits(),
+        ];
+    }
+
+    private function mentorSuggestedSteps(string $journeyType): array
+    {
+        $prefix = $journeyType === 'youth' ? 'jovem' : 'geral';
+
+        return [
+            [
+                'title' => 'Observe seus registros aprovados',
+                'body' => 'Use o histórico real para perceber pequenos próximos passos sem comparação com outras pessoas.',
+                'status' => 'Sugerido',
+                'statusKey' => 'suggested',
+                'scope' => $prefix,
+            ],
+            [
+                'title' => 'Escolha um passo simples',
+                'body' => 'Prefira uma atitude saudável e possível para a semana, sem peso ou promessa de resultado.',
+                'status' => 'Seguro',
+                'statusKey' => 'safe',
+                'scope' => $prefix,
+            ],
+            [
+                'title' => 'Procure acompanhamento humano',
+                'body' => 'Se precisar de cuidado, procure pastor, liderança, discipulado ou aconselhamento apropriado.',
+                'status' => 'Cuidado',
+                'statusKey' => 'care',
+                'scope' => $prefix,
+            ],
+        ];
+    }
+
+    private function mentorPastoralDisclaimer(): array
+    {
+        return [
+            'title' => 'Limite pastoral importante',
+            'text' => 'O Mentor da Caminhada é um apoio simples com mensagens pré-aprovadas. Ele não substitui pastor, liderança, discipulado, aconselhamento pastoral ou acompanhamento humano.',
+            'usesExternalAi' => false,
+        ];
+    }
+
+    private function mentorPastoralLimits(): array
+    {
+        return [
+            'Não substitui pastor, liderança, discipulado ou aconselhamento pastoral.',
+            'Não diagnostica emoções nem trata crises graves sozinho.',
+            'Não julga espiritualidade, acusa falta de fé ou promete resultado espiritual.',
+            'Não expõe comparações entre pessoas ou famílias.',
+            'Não usa IA externa nesta etapa.',
+        ];
+    }
+
+    private function mentorEmptyStates(): array
+    {
+        return [
+            'withoutPersonTitle' => 'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+            'withoutPersonText' => 'Assim que o cadastro for vinculado, o Mentor poderá exibir orientações simples e seguras.',
+            'withoutDataTitle' => 'Ainda não há dados suficientes para uma leitura personalizada.',
+            'withoutDataText' => 'Quando houver registros aprovados, o Mentor poderá sugerir pequenos próximos passos.',
+            'unauthorizedYouthTitle' => 'Mentor jovem indisponível para este perfil.',
+            'unauthorizedYouthText' => 'A caminhada jovem aparece somente para jovens/resgatados autorizados.',
+            'withoutJourneyTitle' => 'Mentor indisponível no momento.',
+            'withoutJourneyText' => 'Assim que a jornada estiver disponível, mensagens pré-aprovadas poderão aparecer aqui.',
         ];
     }
 

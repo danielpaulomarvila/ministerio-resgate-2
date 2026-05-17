@@ -148,10 +148,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/familia-resgate/minha-caminhada/historico', [MinhaCaminhadaController::class, 'history'])
         ->name('familia-resgate.minha_caminhada.historico');
 
-    Route::get('/familia-resgate/minha-caminhada/mentor', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
-        'area' => 'mentor',
-        'journey' => 'all',
-    ]))->name('familia-resgate.minha_caminhada.mentor');
+    Route::get('/familia-resgate/minha-caminhada/mentor', [MinhaCaminhadaController::class, 'mentor'])
+        ->name('familia-resgate.minha_caminhada.mentor');
 
     Route::get('/familia-resgate/minha-caminhada/regras', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
         'area' => 'regras',

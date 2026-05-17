@@ -1002,3 +1002,23 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foi executado migrate:fresh, não foi executado db:wipe, não foram criados ou executados seeders no banco real, não foram criados dados fake no banco real e não foram alterados mentor, regras, ranking/destaques, geral/jovem detalhado, pontuação, presenças, destaques mensal, regras de pontos, Central da Família, Meu Perfil ou Meu Financeiro.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Integração real do Mentor da Caminhada
+
+- **Horário:** 15:45–16:10 aprox.
+- **Objetivo:** integrar somente `/familia-resgate/minha-caminhada/mentor` com mensagens reais/seguras, mantendo fora do escopo regras, ranking/destaques, geral/jovem detalhado, pontuação, presenças, destaques mensal, regras de pontos e demais módulos.
+- **Rota ajustada:** `/familia-resgate/minha-caminhada/mentor` deixou de renderizar `MinhaCaminhadaArea` por `Closure` e passou a apontar para `MinhaCaminhadaController@mentor`.
+- **Controller ajustado:** `MinhaCaminhadaController` recebeu método `mentor` e helpers privados para montar payload seguro usando `WalkingMentorReadService` e `WalkingAuthorizationService`.
+- **Prop real criada:** `walkingMentor`, com `usesRealData`, `usesExternalAi = false`, `generatedAt`, pessoa vinculada, autorização jovem, mensagem geral, mensagem jovem somente quando autorizada, próximos passos seguros, limites pastorais e estados vazios.
+- **Mensagens seguras:** a fonte principal é `WalkingMentorReadService`, com templates pré-aprovados ou fallback seguro por regras; não há chamada para IA externa nem conselho livre.
+- **Sem logs operacionais:** a leitura do Mentor não cria `WalkingMentorResponseLog` nesta etapa.
+- **Mentor jovem protegido:** usuário comum recebe `walkingMentor.youth.authorized = false` e mensagem jovem nula; jovens/resgatados autorizados recebem payload jovem seguro.
+- **Página ajustada:** `resources/js/Pages/FamiliaResgate/MinhaCaminhadaArea.vue` passou a receber `walkingMentor` e, somente no branch `area === 'mentor'`, consumir mensagem, próximos passos, jornada selecionada, fonte, geração por regras e limites pastorais.
+- **Mocks removidos do Mentor:** removidos/neutralizados `mentorWeeklyReading`, `mentorPlanSteps`, `mentorGuidedQuestions`, leitura semanal fake, plano personalizado fake, perguntas guiadas fake e textos que pareciam análise personalizada inventada.
+- **Limite pastoral claro:** a página e o payload informam que o Mentor é apoio simples com mensagens pré-aprovadas e não substitui pastor, liderança, discipulado, aconselhamento pastoral ou acompanhamento humano.
+- **Estados vazios seguros:** adicionados estados para usuário sem pessoa vinculada, dados insuficientes, jornada indisponível e mentor jovem não autorizado.
+- **Teste criado:** `tests/Feature/MinhaCaminhada/MinhaCaminhadaMentorControllerTest.php`, cobrindo autenticação obrigatória, payload seguro, ausência de criação de logs, bloqueio jovem para usuário comum, liberação jovem para jovem/resgatado e presença do limite pastoral.
+- **Validações executadas:** `php -l` passou no controller e no teste; teste novo passou com 6 testes e 89 assertions; `route:list --json` confirmou `/mentor` em `MinhaCaminhadaController@mentor`; testes focados de histórico, visão geral, conquistas, nível, mapa, detalhe de nível e services passaram; `php artisan test --compact` passou com 99 testes e 859 assertions; `npm run build` passou; `git diff --check` passou.
+- **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foi executado migrate:fresh, não foi executado db:wipe, não foram criados ou executados seeders no banco real, não foram criados dados fake no banco real e não foram alterados regras, ranking/destaques, geral/jovem detalhado, pontuação, presenças, destaques mensal, regras de pontos, Central da Família, Meu Perfil ou Meu Financeiro.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.

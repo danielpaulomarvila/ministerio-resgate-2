@@ -9,6 +9,7 @@ const props = defineProps({
   walkingLevel: { type: Object, default: null },
   walkingMap: { type: Object, default: null },
   walkingHistory: { type: Object, default: null },
+  walkingMentor: { type: Object, default: null },
 })
 
 const baseRoute = '/familia-resgate/minha-caminhada'
@@ -191,51 +192,7 @@ const journeyDashboardMocks = {
 
 const historyFilters = ['Todos', 'Caminhada Geral', 'Caminhada Jovem', 'Presença', 'Palavra', 'Devocional', 'Serviço', 'Evangelismo', 'Conquistas']
 const selectedHistoryFilter = ref('Todos')
-
-// Futuro backend:
-// O Mentor da Caminhada deve começar como inteligência gratuita por regras,
-// usando tipos de análise, respostas pré-aprovadas e histórico de respostas
-// para evitar repetição por pessoa e família.
-// IA externa real poderá ser estudada somente em fase futura.
-const mentorWeeklyReading = {
-  title: 'Leitura da semana',
-  text: 'Você tem demonstrado constância em presença e serviço. O próximo passo é fortalecer devocional e Palavra no ritmo da semana.',
-  fields: [
-    { label: 'Área forte', value: 'Presença e serviço' },
-    { label: 'Área a fortalecer', value: 'Devocional pessoal' },
-    { label: 'Ritmo da semana', value: 'Estável' },
-    { label: 'Próximo marco', value: 'Semente da Palavra' },
-  ],
-}
-const mentorPlanSteps = [
-  { category: 'Palavra', action: 'Ler 1 capítulo por dia', impact: 'Fortalece fundamento bíblico e clareza para a semana.', status: 'Sugerido', statusKey: 'suggested' },
-  { category: 'Devocional', action: 'Registrar 3 devocionais na semana', impact: 'Cria constância sem peso e ajuda a perceber crescimento real.', status: 'Em andamento', statusKey: 'progress' },
-  { category: 'Serviço', action: 'Confirmar disponibilidade em uma escala ou serviço', impact: 'Transforma maturidade em cuidado prático pela casa.', status: 'Sugerido', statusKey: 'suggested' },
-  { category: 'Comunhão', action: 'Participar de um momento de comunhão da igreja', impact: 'Mantém vínculos, ensino e alinhamento com a família espiritual.', status: 'Sugerido', statusKey: 'suggested' },
-]
-const mentorJourneyFocusCards = [
-  { journey: 'Caminhada Geral', focus: 'Presença, Palavra e constância.', note: 'Seu mentor acompanha presença, Palavra, devocional, serviço, comunhão, evangelismo e conquistas gerais.' },
-  { journey: 'Caminhada Jovem', focus: 'Desafio bíblico e presença nos Resgatados.', note: 'Jornada jovem acompanhada separadamente da caminhada geral.', youthOnly: true },
-]
-const mentorGuidedQuestions = [
-  'Como posso melhorar minha constância?',
-  'Qual área da minha caminhada geral precisa de mais atenção?',
-  'Como crescer em leitura bíblica esta semana?',
-  'Qual próximo passo combina com meu momento?',
-  'Como servir melhor sem perder equilíbrio?',
-]
-const mentorHowItWorks = {
-  title: 'Como este mentor funciona',
-  text: 'O Mentor da Caminhada usa registros da caminhada geral, como presença, Palavra, devocional, serviço, comunhão, evangelismo e conquistas, para sugerir próximos passos simples.',
-  note: 'Nesta primeira fase, ele funciona por regras pastorais e respostas pré-aprovadas, sem IA externa real. Não julga espiritualidade, não substitui pastor/liderança e futuramente poderá ter orientação específica para jovens autorizados.',
-}
-const mentorCareLimits = [
-  'Não substitui pastor, liderança, discipulado ou aconselhamento pastoral.',
-  'Não diagnostica emoções nem trata crises graves sozinho.',
-  'Não julga espiritualidade, acusa falta de fé ou promete resultado espiritual.',
-  'Não expõe comparações entre pessoas ou famílias.',
-]
-const mentorVisibleJourneyFocusCards = computed(() => mentorJourneyFocusCards.filter((card) => !card.youthOnly || viewerContext.canSeeYouthJourney))
+const selectedMentorJourney = ref('general')
 
 const rulesPrinciplePillars = ['Encorajar, não comparar', 'Acompanhar, não expor', 'Crescer, não competir']
 const rulesJourneyCards = [
@@ -464,6 +421,49 @@ const hasVisibleRankingYouthHighlights = computed(() => visibleRankingYouthHighl
 const showRankingGeneralSection = computed(() => viewerContext.canSeeGeneralHighlights && (selectedRankingFilter.value === 'Todos' || selectedRankingFilter.value === 'Gerais' || (selectedRankingFilter.value !== 'Resgatados' && selectedRankingFilter.value !== 'Equipes' && hasVisibleRankingGeneralHighlights.value)))
 const showRankingYouthSection = computed(() => viewerContext.canSeeYouthHighlights && (selectedRankingFilter.value === 'Todos' || selectedRankingFilter.value === 'Resgatados' || (selectedRankingFilter.value !== 'Gerais' && selectedRankingFilter.value !== 'Equipes' && hasVisibleRankingYouthHighlights.value)))
 const showRankingTeamsSection = computed(() => viewerContext.canSeeYouthTeams && (selectedRankingFilter.value === 'Todos' || selectedRankingFilter.value === 'Equipes'))
+const hasRealMentorData = computed(() => Boolean(props.walkingMentor?.usesRealData))
+const mentorAuthorized = computed(() => Boolean(hasRealMentorData.value && props.walkingMentor?.authorized))
+const canSeeYouthJourneyFromMentor = computed(() => hasRealMentorData.value ? Boolean(props.walkingMentor?.canSeeYouthJourney) : viewerContext.canSeeYouthJourney)
+const activeMentorJourney = computed(() => selectedMentorJourney.value === 'youth' && canSeeYouthJourneyFromMentor.value ? 'youth' : 'general')
+const currentMentorData = computed(() => props.walkingMentor?.[activeMentorJourney.value] || props.walkingMentor?.general || null)
+const mentorMessage = computed(() => currentMentorData.value?.message || null)
+const mentorSuggestedSteps = computed(() => Array.isArray(currentMentorData.value?.suggestedSteps) ? currentMentorData.value.suggestedSteps : [])
+const mentorLimits = computed(() => Array.isArray(currentMentorData.value?.limits) ? currentMentorData.value.limits : [])
+const mentorPastoralDisclaimer = computed(() => props.walkingMentor?.pastoralDisclaimer || {
+  title: 'Limite pastoral importante',
+  text: 'O Mentor da Caminhada é um apoio simples com mensagens pré-aprovadas. Ele não substitui pastor, liderança, discipulado, aconselhamento pastoral ou acompanhamento humano.',
+  usesExternalAi: false,
+})
+const mentorEmptyState = computed(() => {
+  const states = props.walkingMentor?.emptyStates || {}
+
+  if (!hasRealMentorData.value) {
+    return null
+  }
+
+  if (!props.walkingMentor?.authorized) {
+    return {
+      title: states.withoutPersonTitle || 'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+      text: states.withoutPersonText || 'Assim que o cadastro for vinculado, o Mentor poderá exibir orientações simples e seguras.',
+    }
+  }
+
+  if (!currentMentorData.value?.authorized) {
+    return {
+      title: activeMentorJourney.value === 'youth' ? states.unauthorizedYouthTitle || 'Mentor jovem indisponível para este perfil.' : states.withoutJourneyTitle || 'Mentor indisponível no momento.',
+      text: currentMentorData.value?.unavailableMessage || (activeMentorJourney.value === 'youth' ? states.unauthorizedYouthText || 'A caminhada jovem aparece somente para jovens/resgatados autorizados.' : states.withoutJourneyText || 'Assim que a jornada estiver disponível, mensagens pré-aprovadas poderão aparecer aqui.'),
+    }
+  }
+
+  if (!mentorMessage.value) {
+    return {
+      title: states.withoutDataTitle || 'Ainda não há dados suficientes para uma leitura personalizada.',
+      text: states.withoutDataText || 'Quando houver registros aprovados, o Mentor poderá sugerir pequenos próximos passos.',
+    }
+  }
+
+  return null
+})
 const hasRealHistoryData = computed(() => Boolean(props.walkingHistory?.usesRealData))
 const historyAuthorized = computed(() => Boolean(hasRealHistoryData.value && props.walkingHistory?.authorized))
 const canSeeYouthJourneyFromHistory = computed(() => hasRealHistoryData.value ? Boolean(props.walkingHistory?.canSeeYouthJourney) : viewerContext.canSeeYouthJourney)
@@ -1103,16 +1103,59 @@ const mapHeroBadge = computed(() => {
       </section>
 
       <section v-else-if="isMentorArea" class="mentor-dashboard" aria-label="Mentor da Caminhada">
+        <section class="history-filter-card" aria-label="Selecionar jornada do mentor">
+          <div>
+            <span>Jornada segura</span>
+            <strong>{{ activeMentorJourney === 'youth' ? 'Caminhada Jovem' : 'Caminhada Geral' }}</strong>
+          </div>
+          <nav aria-label="Selecionar jornada do mentor">
+            <button
+              type="button"
+              :class="{ active: selectedMentorJourney === 'general' }"
+              @click="selectedMentorJourney = 'general'"
+            >
+              Caminhada Geral
+            </button>
+            <button
+              v-if="canSeeYouthJourneyFromMentor"
+              type="button"
+              :class="{ active: selectedMentorJourney === 'youth' }"
+              @click="selectedMentorJourney = 'youth'"
+            >
+              Caminhada Jovem
+            </button>
+          </nav>
+        </section>
+
         <section class="mentor-main-grid">
           <article class="mentor-reading-card">
             <div class="mentor-reading-content">
-              <span>{{ mentorWeeklyReading.title }}</span>
-              <h2>{{ mentorWeeklyReading.title }}</h2>
-              <p>{{ mentorWeeklyReading.text }}</p>
-              <div class="mentor-reading-fields">
-                <article v-for="field in mentorWeeklyReading.fields" :key="field.label">
-                  <small>{{ field.label }}</small>
-                  <strong>{{ field.value }}</strong>
+              <template v-if="mentorEmptyState">
+                <span>Mensagem segura</span>
+                <h2>{{ mentorEmptyState.title }}</h2>
+                <p>{{ mentorEmptyState.text }}</p>
+              </template>
+              <template v-else>
+                <span>{{ mentorMessage.source === 'pre_approved_template' ? 'Mensagem pré-aprovada' : 'Orientação segura' }}</span>
+                <h2>{{ mentorMessage.title }}</h2>
+                <p>{{ mentorMessage.body }}</p>
+              </template>
+              <div v-if="mentorMessage" class="mentor-reading-fields">
+                <article>
+                  <small>Fonte</small>
+                  <strong>{{ mentorMessage.source === 'pre_approved_template' ? 'Mensagem pré-aprovada' : 'Fallback seguro' }}</strong>
+                </article>
+                <article>
+                  <small>Geração</small>
+                  <strong>{{ mentorMessage.generatedBy === 'rules' ? 'Regras seguras' : mentorMessage.generatedBy }}</strong>
+                </article>
+                <article>
+                  <small>IA externa</small>
+                  <strong>{{ props.walkingMentor?.usesExternalAi ? 'Sim' : 'Não' }}</strong>
+                </article>
+                <article>
+                  <small>Jornada</small>
+                  <strong>{{ activeMentorJourney === 'youth' ? 'Jovem' : 'Geral' }}</strong>
                 </article>
               </div>
             </div>
@@ -1122,57 +1165,50 @@ const mapHeroBadge = computed(() => {
           </article>
 
           <aside class="mentor-care-card">
-            <span>Cuidado importante</span>
-            <h2>Cuidado importante</h2>
-            <p>O Mentor da Caminhada oferece orientação de apoio com base nos registros da jornada geral. Ele não substitui pastor, liderança, discipulado, aconselhamento pastoral, acompanhamento espiritual humano ou ajuda profissional quando necessária.</p>
+            <span>{{ mentorPastoralDisclaimer.title }}</span>
+            <h2>{{ mentorPastoralDisclaimer.title }}</h2>
+            <p>{{ mentorPastoralDisclaimer.text }}</p>
             <ul>
-              <li v-for="limit in mentorCareLimits" :key="limit">{{ limit }}</li>
+              <li v-for="limit in mentorLimits" :key="limit">{{ limit }}</li>
             </ul>
           </aside>
         </section>
 
         <section class="mentor-how-card" aria-label="Como este mentor funciona">
-          <span>{{ mentorHowItWorks.title }}</span>
-          <h2>{{ mentorHowItWorks.title }}</h2>
-          <p>{{ mentorHowItWorks.text }}</p>
-          <p>{{ mentorHowItWorks.note }}</p>
+          <span>Como este mentor funciona</span>
+          <h2>Mensagens simples, pré-aprovadas e sem IA externa</h2>
+          <p>O Mentor da Caminhada usa respostas pré-aprovadas e regras seguras para sugerir próximos passos simples a partir da jornada autorizada.</p>
+          <p>Ele não compara pessoas, não julga espiritualidade, não promete resultados e não substitui cuidado pastoral humano.</p>
         </section>
 
-        <section class="mentor-plan-card" aria-label="Plano personalizado">
+        <section class="mentor-plan-card" aria-label="Próximos passos seguros">
           <header>
-            <span>Plano personalizado</span>
+            <span>Próximos passos seguros</span>
             <h2>Próximos passos sugeridos</h2>
           </header>
           <div class="mentor-plan-grid">
-            <article v-for="step in mentorPlanSteps" :key="step.action" :class="`status-${step.statusKey}`">
+            <article v-for="step in mentorSuggestedSteps" :key="step.title" :class="`status-${step.statusKey}`">
               <header>
-                <small>{{ step.category }}</small>
+                <small>{{ step.scope === 'jovem' ? 'Jornada jovem' : 'Jornada geral' }}</small>
                 <span>{{ step.status }}</span>
               </header>
-              <strong>{{ step.action }}</strong>
-              <p>{{ step.impact }}</p>
+              <strong>{{ step.title }}</strong>
+              <p>{{ step.body }}</p>
             </article>
           </div>
         </section>
 
         <section class="mentor-focus-grid" aria-label="Foco por jornada">
-          <article v-for="card in mentorVisibleJourneyFocusCards" :key="card.journey">
-            <span>{{ card.journey }}</span>
-            <strong>Foco sugerido: {{ card.focus }}</strong>
-            <p>{{ card.note }}</p>
+          <article>
+            <span>Escopo</span>
+            <strong>{{ activeMentorJourney === 'youth' ? 'Mentor jovem autorizado' : 'Mentor geral autorizado' }}</strong>
+            <p>As mensagens aparecem somente para jornadas que o usuário autenticado pode visualizar.</p>
           </article>
-        </section>
-
-        <section class="mentor-questions-card" aria-label="Perguntas guiadas">
-          <header>
-            <span>Perguntas guiadas</span>
-            <h2>Perguntas para uma leitura da caminhada com cuidado</h2>
-          </header>
-          <div>
-            <article v-for="question in mentorGuidedQuestions" :key="question">
-              {{ question }}
-            </article>
-          </div>
+          <article>
+            <span>Segurança</span>
+            <strong>Sem conselho livre e sem IA externa</strong>
+            <p>O conteúdo vem de templates pré-aprovados ou fallback seguro por regras.</p>
+          </article>
         </section>
 
         <nav class="mentor-actions" aria-label="Atalhos do mentor">
