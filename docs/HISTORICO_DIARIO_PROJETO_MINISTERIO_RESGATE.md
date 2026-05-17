@@ -943,3 +943,23 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foram criados ou executados seeders, não foram criados dados fake no banco real e não foram alteradas as rotas internas de níveis, mapa, histórico, mentor, regras, ranking ou outros módulos.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Integração real do Mapa da Minha Caminhada
+
+- **Horário:** 14:20–14:45 aprox.
+- **Objetivo:** integrar somente as rotas de mapa da Minha Caminhada com dados reais, mantendo fora do escopo níveis individuais, histórico, mentor, ranking, regras, geral/jovem detalhado, placeholders e demais módulos.
+- **Rotas ajustadas:** `/familia-resgate/minha-caminhada/mapa`, `/familia-resgate/minha-caminhada/geral/mapa` e `/familia-resgate/minha-caminhada/jovem/mapa` deixaram de renderizar `MinhaCaminhadaArea` por `Closure` e passaram a apontar para `MinhaCaminhadaController@map`, `MinhaCaminhadaController@generalMap` e `MinhaCaminhadaController@youthMap`.
+- **Controller ajustado:** `MinhaCaminhadaController` recebeu métodos de mapa e helper privado para montar payload real usando `WalkingProgressService`, `WalkingLevelService` e `WalkingAuthorizationService`.
+- **Prop real criada:** `walkingMap`, com `usesRealData`, `generatedAt`, pessoa vinculada, jornada solicitada, jornada padrão, `canSeeYouthJourney`, dados gerais, dados jovens somente quando autorizados, pontos aprovados, níveis oficiais, nível atual, próximo nível, progresso, logs recentes e estados vazios.
+- **Payload seguro:** o controller retorna arrays simples, não retorna Models crus, não cria registros, não altera banco, considera somente logs aprovados e não expõe `metadata` dos logs.
+- **Mapa geral real:** passou a usar níveis oficiais cadastrados no banco, progresso calculado por pontos aprovados e status seguro por marco (`completed`, `current`, `next`, `locked`).
+- **Mapa jovem protegido:** rota jovem continua carregando a página, mas sem autorização real retorna `walkingMap.youth.authorized = false`, sem níveis jovens e com estado bloqueado seguro; quando a pessoa está vinculada aos Resgatados, envia níveis/progresso jovens reais.
+- **Página ajustada:** `resources/js/Pages/FamiliaResgate/MinhaCaminhadaArea.vue` passou a receber `walkingMap` e, somente no branch `area === 'mapa'`, consumir dados reais quando disponíveis.
+- **Mocks neutralizados no Mapa:** removido o uso dos pontos fake `380/920`, nível fake `2/6`, marcos conquistados fake, ações de nível baseadas em mock e renderização de mapa jovem sem autorização backend real.
+- **Estados vazios seguros:** adicionados estados para usuário sem pessoa vinculada, jornada indisponível, ausência de pontos aprovados, ausência de níveis e mapa jovem não autorizado.
+- **Teste criado:** `tests/Feature/MinhaCaminhada/MinhaCaminhadaMapaControllerTest.php`, cobrindo autenticação obrigatória, payload seguro do mapa geral, filtro por pontos aprovados, bloqueio do mapa jovem para usuário comum, liberação do mapa jovem para jovem/resgatado e compatibilidade da rota antiga `/mapa` como geral.
+- **Validações executadas:** `php -l` passou no controller e no teste; teste do mapa passou com 6 testes e 118 assertions; rotas confirmadas via `route:list --json`; testes focados de visão geral, conquistas, nível e services passaram; `php artisan test --compact` passou com 80 testes e 516 assertions; `npm run build` passou; `git diff --check` passou.
+- **Busca de termos fake:** busca focada em `MinhaCaminhadaArea.vue` confirmou que os pontos fake do branch Mapa foram neutralizados; permanecem `journeyDashboardMocks` e valores fake em outras abas/áreas do mesmo arquivo por escopo futuro, especialmente detalhes geral/jovem e histórico.
+- **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foram criados ou executados seeders no banco real, não foram criados dados fake no banco real e não foram alterados níveis individuais, histórico, mentor, ranking, regras, geral/jovem detalhado, placeholders, Central da Família, Meu Perfil ou Meu Financeiro.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.

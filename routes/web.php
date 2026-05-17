@@ -165,21 +165,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'journey' => 'all',
     ]))->name('familia-resgate.minha_caminhada.ranking');
 
-    Route::get('/familia-resgate/minha-caminhada/mapa', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
-        'area' => 'mapa',
-        'journey' => 'geral',
-    ]))->name('familia-resgate.minha_caminhada.mapa');
+    Route::get('/familia-resgate/minha-caminhada/mapa', [MinhaCaminhadaController::class, 'map'])
+        ->name('familia-resgate.minha_caminhada.mapa');
 
     // Acesso futuro: membro comum acessa caminhada geral; jovem/resgatado acessa geral + jovem. A rota jovem deverá ser protegida no backend/policy, pois frontend não é segurança final.
-    Route::get('/familia-resgate/minha-caminhada/geral/mapa', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
-        'area' => 'mapa',
-        'journey' => 'geral',
-    ]))->name('familia-resgate.minha_caminhada.geral.mapa');
+    Route::get('/familia-resgate/minha-caminhada/geral/mapa', [MinhaCaminhadaController::class, 'generalMap'])
+        ->name('familia-resgate.minha_caminhada.geral.mapa');
 
-    Route::get('/familia-resgate/minha-caminhada/jovem/mapa', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
-        'area' => 'mapa',
-        'journey' => 'jovem',
-    ]))->name('familia-resgate.minha_caminhada.jovem.mapa');
+    Route::get('/familia-resgate/minha-caminhada/jovem/mapa', [MinhaCaminhadaController::class, 'youthMap'])
+        ->name('familia-resgate.minha_caminhada.jovem.mapa');
 
     Route::get('/familia-resgate/minha-caminhada/geral/niveis/{level}', fn (string $level) => Inertia::render('FamiliaResgate/MinhaCaminhadaNivel', [
         'journey' => 'geral',

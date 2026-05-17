@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Familia;
 
 use App\Http\Controllers\Controller;
+use App\Models\WalkingJourney;
+use App\Models\WalkingLevel;
 use App\Services\MinhaCaminhada\WalkingAchievementReadService;
 use App\Services\MinhaCaminhada\WalkingAuthorizationService;
 use App\Services\MinhaCaminhada\WalkingDashboardReadService;
@@ -141,6 +143,33 @@ class MinhaCaminhadaController extends Controller
                 'emptyStates' => $this->levelEmptyStates(),
             ],
         ]);
+    }
+
+    public function map(
+        Request $request,
+        WalkingProgressService $progressService,
+        WalkingLevelService $levelService,
+        WalkingAuthorizationService $authorizationService
+    ): Response {
+        return $this->renderMap($request, $progressService, $levelService, $authorizationService, 'general', 'geral');
+    }
+
+    public function generalMap(
+        Request $request,
+        WalkingProgressService $progressService,
+        WalkingLevelService $levelService,
+        WalkingAuthorizationService $authorizationService
+    ): Response {
+        return $this->renderMap($request, $progressService, $levelService, $authorizationService, 'general', 'geral');
+    }
+
+    public function youthMap(
+        Request $request,
+        WalkingProgressService $progressService,
+        WalkingLevelService $levelService,
+        WalkingAuthorizationService $authorizationService
+    ): Response {
+        return $this->renderMap($request, $progressService, $levelService, $authorizationService, 'youth', 'jovem');
     }
 
     private function formatJourneyDashboard(array $dashboard, string $journeyType): array
@@ -415,5 +444,232 @@ class MinhaCaminhadaController extends Controller
     {
         return (bool) ($dashboard['authorized'] ?? false)
             && (bool) ($dashboard['progress']['authorized'] ?? false);
+    }
+
+    private function renderMap(
+        Request $request,
+        WalkingProgressService $progressService,
+        WalkingLevelService $levelService,
+        WalkingAuthorizationService $authorizationService,
+        string $requestedJourneyType,
+        string $journeySlug
+    ): Response {
+        $user = $request->user();
+        $person = $user?->person;
+        $defaultJourneyType = $levelService->getJourneyByType('general')?->type ?? 'general';
+
+        if (!$person) {
+            return Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+                'area' => 'mapa',
+                'journey' => $journeySlug,
+                'walkingMap' => $this->emptyMapPayload(
+                    'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+                    false,
+                    $requestedJourneyType,
+                    $defaultJourneyType
+                ),
+            ]);
+        }
+
+        $canSeeYouthJourney = $authorizationService->userCanViewOwnYouthJourney($user);
+
+        return Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+            'area' => 'mapa',
+            'journey' => $journeySlug,
+            'walkingMap' => [
+                'authorized' => true,
+                'usesRealData' => true,
+                'generatedAt' => now()->toISOString(),
+                'message' => null,
+                'requestedJourneyType' => $requestedJourneyType,
+                'defaultJourneyType' => $defaultJourneyType,
+                'person' => [
+                    'id' => $person->id,
+                    'name' => $person->preferred_name ?: $person->full_name,
+                ],
+                'canSeeYouthJourney' => $canSeeYouthJourney,
+                'general' => $this->formatMapJourney(
+                    $progressService->getOwnProgress($user),
+                    $progressService->getRecentApprovedLogs($user, $person),
+                    $levelService
+                ),
+                'youth' => $canSeeYouthJourney
+                    ? $this->formatMapJourney(
+                        $progressService->getOwnProgress($user, 'youth'),
+                        $progressService->getRecentApprovedLogs($user, $person, 'youth'),
+                        $levelService
+                    )
+                    : $this->emptyMapJourney('youth', false, 'Você não tem permissão para visualizar o mapa jovem.'),
+                'emptyStates' => $this->mapEmptyStates(),
+            ],
+        ]);
+    }
+
+    private function emptyMapPayload(string $message, bool $authorized, string $requestedJourneyType, string $defaultJourneyType = 'general'): array
+    {
+        return [
+            'authorized' => $authorized,
+            'usesRealData' => true,
+            'generatedAt' => now()->toISOString(),
+            'message' => $message,
+            'requestedJourneyType' => $requestedJourneyType,
+            'defaultJourneyType' => $defaultJourneyType,
+            'person' => null,
+            'canSeeYouthJourney' => false,
+            'general' => $this->emptyMapJourney('general', false),
+            'youth' => $this->emptyMapJourney('youth', false),
+            'emptyStates' => $this->mapEmptyStates(),
+        ];
+    }
+
+    private function emptyMapJourney(string $journeyType, bool $authorized = true, ?string $message = null): array
+    {
+        return [
+            'authorized' => $authorized,
+            'journeyType' => $journeyType,
+            'journey' => null,
+            'message' => $message,
+            'points' => 0,
+            'approvedLogsCount' => 0,
+            'currentLevel' => null,
+            'nextLevel' => null,
+            'pointsToNextLevel' => 0,
+            'progressPercent' => 0,
+            'levels' => [],
+            'recentLogs' => [],
+            'summary' => [
+                'has_points' => false,
+                'has_current_level' => false,
+                'has_next_level' => false,
+                'has_levels' => false,
+                'is_final_level' => false,
+                'completed_count' => 0,
+                'next_count' => 0,
+                'locked_count' => 0,
+                'levels_count' => 0,
+            ],
+        ];
+    }
+
+    private function formatMapJourney(array $progress, array $recentLogs, WalkingLevelService $levelService): array
+    {
+        if (!($progress['authorized'] ?? false)) {
+            return array_merge(
+                $this->emptyMapJourney($progress['journey_type'] ?? 'general', false),
+                ['message' => $progress['message'] ?? 'Mapa indisponível.']
+            );
+        }
+
+        $journeyType = $progress['journey']['type'] ?? $progress['journey_type'] ?? 'general';
+        $journey = $levelService->getJourneyByType($journeyType);
+
+        if (!$journey) {
+            return $this->emptyMapJourney($journeyType, false, 'Jornada não encontrada ou inativa.');
+        }
+
+        $levelProgress = $progress['level_progress'] ?? [];
+        $points = (int) ($progress['total_points'] ?? 0);
+        $currentLevel = $this->formatLevelData($levelProgress['current_level'] ?? null);
+        $nextLevel = $this->formatLevelData($levelProgress['next_level'] ?? null);
+        $levels = $journey->levels()
+            ->where('is_active', true)
+            ->orderBy('level_number')
+            ->get()
+            ->map(fn (WalkingLevel $level) => $this->formatMapLevel($level, $points, $currentLevel, $nextLevel))
+            ->values()
+            ->all();
+
+        return [
+            'authorized' => true,
+            'journeyType' => $journeyType,
+            'journey' => $this->formatMapJourneyData($journey),
+            'message' => null,
+            'points' => $points,
+            'approvedLogsCount' => (int) ($progress['approved_logs_count'] ?? 0),
+            'currentLevel' => $currentLevel,
+            'nextLevel' => $nextLevel,
+            'pointsToNextLevel' => (int) ($levelProgress['points_to_next_level'] ?? 0),
+            'progressPercent' => (int) ($levelProgress['progress_percentage'] ?? 0),
+            'levels' => $levels,
+            'recentLogs' => $recentLogs,
+            'summary' => [
+                'has_points' => $points > 0,
+                'has_current_level' => $currentLevel !== null,
+                'has_next_level' => $nextLevel !== null,
+                'has_levels' => count($levels) > 0,
+                'is_final_level' => $nextLevel === null && $currentLevel !== null,
+                'completed_count' => collect($levels)->where('status', 'completed')->count(),
+                'next_count' => collect($levels)->where('status', 'next')->count(),
+                'locked_count' => collect($levels)->where('status', 'locked')->count(),
+                'levels_count' => count($levels),
+            ],
+        ];
+    }
+
+    private function formatMapJourneyData(WalkingJourney $journey): array
+    {
+        return [
+            'id' => $journey->id,
+            'key' => $journey->key,
+            'name' => $journey->name,
+            'type' => $journey->type,
+            'description' => $journey->description,
+        ];
+    }
+
+    private function formatMapLevel(WalkingLevel $level, int $points, ?array $currentLevel, ?array $nextLevel): array
+    {
+        $status = $this->mapLevelStatus($level, $points, $currentLevel, $nextLevel);
+
+        return [
+            'id' => $level->id,
+            'name' => $level->name,
+            'slug' => str($level->name ?: 'nivel-'.$level->level_number)->slug()->toString(),
+            'number' => $level->level_number,
+            'position' => $level->level_number,
+            'requiredPoints' => $level->required_points,
+            'description' => $level->description,
+            'icon' => $level->icon ?: '✦',
+            'color' => $level->color,
+            'status' => $status,
+            'isCurrent' => $status === 'current',
+            'isCompleted' => $status === 'completed',
+            'isNext' => $status === 'next',
+            'isLocked' => $status === 'locked',
+            'pointsToReach' => max(0, $level->required_points - $points),
+        ];
+    }
+
+    private function mapLevelStatus(WalkingLevel $level, int $points, ?array $currentLevel, ?array $nextLevel): string
+    {
+        if (($currentLevel['id'] ?? null) === $level->id) {
+            return 'current';
+        }
+
+        if (($nextLevel['id'] ?? null) === $level->id) {
+            return 'next';
+        }
+
+        if ($points > 0 && $level->required_points < $points) {
+            return 'completed';
+        }
+
+        return 'locked';
+    }
+
+    private function mapEmptyStates(): array
+    {
+        return [
+            'withoutPersonTitle' => 'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+            'withoutPersonText' => 'Assim que o cadastro for vinculado, o mapa da sua caminhada real aparecerá aqui.',
+            'withoutPointsTitle' => 'Ainda não há pontos aprovados nesta caminhada.',
+            'withoutPointsText' => 'O mapa mostrará seu avanço conforme registros reais forem aprovados.',
+            'withoutJourneyTitle' => 'Mapa indisponível no momento.',
+            'withoutJourneyText' => 'Assim que a jornada estiver disponível, o mapa real aparecerá aqui.',
+            'unauthorizedYouthTitle' => 'Mapa jovem indisponível para este perfil.',
+            'unauthorizedYouthText' => 'A caminhada jovem aparece somente para jovens/resgatados autorizados.',
+            'withoutLevelsTitle' => 'Nenhum nível cadastrado para esta jornada.',
+            'withoutLevelsText' => 'Assim que os níveis oficiais estiverem ativos, o mapa será exibido aqui.',
+        ];
     }
 }

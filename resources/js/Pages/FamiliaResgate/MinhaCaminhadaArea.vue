@@ -7,6 +7,7 @@ const props = defineProps({
   area: { type: String, default: 'mapa' },
   journey: { type: String, default: 'geral' },
   walkingLevel: { type: Object, default: null },
+  walkingMap: { type: Object, default: null },
 })
 
 const baseRoute = '/familia-resgate/minha-caminhada'
@@ -17,18 +18,18 @@ const journeyConfigs = {
     title: 'Mapa da Caminhada Geral',
     breadcrumb: 'Caminhada Geral',
     subtitle: 'Veja os 20 marcos da caminhada geral e acompanhe cada igreja conquistada no caminho.',
-    points: 380,
-    currentLevel: 2,
-    pointStep: 400,
+    points: 0,
+    currentLevel: 1,
+    pointStep: 1,
   },
   jovem: {
     slug: 'jovem',
     title: 'Mapa Jovem dos Resgatados',
     breadcrumb: 'Resgatados',
     subtitle: 'Veja os 20 marcos da jornada jovem e acompanhe cada estação dos Resgatados no caminho.',
-    points: 920,
-    currentLevel: 6,
-    pointStep: 250,
+    points: 0,
+    currentLevel: 1,
+    pointStep: 1,
   },
 }
 
@@ -81,6 +82,7 @@ const youthLevels = [
 const statusLabels = {
   completed: 'Conquistado',
   current: 'Em progresso',
+  next: 'Próximo marco',
   future: 'Próximo marco',
   locked: 'Bloqueado',
 }
@@ -88,6 +90,7 @@ const statusLabels = {
 const statusNotes = {
   completed: 'Marco já alcançado na caminhada.',
   current: 'Você está aqui, siga firme.',
+  next: 'Próximo nível real a alcançar.',
   future: 'Próxima estação visível.',
   locked: 'Será liberado mais à frente.',
 }
@@ -504,8 +507,34 @@ const visibleHistoryEvents = computed(() => {
 
   return allowedEvents.filter((event) => event.category === selectedHistoryFilter.value)
 })
-const mapHeading = computed(() => journeySlug.value === 'jovem' ? '20 marcos jovens, 20 estações de propósito' : '20 igrejas, 20 marcos espirituais')
-const mapDescription = computed(() => journeySlug.value === 'jovem' ? 'Cada estação representa presença, Palavra, comunhão e propósito na geração jovem.' : 'Cada igreja representa uma estação de presença, Palavra, serviço, comunhão e constância.')
+const hasRealMapData = computed(() => Boolean(props.walkingMap?.usesRealData))
+const requestedMapJourneyType = computed(() => props.walkingMap?.requestedJourneyType === 'youth' || props.journey === 'jovem' ? 'youth' : 'general')
+const canSeeYouthJourneyFromMap = computed(() => hasRealMapData.value ? Boolean(props.walkingMap?.canSeeYouthJourney) : viewerContext.canSeeYouthJourney)
+const activeMapJourney = computed(() => requestedMapJourneyType.value === 'youth' ? 'youth' : 'general')
+const currentMapData = computed(() => hasRealMapData.value ? props.walkingMap?.[activeMapJourney.value] || null : null)
+const mapAuthorized = computed(() => Boolean(hasRealMapData.value && props.walkingMap?.authorized && currentMapData.value?.authorized))
+const mapHeading = computed(() => {
+  if (hasRealMapData.value) {
+    if (!mapAuthorized.value) {
+      return requestedMapJourneyType.value === 'youth' ? 'Mapa jovem indisponível' : 'Mapa da caminhada indisponível'
+    }
+
+    return requestedMapJourneyType.value === 'youth' ? 'Mapa Jovem dos Resgatados' : 'Mapa da Caminhada Geral'
+  }
+
+  return journeySlug.value === 'jovem' ? '20 marcos jovens, 20 estações de propósito' : '20 igrejas, 20 marcos espirituais'
+})
+const mapDescription = computed(() => {
+  if (hasRealMapData.value) {
+    if (!mapAuthorized.value) {
+      return 'Este mapa só aparece quando a jornada está disponível e autorizada para o usuário autenticado.'
+    }
+
+    return 'Mapa calculado com níveis oficiais e pontos aprovados reais, sem dados simulados.'
+  }
+
+  return journeySlug.value === 'jovem' ? 'Cada estação representa presença, Palavra, comunhão e propósito na geração jovem.' : 'Cada igreja representa uma estação de presença, Palavra, serviço, comunhão e constância.'
+})
 const areaLevels = computed(() => journeySlug.value === 'jovem' ? youthLevels : generalLevels)
 const currentLevelName = computed(() => areaLevels.value.find((level) => level.number === journeyConfig.value.currentLevel)?.name || areaLevels.value[0].name)
 const hasRealLevelData = computed(() => Boolean(props.walkingLevel?.usesRealData))
@@ -599,7 +628,7 @@ const levelEmptyState = computed(() => {
 
   return null
 })
-const mapLevels = computed(() => areaLevels.value.map((level) => {
+const fallbackMapLevels = computed(() => areaLevels.value.map((level) => {
   const config = journeyConfig.value
   const pointsRequired = level.number * config.pointStep
   const status = level.number < config.currentLevel
@@ -620,11 +649,89 @@ const mapLevels = computed(() => areaLevels.value.map((level) => {
     progressText: status === 'completed' ? `${pointsRequired} pts alcançados` : `${Math.min(config.points, pointsRequired)} / ${pointsRequired} pontos`,
   }
 }))
+const mapLevels = computed(() => {
+  if (hasRealMapData.value) {
+    return Array.isArray(currentMapData.value?.levels) ? currentMapData.value.levels.map((level) => ({
+      ...level,
+      statusLabel: statusLabels[level.status] || level.status,
+      statusNote: level.description || statusNotes[level.status] || 'Marco da caminhada real.',
+      progressText: level.isCompleted
+        ? `${formatNumber(level.requiredPoints)} pts necessários`
+        : level.isCurrent
+          ? `${formatNumber(currentMapData.value?.points || 0)} pontos aprovados`
+          : level.isNext
+            ? `Faltam ${formatNumber(level.pointsToReach)} pts`
+            : `${formatNumber(level.requiredPoints)} pts necessários`,
+    })) : []
+  }
 
-const progressPercent = computed(() => Math.min(100, Math.round((journeyConfig.value.points / (journeyConfig.value.currentLevel * journeyConfig.value.pointStep)) * 100)))
+  return fallbackMapLevels.value
+})
+const mapSummaryCards = computed(() => {
+  if (!mapAuthorized.value) {
+    return []
+  }
+
+  return [
+    { label: 'Nível atual', value: currentMapData.value.currentLevel?.number || 'Início', note: currentMapData.value.currentLevel?.name || 'Ponto de partida' },
+    { label: 'Pontos aprovados', value: formatNumber(currentMapData.value.points), note: 'Somente registros aprovados entram neste total.' },
+    { label: 'Marcos concluídos', value: formatNumber(currentMapData.value.summary?.completed_count || 0), note: 'Calculado pelos níveis oficiais.' },
+    { label: 'Próximo marco', value: currentMapData.value.nextLevel?.name || 'Marco final', note: currentMapData.value.nextLevel ? `Faltam ${formatNumber(currentMapData.value.pointsToNextLevel)} pts` : 'Sem próximo nível cadastrado.' },
+  ]
+})
+const mapRecentLogs = computed(() => Array.isArray(currentMapData.value?.recentLogs) ? currentMapData.value.recentLogs : [])
+const mapEmptyState = computed(() => {
+  const states = props.walkingMap?.emptyStates || {}
+
+  if (!hasRealMapData.value) {
+    return null
+  }
+
+  if (!props.walkingMap?.authorized) {
+    return {
+      title: states.withoutPersonTitle || 'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+      text: states.withoutPersonText || 'Assim que o cadastro for vinculado, o mapa da sua caminhada real aparecerá aqui.',
+    }
+  }
+
+  if (!currentMapData.value?.authorized) {
+    return {
+      title: requestedMapJourneyType.value === 'youth' ? states.unauthorizedYouthTitle || 'Mapa jovem indisponível para este perfil.' : states.withoutJourneyTitle || 'Mapa indisponível no momento.',
+      text: currentMapData.value?.message || (requestedMapJourneyType.value === 'youth' ? states.unauthorizedYouthText || 'A caminhada jovem aparece somente para jovens/resgatados autorizados.' : states.withoutJourneyText || 'Assim que a jornada estiver disponível, o mapa real aparecerá aqui.'),
+    }
+  }
+
+  if (!currentMapData.value?.summary?.has_levels) {
+    return {
+      title: states.withoutLevelsTitle || 'Nenhum nível cadastrado para esta jornada.',
+      text: states.withoutLevelsText || 'Assim que os níveis oficiais estiverem ativos, o mapa será exibido aqui.',
+    }
+  }
+
+  if (!currentMapData.value?.summary?.has_points) {
+    return {
+      title: states.withoutPointsTitle || 'Ainda não há pontos aprovados nesta caminhada.',
+      text: states.withoutPointsText || 'O mapa mostrará seu avanço conforme registros reais forem aprovados.',
+    }
+  }
+
+  return null
+})
+const progressPercent = computed(() => hasRealMapData.value ? Number(currentMapData.value?.progressPercent || 0) : Math.min(100, Math.round((journeyConfig.value.points / (journeyConfig.value.currentLevel * journeyConfig.value.pointStep)) * 100)))
 const completedCount = computed(() => mapLevels.value.filter((level) => level.status === 'completed').length)
-const futureCount = computed(() => mapLevels.value.filter((level) => level.status === 'future').length)
+const futureCount = computed(() => mapLevels.value.filter((level) => level.status === 'future' || level.status === 'next').length)
 const lockedCount = computed(() => mapLevels.value.filter((level) => level.status === 'locked').length)
+const mapHeroBadge = computed(() => {
+  if (hasRealMapData.value) {
+    if (!mapAuthorized.value) {
+      return requestedMapJourneyType.value === 'youth' ? 'Acesso jovem protegido' : 'Mapa indisponível'
+    }
+
+    return currentMapData.value.currentLevel?.number ? `Nível ${currentMapData.value.currentLevel.number}` : 'Ponto de partida'
+  }
+
+  return `Nível ${journeyConfig.value.currentLevel} de 20`
+})
 </script>
 
 <template>
@@ -646,7 +753,7 @@ const lockedCount = computed(() => mapLevels.value.filter((level) => level.statu
         <strong v-else-if="isMentorArea">Apoio pastoral</strong>
         <strong v-else-if="isRulesArea">Caminhada saudável</strong>
         <strong v-else-if="isRankingArea">Reconhecimento saudável</strong>
-        <strong v-else>Nível {{ journeyConfig.currentLevel }} de 20</strong>
+        <strong v-else>{{ mapHeroBadge }}</strong>
       </header>
 
       <section v-if="isLevelArea" class="level-overview" aria-label="Meu nível atual">
@@ -1280,7 +1387,15 @@ const lockedCount = computed(() => mapLevels.value.filter((level) => level.statu
       </section>
 
       <template v-else>
-        <section class="map-summary" aria-label="Resumo do mapa da caminhada">
+        <section v-if="mapSummaryCards.length" class="map-summary" aria-label="Resumo do mapa da caminhada">
+          <article v-for="card in mapSummaryCards" :key="card.label">
+            <span>{{ card.label }}</span>
+            <strong>{{ card.value }}</strong>
+            <small>{{ card.note }}</small>
+          </article>
+        </section>
+
+        <section v-else-if="!hasRealMapData" class="map-summary" aria-label="Resumo do mapa da caminhada">
           <article>
             <span>Atual</span>
             <strong>{{ journeyConfig.currentLevel }}</strong>
@@ -1303,7 +1418,12 @@ const lockedCount = computed(() => mapLevels.value.filter((level) => level.statu
           </article>
         </section>
 
-        <section class="map-card">
+        <article v-if="mapEmptyState" class="map-empty-state">
+          <strong>{{ mapEmptyState.title }}</strong>
+          <p>{{ mapEmptyState.text }}</p>
+        </article>
+
+        <section v-if="!hasRealMapData || (mapAuthorized && mapLevels.length)" class="map-card">
           <div class="map-sky" aria-hidden="true"></div>
           <div class="map-glow" aria-hidden="true"></div>
 
@@ -1322,15 +1442,17 @@ const lockedCount = computed(() => mapLevels.value.filter((level) => level.statu
           <div class="map-track-shell" aria-label="Mapa horizontal com 20 marcos da caminhada">
             <div class="map-track">
               <div class="map-path" aria-hidden="true"></div>
-              <Link
+              <component
+                :is="hasRealMapData ? 'article' : Link"
                 v-for="level in mapLevels"
-                :key="level.number"
+                :key="level.id || level.number"
                 class="map-level"
                 :class="[`is-${level.status}`, { 'is-final': level.number === 20 }]"
                 :href="level.route"
-                :aria-label="`Abrir nível ${level.number}: ${level.name}`"
+                :aria-label="`${hasRealMapData ? 'Nível real' : 'Abrir nível'} ${level.number}: ${level.name}`"
               >
                 <span v-if="level.status === 'completed'" class="state-mark">✓</span>
+                <span v-else-if="level.status === 'next'" class="state-mark">→</span>
                 <span v-else-if="level.status === 'locked'" class="state-mark">🔒</span>
                 <span class="level-number">Nível {{ level.number }}</span>
                 <span class="church" aria-hidden="true">
@@ -1349,7 +1471,7 @@ const lockedCount = computed(() => mapLevels.value.filter((level) => level.statu
                   <small>{{ level.statusLabel }}</small>
                   <em>{{ level.statusNote }}</em>
                 </span>
-              </Link>
+              </component>
             </div>
           </div>
         </section>
@@ -1369,10 +1491,21 @@ const lockedCount = computed(() => mapLevels.value.filter((level) => level.statu
           </article>
 
           <article class="future-card">
-            <span>Próxima integração</span>
-            <h2>Páginas personalizadas para cada marco</h2>
-            <p>Cada marco terá uma página personalizada com significado, conquistas, atividades e histórico da caminhada.</p>
-            <strong>{{ lockedCount }} marcos aguardam as próximas estações.</strong>
+            <span>{{ hasRealMapData ? 'Dados reais' : 'Próxima integração' }}</span>
+            <h2>{{ hasRealMapData ? (currentMapData?.nextLevel?.name || 'Mapa atualizado com dados reais') : 'Páginas personalizadas para cada marco' }}</h2>
+            <p>{{ hasRealMapData ? 'Este mapa usa níveis oficiais, pontos aprovados e logs recentes sem metadata sensível.' : 'Cada marco terá uma página personalizada com significado, conquistas, atividades e histórico da caminhada.' }}</p>
+            <strong>{{ hasRealMapData ? `${formatNumber(lockedCount)} marcos protegidos à frente` : `${lockedCount} marcos aguardam as próximas estações.` }}</strong>
+          </article>
+
+          <article v-if="mapRecentLogs.length" class="map-recent-logs">
+            <span>Registros recentes</span>
+            <h2>Pontos considerados no mapa</h2>
+            <div>
+              <section v-for="log in mapRecentLogs" :key="log.id">
+                <strong>{{ log.category }}</strong>
+                <small>{{ formatNumber(log.points) }} pts</small>
+              </section>
+            </div>
           </article>
         </section>
       </template>
@@ -1726,6 +1859,9 @@ a { text-decoration: none; }
 .map-summary span { display: block; color: #8a5b13; font-size: .76rem; font-weight: 950; letter-spacing: .06em; text-transform: uppercase; }
 .map-summary strong { display: block; margin-top: 3px; color: #071b33; font-size: 1.5rem; font-weight: 950; letter-spacing: -.05em; }
 .map-summary small { color: #445164; font-size: .8rem; font-weight: 820; }
+.map-empty-state { max-width: 1380px; margin: 0 auto 14px; padding: 14px 16px; border: 1px solid rgba(217,164,65,.18); border-radius: 20px; background: rgba(255,248,234,.88); box-shadow: 0 12px 28px rgba(7,27,51,.07), inset 0 1px 0 rgba(255,255,255,.64); }
+.map-empty-state strong { display: block; color: #071b33; font-size: 1rem; font-weight: 950; }
+.map-empty-state p { margin: 4px 0 0; color: #445164; font-size: .84rem; font-weight: 780; line-height: 1.34; }
 .map-card { position: relative; overflow: hidden; margin-bottom: 14px; padding: 18px; border: 1px solid rgba(246,200,95,.34); border-radius: 28px; background: #020a1c; box-shadow: 0 24px 58px rgba(7,27,51,.2), inset 0 1px 0 rgba(255,248,234,.14); isolation: isolate; }
 .map-sky { position: absolute; inset: 0; z-index: -3; background: url('/images/familia-resgate/minha-caminhada/mapa-caminhada-cinematico.png') center 48% / cover no-repeat; opacity: .64; filter: saturate(1.12) contrast(1.08) brightness(.9); }
 .journey-jovem .map-sky { background-image: url('/images/familia-resgate/minha-caminhada/mapa-caminhada-jovens%20-%20cinematico.png'); opacity: .72; filter: saturate(1.18) contrast(1.08) brightness(.92); }
@@ -1790,14 +1926,14 @@ a { text-decoration: none; }
 .level-label em { color: rgba(255,248,234,.74); font-size: .58rem; font-style: normal; font-weight: 760; line-height: 1.16; }
 .map-level.is-completed .church-glow, .map-level.is-current .church-glow { opacity: 1; background: radial-gradient(circle, rgba(246,200,95,.6), transparent 68%); }
 .map-level.is-current .church { transform: translateY(-4px) scale(1.08); }
-.map-level.is-future .church { filter: drop-shadow(0 12px 16px rgba(0,0,0,.3)) saturate(.9); }
+.map-level.is-future .church, .map-level.is-next .church { filter: drop-shadow(0 12px 16px rgba(0,0,0,.3)) saturate(.9); }
 .map-level.is-locked { opacity: .72; }
 .map-level.is-locked .church { filter: drop-shadow(0 10px 14px rgba(0,0,0,.24)) grayscale(.28) saturate(.72); }
 .map-level.is-final .church-glow { background: radial-gradient(circle, rgba(246,200,95,.7), transparent 68%); }
 .map-footer-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 12px; }
-.legend-card, .future-card { padding: 16px; border: 1px solid rgba(217,164,65,.18); border-radius: 22px; background: rgba(255,248,234,.86); box-shadow: 0 14px 32px rgba(7,27,51,.08), inset 0 1px 0 rgba(255,255,255,.64); }
-.legend-card header span, .future-card span { color: #8a5b13; font-size: .74rem; font-weight: 950; letter-spacing: .1em; text-transform: uppercase; }
-.legend-card h2, .future-card h2 { margin: 4px 0 12px; color: #071b33; font: 900 1.2rem/1.08 Georgia, serif; }
+.legend-card, .future-card, .map-recent-logs { padding: 16px; border: 1px solid rgba(217,164,65,.18); border-radius: 22px; background: rgba(255,248,234,.86); box-shadow: 0 14px 32px rgba(7,27,51,.08), inset 0 1px 0 rgba(255,255,255,.64); }
+.legend-card header span, .future-card span, .map-recent-logs > span { color: #8a5b13; font-size: .74rem; font-weight: 950; letter-spacing: .1em; text-transform: uppercase; }
+.legend-card h2, .future-card h2, .map-recent-logs h2 { margin: 4px 0 12px; color: #071b33; font: 900 1.2rem/1.08 Georgia, serif; }
 .legend-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
 .legend-list div { display: grid; gap: 3px; padding: 11px; border: 1px solid rgba(217,164,65,.14); border-radius: 16px; background: rgba(255,255,255,.56); }
 .legend-list i { width: 16px; height: 16px; border-radius: 50%; box-shadow: 0 0 0 4px rgba(217,164,65,.12); }
@@ -1809,6 +1945,10 @@ a { text-decoration: none; }
 .legend-list small, .future-card p { color: #445164; font-size: .8rem; font-weight: 780; line-height: 1.32; }
 .future-card p { margin: 0 0 10px; }
 .future-card strong { display: inline-flex; padding: 8px 10px; border: 1px solid rgba(217,164,65,.2); border-radius: 999px; background: rgba(217,164,65,.12); color: #8a5b13; font-size: .78rem; font-weight: 950; }
+.map-recent-logs div { display: grid; gap: 8px; }
+.map-recent-logs section { display: flex; justify-content: space-between; gap: 10px; padding: 9px 10px; border: 1px solid rgba(217,164,65,.14); border-radius: 14px; background: rgba(255,255,255,.54); }
+.map-recent-logs strong { color: #071b33; font-size: .82rem; font-weight: 950; }
+.map-recent-logs small { color: #8a5b13; font-size: .76rem; font-weight: 950; }
 @media (max-width: 1100px) {
   .map-summary, .legend-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .level-cards { grid-template-columns: 1fr; }
