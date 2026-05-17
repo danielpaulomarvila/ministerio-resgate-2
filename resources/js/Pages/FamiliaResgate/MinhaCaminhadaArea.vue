@@ -11,6 +11,7 @@ const props = defineProps({
   walkingHistory: { type: Object, default: null },
   walkingMentor: { type: Object, default: null },
   walkingRules: { type: Object, default: null },
+  walkingJourneyDetail: { type: Object, default: null },
 })
 
 const baseRoute = '/familia-resgate/minha-caminhada'
@@ -96,99 +97,6 @@ const statusNotes = {
   next: 'Próximo nível real a alcançar.',
   future: 'Próxima estação visível.',
   locked: 'Será liberado mais à frente.',
-}
-
-const journeyDashboardMocks = {
-  geral: {
-    slug: 'geral',
-    title: 'Detalhes da Caminhada Geral',
-    breadcrumb: 'Caminhada Geral',
-    subtitle: 'Veja como sua caminhada na igreja está avançando em presença, Palavra, serviço e comunhão.',
-    label: 'Jornada geral',
-    currentLevelName: 'Coração Desperto',
-    currentLevel: 2,
-    points: 380,
-    pointsTarget: 800,
-    progress: 48,
-    nextLevelName: 'Semente da Palavra',
-    positionLabel: 'Posição geral',
-    position: '12º',
-    badgeLabel: 'Badges gerais',
-    badgesCount: 3,
-    levelButton: 'Ver nível atual',
-    mapButton: 'Ir ao mapa geral',
-    levelRoute: `${baseRoute}/geral/niveis/2`,
-    mapRoute: `${baseRoute}/geral/mapa`,
-    growthTitle: 'Áreas de crescimento',
-    growthHeading: 'Análise da caminhada',
-    focusLabel: 'Foco da semana',
-    focusTitle: 'Fortalecer Palavra e Devocional',
-    focusSuggestion: 'Ler 1 capítulo por dia e registrar uma breve reflexão.',
-    activitiesTitle: 'Atividades recentes',
-    activitiesHeading: 'Movimentos da caminhada geral',
-    achievementsTitle: 'Conquistas gerais',
-    growthItems: [
-      { icon: '⛪', name: 'Presença', percent: 82, points: 145, note: 'Constância nos cultos e encontros.' },
-      { icon: '📖', name: 'Palavra', percent: 64, points: 88, note: 'Leitura bíblica em progresso.' },
-      { icon: '🕯️', name: 'Devocional', percent: 52, points: 54, note: 'Tempo diário com Deus.' },
-      { icon: '🤝', name: 'Serviço', percent: 70, points: 72, note: 'Mãos disponíveis na casa.' },
-      { icon: '👥', name: 'Comunhão', percent: 58, points: 42, note: 'Caminhada junto da família.' },
-      { icon: '🕊️', name: 'Evangelismo', percent: 36, points: 24, note: 'Compartilhando esperança.' },
-      { icon: '🎓', name: 'Formação', percent: 44, points: 31, note: 'Crescendo em maturidade.' },
-    ],
-    activities: [
-      { name: 'Presença no culto', points: 40 },
-      { name: 'Leitura bíblica do dia', points: 18 },
-      { name: 'Serviço em escala', points: 35 },
-    ],
-    achievements: ['Presença Fiel', 'Palavra Viva', 'Servo Disponível'],
-  },
-  jovem: {
-    slug: 'jovem',
-    title: 'Detalhes da Caminhada Jovem',
-    breadcrumb: 'Resgatados',
-    subtitle: 'Veja sua evolução nos Resgatados, desafios, encontros, Palavra, serviço e missões.',
-    label: 'Resgatados',
-    currentLevelName: 'Escudeiro da Palavra',
-    currentLevel: 6,
-    points: 920,
-    pointsTarget: 1500,
-    progress: 61,
-    nextLevelName: 'Sentinela da Fé',
-    positionLabel: 'Posição jovem',
-    position: '5º',
-    badgeLabel: 'Badges jovens',
-    badgesCount: 6,
-    levelButton: 'Ver nível jovem',
-    mapButton: 'Ir ao mapa jovem',
-    levelRoute: `${baseRoute}/jovem/niveis/6`,
-    mapRoute: `${baseRoute}/jovem/mapa`,
-    growthTitle: 'Áreas jovens',
-    growthHeading: 'Ritmo dos Resgatados',
-    focusLabel: 'Desafio da semana',
-    focusTitle: 'Memorizar um versículo e responder o desafio bíblico.',
-    focusSuggestion: 'Escolha um versículo, escreva uma aplicação e compartilhe no encontro.',
-    activitiesTitle: 'Missões recentes',
-    activitiesHeading: 'Movimentos dos Resgatados',
-    achievementsTitle: 'Conquistas jovens',
-    growthItems: [
-      { icon: '🔥', name: 'Presença nos Resgatados', percent: 88, points: 210, note: 'Constância nos encontros jovens.' },
-      { icon: '📖', name: 'Bíblia na mão', percent: 76, points: 165, note: 'Palavra como fundamento.' },
-      { icon: '🧠', name: 'Desafios bíblicos', percent: 68, points: 138, note: 'Aprendizado em movimento.' },
-      { icon: '🤝', name: 'Serviço jovem', percent: 62, points: 116, note: 'Servindo com propósito.' },
-      { icon: '👥', name: 'Comunhão', percent: 74, points: 124, note: 'Crescendo com a geração.' },
-      { icon: '🕊️', name: 'Evangelismo', percent: 46, points: 82, note: 'Chamando outros para perto.' },
-      { icon: '🌍', name: 'Missões', percent: 40, points: 85, note: 'Propósito além de si.' },
-    ],
-    activities: [
-      { name: 'Encontro dos Resgatados', points: 55 },
-      { name: 'Desafio bíblico respondido', points: 35 },
-      { name: 'Versículo memorizado', points: 28 },
-      { name: 'Missão jovem concluída', points: 45 },
-    ],
-    achievements: ['Resgatado Presente', 'Bíblia na Mão', 'Chama Jovem', 'Desafio Cumprido'],
-    notice: 'Esta jornada é separada da caminhada geral. Os pontos jovens não se misturam com os pontos gerais.',
-  },
 }
 
 const historyFilters = ['Todos', 'Caminhada Geral', 'Caminhada Jovem', 'Presença', 'Palavra', 'Devocional', 'Serviço', 'Evangelismo', 'Conquistas']
@@ -294,12 +202,133 @@ const isMentorArea = computed(() => props.area === 'mentor')
 const isRulesArea = computed(() => props.area === 'regras')
 const isRankingArea = computed(() => props.area === 'ranking')
 const journeySlug = computed(() => props.journey === 'jovem' ? 'jovem' : 'geral')
-const journeyDetailSlug = computed(() => props.area === 'jovem' ? 'jovem' : 'geral')
 const journeyConfig = computed(() => journeyConfigs[journeySlug.value])
-const journeyDashboard = computed(() => journeyDashboardMocks[journeyDetailSlug.value])
-const areaTitle = computed(() => isLevelArea.value ? 'Meu Nível Atual' : isRankingArea.value ? 'Destaques da Caminhada' : isRulesArea.value ? 'Regras da Caminhada' : isMentorArea.value ? 'Mentor da Caminhada' : isHistoryArea.value ? 'Histórico da Caminhada' : isJourneyDetailArea.value ? journeyDashboard.value.title : journeyConfig.value.title)
-const areaBreadcrumb = computed(() => isLevelArea.value ? 'Meu Nível Atual' : isRankingArea.value ? 'Destaques' : isRulesArea.value ? 'Regras' : isMentorArea.value ? 'Mentor' : isHistoryArea.value ? 'Histórico' : isJourneyDetailArea.value ? journeyDashboard.value.breadcrumb : journeyConfig.value.breadcrumb)
-const areaSubtitle = computed(() => isLevelArea.value ? 'Veja onde você está na sua caminhada e qual é o próximo marco da sua jornada.' : isRankingArea.value ? 'Reconheça constância, serviço, participação e crescimento sem transformar a fé em competição.' : isRulesArea.value ? 'Entenda como a pontuação, os níveis, as conquistas e os marcos espirituais ajudam a acompanhar sua constância com equilíbrio e cuidado.' : isMentorArea.value ? 'Receba uma orientação simples e pastoral com base na sua caminhada geral, seus registros e seus próximos passos.' : isHistoryArea.value ? 'Acompanhe as ações, pontos, conquistas e registros que formam sua jornada espiritual.' : isJourneyDetailArea.value ? journeyDashboard.value.subtitle : journeyConfig.value.subtitle)
+const hasRealJourneyDetailData = computed(() => Boolean(props.walkingJourneyDetail?.usesRealData))
+const currentJourneyDetail = computed(() => hasRealJourneyDetailData.value ? props.walkingJourneyDetail?.journey || null : null)
+const requestedJourneyDetailType = computed(() => props.walkingJourneyDetail?.requestedJourneyType === 'youth' || props.area === 'jovem' ? 'youth' : 'general')
+const journeyDetailAuthorized = computed(() => Boolean(hasRealJourneyDetailData.value && props.walkingJourneyDetail?.authorized && currentJourneyDetail.value?.authorized))
+const journeyDetailIsYouth = computed(() => requestedJourneyDetailType.value === 'youth')
+const journeyDetailMeta = computed(() => ({
+  slug: journeyDetailIsYouth.value ? 'jovem' : 'geral',
+  title: journeyDetailIsYouth.value ? 'Detalhes da Caminhada Jovem' : 'Detalhes da Caminhada Geral',
+  breadcrumb: journeyDetailIsYouth.value ? 'Resgatados' : 'Caminhada Geral',
+  subtitle: journeyDetailIsYouth.value
+    ? 'Veja sua caminhada jovem com pontos aprovados, níveis, registros reais, conquistas e apoio seguro.'
+    : 'Veja sua caminhada geral com pontos aprovados, níveis, registros reais, conquistas e apoio seguro.',
+  label: journeyDetailIsYouth.value ? 'Jornada jovem' : 'Jornada geral',
+}))
+const formatNumber = (value) => Number(value || 0).toLocaleString('pt-BR')
+const formatShortDate = (value) => {
+  if (!value) {
+    return 'Data não informada'
+  }
+
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date(value))
+}
+const areaTitle = computed(() => isLevelArea.value ? 'Meu Nível Atual' : isRankingArea.value ? 'Destaques da Caminhada' : isRulesArea.value ? 'Regras da Caminhada' : isMentorArea.value ? 'Mentor da Caminhada' : isHistoryArea.value ? 'Histórico da Caminhada' : isJourneyDetailArea.value ? journeyDetailMeta.value.title : journeyConfig.value.title)
+const areaBreadcrumb = computed(() => isLevelArea.value ? 'Meu Nível Atual' : isRankingArea.value ? 'Destaques' : isRulesArea.value ? 'Regras' : isMentorArea.value ? 'Mentor' : isHistoryArea.value ? 'Histórico' : isJourneyDetailArea.value ? journeyDetailMeta.value.breadcrumb : journeyConfig.value.breadcrumb)
+const areaSubtitle = computed(() => isLevelArea.value ? 'Veja onde você está na sua caminhada e qual é o próximo marco da sua jornada.' : isRankingArea.value ? 'Reconheça constância, serviço, participação e crescimento sem transformar a fé em competição.' : isRulesArea.value ? 'Entenda como a pontuação, os níveis, as conquistas e os marcos espirituais ajudam a acompanhar sua constância com equilíbrio e cuidado.' : isMentorArea.value ? 'Receba uma orientação simples e pastoral com base na sua caminhada geral, seus registros e seus próximos passos.' : isHistoryArea.value ? 'Acompanhe as ações, pontos, conquistas e registros que formam sua jornada espiritual.' : isJourneyDetailArea.value ? journeyDetailMeta.value.subtitle : journeyConfig.value.subtitle)
+const journeyDetailProgress = computed(() => currentJourneyDetail.value?.progress || {})
+const journeyDetailCurrentLevel = computed(() => currentJourneyDetail.value?.currentLevel || null)
+const journeyDetailNextLevel = computed(() => currentJourneyDetail.value?.nextLevel || null)
+const journeyDetailRecentLogs = computed(() => Array.isArray(currentJourneyDetail.value?.recentLogs) ? currentJourneyDetail.value.recentLogs : [])
+const journeyDetailAchievements = computed(() => Array.isArray(currentJourneyDetail.value?.achievements) ? currentJourneyDetail.value.achievements : [])
+const journeyDetailMentor = computed(() => currentJourneyDetail.value?.mentor || null)
+const journeyDetailSummaryCards = computed(() => [
+  {
+    label: journeyDetailIsYouth.value ? 'Pontos jovens' : 'Pontos gerais',
+    value: `${formatNumber(journeyDetailProgress.value.points || 0)} pts`,
+    note: 'Somente registros aprovados entram neste total.',
+  },
+  {
+    label: journeyDetailIsYouth.value ? 'Nível jovem' : 'Nível atual',
+    value: journeyDetailCurrentLevel.value?.name || 'Ponto de partida',
+    note: journeyDetailCurrentLevel.value ? `Nível ${journeyDetailCurrentLevel.value.number}` : 'Ainda sem nível calculado.',
+  },
+  {
+    label: 'Próximo marco',
+    value: journeyDetailNextLevel.value?.name || 'Marco final',
+    note: journeyDetailNextLevel.value ? `Faltam ${formatNumber(journeyDetailProgress.value.pointsToNextLevel || 0)} pts` : 'Não há próximo nível cadastrado.',
+  },
+  {
+    label: 'Registros aprovados',
+    value: formatNumber(journeyDetailProgress.value.approvedLogsCount || 0),
+    note: 'Sem pendentes, rejeitados ou metadata sensível.',
+  },
+])
+const journeyDetailEmptyState = computed(() => {
+  const states = props.walkingJourneyDetail?.emptyStates || {}
+
+  if (!hasRealJourneyDetailData.value) {
+    return null
+  }
+
+  if (!props.walkingJourneyDetail?.authorized) {
+    if (props.walkingJourneyDetail?.reason === 'without_person') {
+      return {
+        title: states.withoutPersonTitle || 'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+        text: props.walkingJourneyDetail?.message || states.withoutPersonText || 'Assim que o cadastro for vinculado, os detalhes reais da caminhada aparecerão aqui.',
+      }
+    }
+
+    if (requestedJourneyDetailType.value === 'youth') {
+      return {
+        title: states.unauthorizedYouthTitle || 'Caminhada jovem indisponível para este perfil.',
+        text: props.walkingJourneyDetail?.message || states.unauthorizedYouthText || 'A caminhada jovem aparece somente para jovens/resgatados autorizados.',
+      }
+    }
+
+    return {
+      title: states.withoutPersonTitle || states.withoutJourneyTitle || 'Jornada indisponível no momento.',
+      text: props.walkingJourneyDetail?.message || states.withoutPersonText || states.withoutJourneyText || 'Assim que a jornada estiver disponível, os detalhes reais aparecerão aqui.',
+    }
+  }
+
+  if (!currentJourneyDetail.value?.authorized) {
+    return {
+      title: states.withoutJourneyTitle || 'Jornada indisponível no momento.',
+      text: currentJourneyDetail.value?.message || states.withoutJourneyText || 'Assim que a jornada estiver disponível, os detalhes reais aparecerão aqui.',
+    }
+  }
+
+  return null
+})
+const journeyDetailApprovedLogsEmptyState = computed(() => {
+  const states = props.walkingJourneyDetail?.emptyStates || {}
+
+  if (journeyDetailEmptyState.value || journeyDetailRecentLogs.value.length) {
+    return null
+  }
+
+  return {
+    title: states.withoutApprovedLogsTitle || 'Ainda não há registros aprovados nesta jornada.',
+    text: states.withoutApprovedLogsText || 'Quando houver registros aprovados, eles aparecerão aqui sem metadata sensível.',
+  }
+})
+const journeyDetailAchievementsEmptyState = computed(() => {
+  const states = props.walkingJourneyDetail?.emptyStates || {}
+
+  if (journeyDetailEmptyState.value || journeyDetailAchievements.value.length) {
+    return null
+  }
+
+  return {
+    title: states.withoutAchievementsTitle || 'Nenhuma conquista real nesta jornada ainda.',
+    text: states.withoutAchievementsText || 'Conquistas concedidas ou em progresso aparecerão aqui quando existirem.',
+  }
+})
+const journeyDetailMentorEmptyState = computed(() => {
+  const states = props.walkingJourneyDetail?.emptyStates || {}
+
+  if (journeyDetailEmptyState.value || journeyDetailMentor.value?.message) {
+    return null
+  }
+
+  return {
+    title: states.withoutMentorTitle || 'Mentor indisponível para esta jornada.',
+    text: journeyDetailMentor.value?.unavailableMessage || states.withoutMentorText || 'Quando houver mensagem segura disponível, ela aparecerá aqui como apoio simples.',
+  }
+})
 const hasRealRulesData = computed(() => Boolean(props.walkingRules?.usesRealData))
 const canSeeYouthJourneyFromRules = computed(() => hasRealRulesData.value ? Boolean(props.walkingRules?.canSeeYouthJourney) : viewerContext.canSeeYouthJourney)
 const activeRulesJourney = computed(() => selectedRulesJourney.value === 'youth' && canSeeYouthJourneyFromRules.value ? 'youth' : 'general')
@@ -592,7 +621,6 @@ const currentLevelName = computed(() => areaLevels.value.find((level) => level.n
 const hasRealLevelData = computed(() => Boolean(props.walkingLevel?.usesRealData))
 const canSeeYouthJourney = computed(() => hasRealLevelData.value ? Boolean(props.walkingLevel?.canSeeYouthJourney) : viewerContext.canSeeYouthJourney)
 const activeLevelJourney = computed(() => props.walkingLevel?.defaultJourneyType === 'youth' && canSeeYouthJourney.value ? 'youth' : 'general')
-const formatNumber = (value) => Number(value || 0).toLocaleString('pt-BR')
 const buildRealLevelCard = (journey, type) => {
   const currentLevel = journey?.currentLevel || null
   const nextLevel = journey?.nextLevel || null
@@ -800,7 +828,7 @@ const mapHeroBadge = computed(() => {
           <small>{{ areaSubtitle }}</small>
         </div>
         <strong v-if="isLevelArea">{{ canSeeYouthJourney ? 'Jornadas separadas' : 'Jornada geral' }}</strong>
-        <strong v-else-if="isJourneyDetailArea">{{ journeyDashboard.label }}</strong>
+        <strong v-else-if="isJourneyDetailArea">{{ journeyDetailMeta.label }}</strong>
         <strong v-else-if="isHistoryArea">Histórico completo</strong>
         <strong v-else-if="isMentorArea">Apoio pastoral</strong>
         <strong v-else-if="isRulesArea">Caminhada saudável</strong>
@@ -887,72 +915,89 @@ const mapHeroBadge = computed(() => {
         </nav>
       </section>
 
-      <section v-else-if="isJourneyDetailArea" class="journey-dashboard" :class="{ 'is-youth-dashboard': journeyDashboard.slug === 'jovem' }" :aria-label="journeyDashboard.title">
+      <section v-else-if="isJourneyDetailArea" class="journey-dashboard" :class="{ 'is-youth-dashboard': journeyDetailMeta.slug === 'jovem' }" :aria-label="journeyDetailMeta.title">
         <section class="detail-summary-grid" aria-label="Resumo compacto da jornada">
-          <article>
-            <span>{{ journeyDashboard.slug === 'jovem' ? 'Nível jovem' : 'Nível atual' }}</span>
-            <strong>{{ journeyDashboard.currentLevelName }}</strong>
-            <small>Nível {{ journeyDashboard.currentLevel }} de 20</small>
-          </article>
-          <article>
-            <span>{{ journeyDashboard.slug === 'jovem' ? 'Pontos jovens' : 'Pontos gerais' }}</span>
-            <strong>{{ journeyDashboard.points.toLocaleString('pt-BR') }} / {{ journeyDashboard.pointsTarget.toLocaleString('pt-BR') }}</strong>
-            <small>{{ journeyDashboard.progress }}% do próximo marco</small>
-          </article>
-          <article>
-            <span>Próximo marco</span>
-            <strong>{{ journeyDashboard.nextLevelName }}</strong>
-            <small>Continue avançando com constância</small>
-          </article>
-          <article>
-            <span>{{ journeyDashboard.positionLabel }}</span>
-            <strong>{{ journeyDashboard.position }}</strong>
-            <small>{{ journeyDashboard.badgeLabel }}: {{ journeyDashboard.badgesCount }}</small>
+          <article v-for="card in journeyDetailSummaryCards" :key="card.label">
+            <span>{{ card.label }}</span>
+            <strong>{{ card.value }}</strong>
+            <small>{{ card.note }}</small>
           </article>
         </section>
 
-        <section class="weekly-focus-card">
+        <article v-if="journeyDetailEmptyState" class="dashboard-notice">
+          <span>{{ journeyDetailEmptyState.title }}</span>
+          <strong>{{ journeyDetailEmptyState.text }}</strong>
+        </article>
+
+        <section v-if="journeyDetailAuthorized" class="weekly-focus-card">
           <div>
-            <span>{{ journeyDashboard.focusLabel }}</span>
-            <h2>{{ journeyDashboard.focusTitle }}</h2>
-            <p>{{ journeyDashboard.focusSuggestion }}</p>
+            <span>{{ journeyDetailIsYouth ? 'Caminhada jovem real' : 'Caminhada geral real' }}</span>
+            <h2>{{ journeyDetailCurrentLevel?.name || 'Ponto de partida' }}</h2>
+            <p>{{ journeyDetailCurrentLevel?.description || 'Seu avanço será calculado conforme registros reais aprovados forem lançados.' }}</p>
           </div>
-          <nav aria-label="Ações do foco da semana">
+          <nav aria-label="Ações da jornada detalhada">
             <Link :href="`${baseRoute}/regras`">Ver regras</Link>
             <Link :href="`${baseRoute}/historico`">Ver histórico</Link>
           </nav>
         </section>
 
-        <section class="dashboard-section compact-analysis-section">
+        <section v-if="journeyDetailAuthorized" class="dashboard-section compact-analysis-section">
           <header>
-            <span>{{ journeyDashboard.growthTitle }}</span>
-            <h2>{{ journeyDashboard.growthHeading }}</h2>
+            <span>Progresso real</span>
+            <h2>Níveis e próximo marco</h2>
           </header>
           <div class="growth-grid">
-            <article v-for="item in journeyDashboard.growthItems" :key="item.name" class="growth-card">
+            <article class="growth-card">
               <div>
-                <strong>{{ item.name }}</strong>
-                <small>{{ item.percent }}%</small>
+                <strong>Pontos aprovados</strong>
+                <small>{{ journeyDetailProgress.progressPercent || 0 }}%</small>
               </div>
-              <p>{{ item.note }}</p>
+              <p>Percentual calculado entre o nível atual e o próximo nível oficial.</p>
               <footer>
-                <em><i :style="{ width: `${item.percent}%` }"></i></em>
-                <small>{{ item.points }} pts</small>
+                <em><i :style="{ width: `${journeyDetailProgress.progressPercent || 0}%` }"></i></em>
+                <small>{{ formatNumber(journeyDetailProgress.points || 0) }} pts</small>
+              </footer>
+            </article>
+            <article class="growth-card">
+              <div>
+                <strong>Nível atual</strong>
+                <small>{{ journeyDetailCurrentLevel?.number ? `Nível ${journeyDetailCurrentLevel.number}` : 'Início' }}</small>
+              </div>
+              <p>{{ journeyDetailCurrentLevel?.description || 'Ainda aguardando avanço por pontos aprovados.' }}</p>
+              <footer>
+                <em><i :style="{ width: journeyDetailCurrentLevel ? '100%' : '0%' }"></i></em>
+                <small>{{ journeyDetailCurrentLevel?.requiredPoints ? `${formatNumber(journeyDetailCurrentLevel.requiredPoints)} pts` : '0 pts' }}</small>
+              </footer>
+            </article>
+            <article class="growth-card">
+              <div>
+                <strong>Próximo marco</strong>
+                <small>{{ journeyDetailNextLevel?.number ? `Nível ${journeyDetailNextLevel.number}` : 'Final' }}</small>
+              </div>
+              <p>{{ journeyDetailNextLevel?.description || 'Não há próximo nível ativo cadastrado para esta jornada.' }}</p>
+              <footer>
+                <em><i :style="{ width: journeyDetailNextLevel ? '45%' : '100%' }"></i></em>
+                <small>{{ journeyDetailProgress.pointsToNextLevel ? `${formatNumber(journeyDetailProgress.pointsToNextLevel)} pts restantes` : 'Completo' }}</small>
               </footer>
             </article>
           </div>
         </section>
 
-        <section class="dashboard-grid">
+        <section v-if="journeyDetailAuthorized" class="dashboard-grid">
           <article class="dashboard-panel">
             <header>
-              <span>{{ journeyDashboard.activitiesTitle }}</span>
-              <h2>{{ journeyDashboard.activitiesHeading }}</h2>
+              <span>Registros reais</span>
+              <h2>Pontos aprovados recentes</h2>
             </header>
             <div class="activity-list">
-              <div v-for="activity in journeyDashboard.activities" :key="activity.name">
-                <strong>{{ activity.name }}</strong>
-                <small>+{{ activity.points }} pts {{ journeyDashboard.slug === 'jovem' ? 'jovens' : 'gerais' }}</small>
+              <div v-if="journeyDetailApprovedLogsEmptyState">
+                <strong>{{ journeyDetailApprovedLogsEmptyState.title }}</strong>
+                <small>+0 pts</small>
+              </div>
+              <div v-for="activity in journeyDetailRecentLogs" :key="activity.id || `${activity.createdAt}-${activity.category}`">
+                <strong>{{ activity.categoryLabel || activity.category || 'Registro aprovado' }}</strong>
+                <small>+{{ formatNumber(activity.points) }} pts {{ journeyDetailIsYouth ? 'jovens' : 'gerais' }}</small>
+                <p>{{ activity.notes }}</p>
               </div>
             </div>
           </article>
@@ -960,22 +1005,33 @@ const mapHeroBadge = computed(() => {
           <article class="dashboard-panel">
             <header>
               <span>Conquistas</span>
-              <h2>{{ journeyDashboard.achievementsTitle }}</h2>
+              <h2>Conquistas reais da jornada</h2>
             </header>
             <div class="badge-list">
-              <strong v-for="achievement in journeyDashboard.achievements" :key="achievement">{{ achievement }}</strong>
+              <strong v-if="journeyDetailAchievementsEmptyState">{{ journeyDetailAchievementsEmptyState.title }}</strong>
+              <strong v-for="achievement in journeyDetailAchievements" :key="achievement.id || achievement.achievement?.key">{{ achievement.achievement?.name || 'Conquista' }}</strong>
             </div>
           </article>
         </section>
 
-        <article v-if="journeyDashboard.notice" class="dashboard-notice">
+        <article v-if="journeyDetailAuthorized && journeyDetailMentor?.message" class="dashboard-notice">
+          <span>{{ journeyDetailMentor.message.title }}</span>
+          <strong>{{ journeyDetailMentor.message.body }}</strong>
+        </article>
+
+        <article v-else-if="journeyDetailAuthorized && journeyDetailMentorEmptyState" class="dashboard-notice">
+          <span>{{ journeyDetailMentorEmptyState.title }}</span>
+          <strong>{{ journeyDetailMentorEmptyState.text }}</strong>
+        </article>
+
+        <article v-if="journeyDetailAuthorized && journeyDetailIsYouth" class="dashboard-notice">
           <span>Jornada separada</span>
-          <strong>{{ journeyDashboard.notice }}</strong>
+          <strong>Esta jornada é separada da caminhada geral. Os pontos jovens não se misturam com os pontos gerais.</strong>
         </article>
 
         <nav class="journey-shortcuts" aria-label="Atalhos da jornada">
-          <Link :href="journeyDashboard.levelRoute">{{ journeyDashboard.levelButton }}</Link>
-          <Link :href="journeyDashboard.mapRoute">{{ journeyDashboard.mapButton }}</Link>
+          <Link :href="`${baseRoute}/${journeyDetailMeta.slug}/niveis/${journeyDetailCurrentLevel?.number || 1}`">{{ journeyDetailIsYouth ? 'Ver nível jovem' : 'Ver nível atual' }}</Link>
+          <Link :href="`${baseRoute}/${journeyDetailMeta.slug}/mapa`">{{ journeyDetailIsYouth ? 'Ir ao mapa jovem' : 'Ir ao mapa geral' }}</Link>
           <Link :href="`${baseRoute}/conquistas`">Ver conquistas</Link>
           <Link :href="baseRoute">Voltar para Minha Caminhada</Link>
         </nav>

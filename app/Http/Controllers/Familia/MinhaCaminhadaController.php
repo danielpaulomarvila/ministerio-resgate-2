@@ -264,6 +264,16 @@ class MinhaCaminhadaController extends Controller
         return $this->renderRulesPage($request, $rulesReadService, 'points');
     }
 
+    public function generalJourney(Request $request): Response
+    {
+        return $this->renderJourneyDetail($request, 'general', 'geral');
+    }
+
+    public function youthJourney(Request $request): Response
+    {
+        return $this->renderJourneyDetail($request, 'youth', 'jovem');
+    }
+
     public function map(
         Request $request,
         WalkingProgressService $progressService,
@@ -347,6 +357,240 @@ class MinhaCaminhadaController extends Controller
             'achievements' => $dashboard['achievements'] ?? [],
             'mentor' => $dashboard['mentor'] ?? null,
             'highlights' => $dashboard['highlights'] ?? [],
+        ];
+    }
+
+    private function renderJourneyDetail(Request $request, string $requestedJourneyType, string $journeySlug): Response
+    {
+        $user = $request->user();
+        $person = $user?->person;
+        $canSeeYouthJourney = $person ? $this->authorizationService->userCanViewOwnYouthJourney($user) : false;
+
+        if (!$person) {
+            return Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+                'area' => $journeySlug,
+                'journey' => $journeySlug,
+                'walkingJourneyDetail' => $this->emptyJourneyDetailPayload(
+                    'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+                    $requestedJourneyType,
+                    false,
+                    false,
+                    'without_person'
+                ),
+            ]);
+        }
+
+        if ($requestedJourneyType === 'youth' && !$canSeeYouthJourney) {
+            return Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+                'area' => $journeySlug,
+                'journey' => $journeySlug,
+                'walkingJourneyDetail' => $this->emptyJourneyDetailPayload(
+                    'Você não tem permissão para visualizar a caminhada jovem.',
+                    'youth',
+                    false,
+                    false,
+                    'unauthorized_youth',
+                    [
+                        'id' => $person->id,
+                        'name' => $person->preferred_name ?: $person->full_name,
+                    ]
+                ),
+            ]);
+        }
+
+        $dashboard = $this->dashboardReadService->getOwnDashboard($user, $requestedJourneyType);
+        $journey = $this->formatJourneyDetailJourney($dashboard, $requestedJourneyType);
+        $authorized = (bool) ($dashboard['authorized'] ?? false) && (bool) ($journey['authorized'] ?? false);
+
+        return Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
+            'area' => $journeySlug,
+            'journey' => $journeySlug,
+            'walkingJourneyDetail' => [
+                'authorized' => $authorized,
+                'usesRealData' => true,
+                'generatedAt' => now()->toISOString(),
+                'requestedJourneyType' => $requestedJourneyType,
+                'person' => [
+                    'id' => $person->id,
+                    'name' => $person->preferred_name ?: $person->full_name,
+                ],
+                'canSeeYouthJourney' => $canSeeYouthJourney,
+                'message' => $authorized ? null : ($dashboard['message'] ?? 'Jornada indisponível no momento.'),
+                'journey' => $journey,
+                'emptyStates' => $this->journeyDetailEmptyStates(),
+            ],
+        ]);
+    }
+
+    private function emptyJourneyDetailPayload(
+        string $message,
+        string $requestedJourneyType,
+        bool $authorized,
+        bool $canSeeYouthJourney,
+        string $reason,
+        ?array $person = null
+    ): array {
+        return [
+            'authorized' => $authorized,
+            'usesRealData' => true,
+            'generatedAt' => now()->toISOString(),
+            'requestedJourneyType' => $requestedJourneyType,
+            'person' => $person,
+            'canSeeYouthJourney' => $canSeeYouthJourney,
+            'message' => $message,
+            'reason' => $reason,
+            'journey' => $this->emptyJourneyDetailJourney($requestedJourneyType, false, $message),
+            'emptyStates' => $this->journeyDetailEmptyStates(),
+        ];
+    }
+
+    private function emptyJourneyDetailJourney(string $journeyType, bool $authorized = true, ?string $message = null): array
+    {
+        return [
+            'authorized' => $authorized,
+            'journeyType' => $journeyType,
+            'message' => $message,
+            'journey' => null,
+            'progress' => [
+                'points' => 0,
+                'approvedLogsCount' => 0,
+                'pointsToNextLevel' => 0,
+                'progressPercent' => 0,
+            ],
+            'currentLevel' => null,
+            'nextLevel' => null,
+            'achievements' => [],
+            'recentLogs' => [],
+            'mentor' => $this->emptyMentorJourney($journeyType, false, $message),
+            'summary' => [
+                'hasPoints' => false,
+                'hasCurrentLevel' => false,
+                'hasNextLevel' => false,
+                'isFinalLevel' => false,
+                'approvedLogsCount' => 0,
+                'achievementsCount' => 0,
+                'hasMentor' => false,
+            ],
+        ];
+    }
+
+    private function formatJourneyDetailJourney(array $dashboard, string $journeyType): array
+    {
+        if (!($dashboard['authorized'] ?? false)) {
+            return $this->emptyJourneyDetailJourney(
+                $journeyType,
+                false,
+                $dashboard['message'] ?? 'Jornada indisponível no momento.'
+            );
+        }
+
+        $progress = $dashboard['progress'] ?? [];
+
+        if (!($progress['authorized'] ?? false)) {
+            return $this->emptyJourneyDetailJourney(
+                $progress['journey_type'] ?? $journeyType,
+                false,
+                $progress['message'] ?? 'Jornada indisponível no momento.'
+            );
+        }
+
+        $levelProgress = $progress['level_progress'] ?? [];
+        $points = (int) ($progress['total_points'] ?? 0);
+        $currentLevel = $this->formatLevelData($levelProgress['current_level'] ?? null);
+        $nextLevel = $this->formatLevelData($levelProgress['next_level'] ?? null);
+        $achievements = $this->formatJourneyDetailAchievements($dashboard['achievements'] ?? []);
+        $recentLogs = $this->formatJourneyDetailLogs($dashboard['recent_logs'] ?? [], $journeyType);
+        $mentor = $this->formatMentorJourney($dashboard['mentor'] ?? [], $journeyType);
+
+        return [
+            'authorized' => true,
+            'journeyType' => $progress['journey']['type'] ?? $journeyType,
+            'message' => null,
+            'journey' => $progress['journey'] ?? null,
+            'progress' => [
+                'points' => $points,
+                'approvedLogsCount' => (int) ($progress['approved_logs_count'] ?? 0),
+                'pointsToNextLevel' => (int) ($levelProgress['points_to_next_level'] ?? 0),
+                'progressPercent' => (int) ($levelProgress['progress_percentage'] ?? 0),
+            ],
+            'currentLevel' => $currentLevel,
+            'nextLevel' => $nextLevel,
+            'achievements' => $achievements,
+            'recentLogs' => $recentLogs,
+            'mentor' => $mentor,
+            'summary' => [
+                'hasPoints' => $points > 0,
+                'hasCurrentLevel' => $currentLevel !== null,
+                'hasNextLevel' => $nextLevel !== null,
+                'isFinalLevel' => $nextLevel === null && $currentLevel !== null,
+                'approvedLogsCount' => (int) ($progress['approved_logs_count'] ?? 0),
+                'achievementsCount' => count($achievements),
+                'hasMentor' => (bool) ($mentor['authorized'] ?? false) && !empty($mentor['message']),
+            ],
+        ];
+    }
+
+    private function formatJourneyDetailAchievements(array $achievements): array
+    {
+        return collect($achievements)
+            ->map(function (array $personAchievement) {
+                $achievement = $personAchievement['achievement'] ?? [];
+
+                return [
+                    'id' => $personAchievement['id'] ?? null,
+                    'status' => $personAchievement['status'] ?? null,
+                    'progressCurrent' => (int) ($personAchievement['progress_current'] ?? 0),
+                    'progressTarget' => (int) ($personAchievement['progress_target'] ?? 0),
+                    'awardedAt' => $personAchievement['awarded_at'] ?? null,
+                    'achievement' => [
+                        'id' => $achievement['id'] ?? null,
+                        'key' => $achievement['key'] ?? null,
+                        'name' => $achievement['name'] ?? 'Conquista',
+                        'description' => $achievement['description'] ?? null,
+                        'type' => $achievement['type'] ?? null,
+                        'category' => $achievement['category'] ?? null,
+                        'icon' => $achievement['icon'] ?: '✦',
+                        'color' => $achievement['color'] ?? null,
+                        'requiresValidation' => (bool) ($achievement['requires_validation'] ?? false),
+                    ],
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    private function formatJourneyDetailLogs(array $logs, string $journeyType): array
+    {
+        return collect($logs)
+            ->map(fn (array $log) => [
+                'id' => $log['id'] ?? null,
+                'category' => $log['category'] ?? null,
+                'categoryLabel' => $this->historyCategoryLabel($log['category'] ?? null),
+                'points' => (int) ($log['points'] ?? 0),
+                'notes' => $log['notes'] ?: 'Registro aprovado sem observação pública.',
+                'createdAt' => $log['created_at'] ?? null,
+                'sourceType' => $log['source_type'] ?? null,
+                'journeyType' => $journeyType,
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function journeyDetailEmptyStates(): array
+    {
+        return [
+            'withoutPersonTitle' => 'Seu usuário ainda não está vinculado a uma pessoa cadastrada.',
+            'withoutPersonText' => 'Assim que o cadastro for vinculado, os detalhes reais da caminhada aparecerão aqui.',
+            'withoutJourneyTitle' => 'Jornada indisponível no momento.',
+            'withoutJourneyText' => 'Assim que a jornada estiver disponível, os detalhes reais aparecerão aqui.',
+            'unauthorizedYouthTitle' => 'Caminhada jovem indisponível para este perfil.',
+            'unauthorizedYouthText' => 'A caminhada jovem aparece somente para jovens/resgatados autorizados.',
+            'withoutApprovedLogsTitle' => 'Ainda não há registros aprovados nesta jornada.',
+            'withoutApprovedLogsText' => 'Quando houver registros aprovados, eles aparecerão aqui sem metadata sensível.',
+            'withoutAchievementsTitle' => 'Nenhuma conquista real nesta jornada ainda.',
+            'withoutAchievementsText' => 'Conquistas concedidas ou em progresso aparecerão aqui quando existirem.',
+            'withoutMentorTitle' => 'Mentor indisponível para esta jornada.',
+            'withoutMentorText' => 'Quando houver mensagem segura disponível, ela aparecerá aqui como apoio simples.',
         ];
     }
 

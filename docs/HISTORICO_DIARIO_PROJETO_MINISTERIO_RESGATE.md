@@ -1044,3 +1044,23 @@ Continuar a implementação visual do mapa, finalizar limpeza do CSS antigo de o
 - **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foi executado migrate:fresh, não foi executado db:wipe, não foram criados ou executados seeders no banco real, não foram criados dados fake no banco real e não foram alterados ranking/destaques, geral/jovem detalhado, presenças, destaques mensal, Central da Família, Meu Perfil ou Meu Financeiro.
 - **Commit:** nenhum commit realizado nesta etapa.
 - **Push:** nenhum push realizado nesta etapa.
+
+### Etapa — Integração real de Geral/Jovem detalhado da Minha Caminhada
+
+- **Horário:** 16:50–17:20 aprox.
+- **Objetivo:** integrar somente `/familia-resgate/minha-caminhada/geral` e `/familia-resgate/minha-caminhada/jovem` com dados reais/seguros, mantendo fora do escopo ranking/destaques, presenças, destaques mensal, placeholders finais, Central da Família, Meu Perfil e Meu Financeiro.
+- **Rotas ajustadas:** `/geral` e `/jovem` deixaram de renderizar `MinhaCaminhadaArea` por `Closure` e passaram a apontar para `MinhaCaminhadaController@generalJourney` e `MinhaCaminhadaController@youthJourney`.
+- **Service novo:** não foi criado service novo; a etapa reaproveitou `WalkingDashboardReadService`, `WalkingProgressService`, `WalkingLevelService`, `WalkingAchievementReadService`, `WalkingMentorReadService` e `WalkingAuthorizationService`.
+- **Controller ajustado:** `MinhaCaminhadaController` recebeu métodos `generalJourney` e `youthJourney`, além de helpers privados para montar payload seguro de detalhe da jornada.
+- **Prop real criada:** `walkingJourneyDetail`, com `usesRealData`, `generatedAt`, `requestedJourneyType`, pessoa vinculada, autorização jovem, jornada detalhada, progresso, nível atual, próximo nível, conquistas reais, registros aprovados recentes, mentor seguro, resumo e estados vazios.
+- **Dados reais exibidos:** a aba detalhada usa somente pontos aprovados, conquistas reais visíveis, mentor seguro pré-aprovado/fallback e logs recentes sem metadata sensível.
+- **Jornada jovem protegida:** usuário comum recebe `walkingJourneyDetail.authorized = false`, motivo `unauthorized_youth` e detalhes jovens vazios; jovens/resgatados autorizados recebem payload jovem real.
+- **Página ajustada:** `resources/js/Pages/FamiliaResgate/MinhaCaminhadaArea.vue` passou a receber `walkingJourneyDetail` e, somente nos branches `area === 'geral'` e `area === 'jovem'`, consumir resumo real, níveis, registros aprovados, conquistas e mentor.
+- **Mocks removidos/neutralizados de Geral/Jovem detalhado:** removidos `journeyDashboardMocks`, pontos `380/920`, níveis fixos `2/6`, posição fake, badges fake, atividades fake, análise fake, foco semanal fake e atalhos baseados em mocks.
+- **Estados vazios seguros:** adicionados estados para usuário sem pessoa vinculada, jornada indisponível, caminhada jovem não autorizada, sem registros aprovados, sem conquistas reais e mentor indisponível.
+- **Teste criado:** `tests/Feature/MinhaCaminhada/MinhaCaminhadaJornadaDetalheControllerTest.php`, cobrindo autenticação obrigatória para geral/jovem, payload seguro geral, uso apenas de dados aprovados, bloqueio jovem, liberação jovem, ausência de metadata sensível e leitura sem criação de registros operacionais.
+- **Validações executadas:** `php -l` passou no controller e no teste novo; teste novo passou com 8 testes e 141 assertions; `route:list --json` confirmou `/geral` em `MinhaCaminhadaController@generalJourney` e `/jovem` em `MinhaCaminhadaController@youthJourney`; testes focados de regras, mentor, histórico, visão geral, conquistas, nível, mapa, detalhe de nível e services passaram; `php artisan test --compact` passou com 115 testes e 1111 assertions; `npm run build` passou; `git diff --check` passou.
+- **Busca de mocks:** busca por termos fake/antigos não encontrou mocks nos branches geral/jovem detalhado; os matches restantes `Presença Fiel`, `Servo Disponível` e `Palavra Viva` pertencem ao branch ranking/destaques, fora do escopo desta etapa.
+- **Escopo preservado:** não foram criadas ou alteradas migrations, não foi executado migrate, não foi executado migrate:fresh, não foi executado db:wipe, não foram criados ou executados seeders no banco real, não foram criados dados fake no banco real e não foram alterados ranking/destaques, presenças, destaques mensal, placeholders finais, Central da Família, Meu Perfil ou Meu Financeiro.
+- **Commit:** nenhum commit realizado nesta etapa.
+- **Push:** nenhum push realizado nesta etapa.

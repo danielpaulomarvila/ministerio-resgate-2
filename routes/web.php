@@ -135,15 +135,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/familia-resgate/minha-caminhada/nivel', [MinhaCaminhadaController::class, 'level'])
         ->name('familia-resgate.minha_caminhada.nivel');
 
-    Route::get('/familia-resgate/minha-caminhada/geral', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
-        'area' => 'geral',
-        'journey' => 'geral',
-    ]))->name('familia-resgate.minha_caminhada.geral');
+    Route::get('/familia-resgate/minha-caminhada/geral', [MinhaCaminhadaController::class, 'generalJourney'])
+        ->name('familia-resgate.minha_caminhada.geral');
 
-    Route::get('/familia-resgate/minha-caminhada/jovem', fn () => Inertia::render('FamiliaResgate/MinhaCaminhadaArea', [
-        'area' => 'jovem',
-        'journey' => 'jovem',
-    ]))->name('familia-resgate.minha_caminhada.jovem');
+    Route::get('/familia-resgate/minha-caminhada/jovem', [MinhaCaminhadaController::class, 'youthJourney'])
+        ->name('familia-resgate.minha_caminhada.jovem');
 
     Route::get('/familia-resgate/minha-caminhada/historico', [MinhaCaminhadaController::class, 'history'])
         ->name('familia-resgate.minha_caminhada.historico');
